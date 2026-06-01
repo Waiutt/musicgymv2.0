@@ -146,15 +146,28 @@ public class StrengthActivity extends AppCompatActivity {
 
         LinearLayout row = null;
         for (int i = 0; i < results.size(); i++) {
-            if (i % 3 == 0) {
-                row = new LinearLayout(this);
-                row.setOrientation(LinearLayout.HORIZONTAL);
-                row.setPadding(0, 0, 0, 4);
-                exerciseContainer.addView(row);
-            }
+            if (i % 3 == 0) row = newCardRow(exerciseContainer);
             String name = results.get(i);
             row.addView(buildExerciseCard(name, "#FC4C02", selectedExercises.containsKey(name)));
         }
+    }
+
+    private LinearLayout newCardRow(LinearLayout parent) {
+        LinearLayout row = new LinearLayout(this);
+        row.setOrientation(LinearLayout.HORIZONTAL);
+        row.setPadding(0, 0, 0, 4);
+        parent.addView(row);
+        return row;
+    }
+
+    private EditText createStyledEditText(String hint) {
+        EditText et = new EditText(this);
+        et.setHint(hint);
+        et.setTextColor(Color.WHITE);
+        et.setHintTextColor(Color.GRAY);
+        et.setBackgroundColor(ColorTokens.BG_INPUT);
+        et.setPadding(20, 16, 20, 16);
+        return et;
     }
 
     // ==================== 模板 ====================
@@ -171,9 +184,7 @@ public class StrengthActivity extends AppCompatActivity {
 
     private void saveTemplate() {
         if (selectedExercises.isEmpty()) { Toast.makeText(this, "请先选择动作", Toast.LENGTH_SHORT).show(); return; }
-        EditText et = new EditText(this);
-        et.setHint("模板名称 (如: 推日)"); et.setTextColor(Color.WHITE); et.setHintTextColor(Color.GRAY);
-        et.setBackgroundColor(ColorTokens.BG_INPUT); et.setPadding(20, 16, 20, 16);
+        EditText et = createStyledEditText("模板名称 (如: 推日)");
         new AlertDialog.Builder(this).setTitle("保存模板").setView(et)
                 .setPositiveButton("保存", (d, w) -> {
                     String name = et.getText().toString().trim();
@@ -220,9 +231,7 @@ public class StrengthActivity extends AppCompatActivity {
     }
 
     private void showAddCustomDialog() {
-        EditText et = new EditText(this);
-        et.setHint("输入动作名称"); et.setTextColor(Color.WHITE); et.setHintTextColor(Color.GRAY);
-        et.setBackgroundColor(ColorTokens.BG_INPUT); et.setPadding(20, 16, 20, 16);
+        EditText et = createStyledEditText("输入动作名称");
         new AlertDialog.Builder(this).setTitle("添加自定义动作").setView(et)
                 .setPositiveButton("添加", (d, w) -> {
                     String name = et.getText().toString().trim();
