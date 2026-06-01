@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="24dp"
+    android:height="24dp"
+    android:viewportWidth="24"
+    android:viewportHeight="24">
+    <!-- 十字瞄准外圈 -->
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M12,2C11,2 10,3 10,4.1c-3.8,0.5 -6.7,3.4 -7.2,7.2C1.7,11.3 0.6,12.3 0,12l0,0c0.6,0.3 1.7,0.7 2.8,0.7c0.5,3.8 3.4,6.7 7.2,7.2C10,21 10,22 12,22c2,0 2,-1 2,-2.1c3.8,-0.5 6.7,-3.4 7.2,-7.2C22.3,12.7 23.4,11.7 24,12l0,0c-0.6,-0.3 -1.7,-0.7 -2.8,-0.7c-0.5,-3.8 -3.4,-6.7 -7.2,-7.2C14,3 14,2 12,2zM12,8.5c1.9,0 3.5,1.6 3.5,3.5s-1.6,3.5 -3.5,3.5 -3.5,-1.6 -3.5,-3.5 1.6,-3.5 3.5,-3.5z" />
+    <!-- 中心点 -->
+    <path
+        android:fillColor="#FC4C02"
+        android:pathData="M12,10.5c0.8,0 1.5,0.7 1.5,1.5s-0.7,1.5 -1.5,1.5 -1.5,-0.7 -1.5,-1.5 0.7,-1.5 1.5,-1.5z" />
+</vector>

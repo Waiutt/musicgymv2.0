@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="bg_dark">#0f172a</color>
+    <color name="bg_card">#1e293b</color>
+
+    <color name="cyber_cyan">#38bdf8</color>
+    <color name="purple_200">#38bdf8</color> <color name="purple_500">#0ea5e9</color>
+    <color name="purple_700">#0284c7</color>
+
+    <color name="cyber_rose">#f43f5e</color>
+    <color name="cyber_green">#34d399</color>
+
+    <color name="white">#FFFFFF</color>
+    <color name="text_gray">#9ca3af</color>
+</resources>

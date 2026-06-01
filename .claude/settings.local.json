@@ -1,0 +1,17 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(git -C \"C:/Users/ASUS/Desktop/DraggableProgressBar - 副本/MusicGym\" log --oneline -20)",
+      "Bash(./gradlew assembleDebug)",
+      "Bash(node -e \"require\\('docx'\\)\")",
+      "Bash(npm install *)",
+      "Bash(node generate_doc.js)",
+      "Bash(node gen_doc_v2.js)",
+      "Bash(node -c gen_doc_v2.js)",
+      "Bash(git -C \"C:\\\\Users\\\\ASUS\\\\Desktop\\\\DraggableProgressBar - 副本\\\\MusicGym\" log --oneline -5)",
+      "Bash(git init *)",
+      "Bash(git config *)",
+      "Bash(git add *)"
+    ]
+  }
+}

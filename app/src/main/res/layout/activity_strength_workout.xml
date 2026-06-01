@@ -1,0 +1,134 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#0f172a"
+    android:orientation="vertical">
+
+    <!-- 顶部栏 -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="56dp"
+        android:background="#1e293b"
+        android:gravity="center_vertical"
+        android:orientation="horizontal"
+        android:paddingStart="12dp"
+        android:paddingEnd="16dp">
+
+        <TextView
+            android:id="@+id/sworkout_btn_back"
+            android:layout_width="36dp"
+            android:layout_height="36dp"
+            android:background="@drawable/stats_filter_unselected"
+            android:gravity="center"
+            android:text="✕"
+            android:textColor="#FFFFFF"
+            android:textSize="16sp" />
+
+        <TextView
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="12dp"
+            android:layout_weight="1"
+            android:text="训练记录"
+            android:textColor="#FFFFFF"
+            android:textSize="18sp"
+            android:textStyle="bold" />
+
+        <TextView
+            android:id="@+id/sworkout_toggle_mode"
+            android:layout_width="36dp"
+            android:layout_height="36dp"
+            android:layout_marginEnd="12dp"
+            android:background="@drawable/stats_filter_unselected"
+            android:gravity="center"
+            android:text="◉"
+            android:textColor="#FFFFFF"
+            android:textSize="16sp" />
+
+        <TextView
+            android:id="@+id/sworkout_timer"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="00:00"
+            android:textColor="#f59e0b"
+            android:textSize="20sp"
+            android:textStyle="bold" />
+    </LinearLayout>
+
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1">
+
+        <!-- 列表模式 -->
+        <ScrollView
+            android:id="@+id/sworkout_scroll"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+
+            <LinearLayout
+                android:id="@+id/sworkout_container"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:padding="12dp" />
+        </ScrollView>
+
+        <!-- 滑动切换模式 -->
+        <androidx.viewpager2.widget.ViewPager2
+            android:id="@+id/sworkout_pager"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:visibility="gone" />
+
+        <!-- 组间休息浮层 -->
+        <LinearLayout
+            android:id="@+id/sworkout_rest_overlay"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:background="#cc0f172a"
+            android:gravity="center"
+            android:orientation="vertical"
+            android:visibility="gone">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="⏱"
+                android:textSize="48sp" />
+
+            <TextView
+                android:id="@+id/sworkout_rest_timer"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="12dp"
+                android:text="休息 01:30"
+                android:textColor="#f59e0b"
+                android:textSize="32sp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:text="点击跳过"
+                android:textColor="#9ca3af"
+                android:textSize="14sp" />
+        </LinearLayout>
+    </FrameLayout>
+
+    <!-- 底部保存 -->
+    <TextView
+        android:id="@+id/sworkout_btn_save"
+        android:layout_width="match_parent"
+        android:layout_height="52dp"
+        android:layout_margin="16dp"
+        android:background="#FC4C02"
+        android:gravity="center"
+        android:text="保存训练"
+        android:textColor="#FFFFFF"
+        android:textSize="16sp"
+        android:textStyle="bold" />
+
+</LinearLayout>
