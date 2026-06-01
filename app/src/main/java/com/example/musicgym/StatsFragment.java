@@ -64,12 +64,12 @@ public class StatsFragment extends Fragment {
     private int currentYear, currentMonth, currentDayCount;
     private int lastYear, lastMonth, lastDayCount;
 
-    private static final int COLOR_RUN = Color.parseColor("#FC4C02");
-    private static final int COLOR_CYCLE = Color.parseColor("#38bdf8");
-    private static final int COLOR_WALK = Color.parseColor("#34d399");
-    private static final int COLOR_STRENGTH = Color.parseColor("#f59e0b");
-    private static final int COLOR_CUR_MONTH = Color.parseColor("#FC4C02");
-    private static final int COLOR_LAST_MONTH = Color.parseColor("#9ca3af");
+    private static final int COLOR_RUN = ColorTokens.BRAND_ORANGE;
+    private static final int COLOR_CYCLE = ColorTokens.ACCENT_CYAN;
+    private static final int COLOR_WALK = ColorTokens.ACCENT_GREEN_SOFT;
+    private static final int COLOR_STRENGTH = ColorTokens.ACCENT_AMBER;
+    private static final int COLOR_CUR_MONTH = ColorTokens.BRAND_ORANGE;
+    private static final int COLOR_LAST_MONTH = ColorTokens.TEXT_SECONDARY;
 
     @Nullable
     @Override
@@ -119,8 +119,8 @@ public class StatsFragment extends Fragment {
         lineChart.setTouchEnabled(true); lineChart.setDragEnabled(true);
         lineChart.setScaleEnabled(true); lineChart.setPinchZoom(true);
         lineChart.setDrawGridBackground(false);
-        lineChart.setBackgroundColor(Color.parseColor("#1e293b"));
-        lineChart.setNoDataText("No data"); lineChart.setNoDataTextColor(Color.parseColor("#9ca3af"));
+        lineChart.setBackgroundColor(ColorTokens.BG_CARD);
+        lineChart.setNoDataText("No data"); lineChart.setNoDataTextColor(ColorTokens.TEXT_SECONDARY);
 
         Legend legend = lineChart.getLegend();
         legend.setTextColor(Color.WHITE); legend.setTextSize(11f);
@@ -131,13 +131,13 @@ public class StatsFragment extends Fragment {
         legend.setDrawInside(false);
 
         XAxis xa = lineChart.getXAxis();
-        xa.setTextColor(Color.parseColor("#9ca3af")); xa.setTextSize(10f);
+        xa.setTextColor(ColorTokens.TEXT_SECONDARY); xa.setTextSize(10f);
         xa.setPosition(XAxis.XAxisPosition.BOTTOM); xa.setDrawGridLines(false);
         xa.setGranularity(1f); xa.setLabelCount(7, true);
 
         YAxis ya = lineChart.getAxisLeft();
-        ya.setTextColor(Color.parseColor("#9ca3af")); ya.setTextSize(10f);
-        ya.setDrawGridLines(true); ya.setGridColor(Color.parseColor("#334155"));
+        ya.setTextColor(ColorTokens.TEXT_SECONDARY); ya.setTextSize(10f);
+        ya.setDrawGridLines(true); ya.setGridColor(ColorTokens.BG_INPUT);
         ya.setGridLineWidth(0.5f); ya.setAxisMinimum(0f);
         lineChart.getAxisRight().setEnabled(false);
     }
@@ -159,7 +159,7 @@ public class StatsFragment extends Fragment {
 
     private void updateFilterUI() {
         for (TextView tv : new TextView[]{tvFilterAll, tvFilterRunning, tvFilterCycling, tvFilterWalking, tvFilterStrength}) {
-            tv.setBackgroundResource(R.drawable.stats_filter_unselected); tv.setTextColor(Color.parseColor("#9ca3af"));
+            tv.setBackgroundResource(R.drawable.stats_filter_unselected); tv.setTextColor(ColorTokens.TEXT_SECONDARY);
         }
         TextView sel;
         switch (currentFilter) {
@@ -382,7 +382,7 @@ public class StatsFragment extends Fragment {
         weekRow.setOrientation(LinearLayout.HORIZONTAL); weekRow.setPadding(0,0,0,4);
         for (String w : new String[]{"日","一","二","三","四","五","六"}) {
             TextView tw = new TextView(getContext());
-            tw.setText(w); tw.setTextColor(Color.parseColor("#6b7280")); tw.setTextSize(10f);
+            tw.setText(w); tw.setTextColor(ColorTokens.TEXT_HINT); tw.setTextSize(10f);
             tw.setGravity(Gravity.CENTER);
             tw.setLayoutParams(new LinearLayout.LayoutParams(0, 40, 1));
             weekRow.addView(tw);
@@ -412,10 +412,10 @@ public class StatsFragment extends Fragment {
             boolean cardio = cardioDays.contains(day);
             boolean strength = strengthDays.contains(day);
             int bg;
-            if (cardio && strength) bg = Color.parseColor("#FC4C02");
-            else if (cardio) bg = Color.parseColor("#22c55e");
-            else if (strength) bg = Color.parseColor("#f59e0b");
-            else bg = Color.parseColor("#334155");
+            if (cardio && strength) bg = ColorTokens.BRAND_ORANGE;
+            else if (cardio) bg = ColorTokens.ACCENT_GREEN;
+            else if (strength) bg = ColorTokens.ACCENT_AMBER;
+            else bg = ColorTokens.BG_INPUT;
 
             TextView tv = new TextView(getContext());
             tv.setText(String.valueOf(day)); tv.setTextColor(Color.WHITE); tv.setTextSize(11f);

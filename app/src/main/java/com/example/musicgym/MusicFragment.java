@@ -268,12 +268,12 @@ public class MusicFragment extends Fragment {
             row.setGravity(Gravity.CENTER_VERTICAL);
             row.setPadding(12, 10, 8, 10);
             boolean isCurrent = idx == currentTrackIndex;
-            row.setBackgroundColor(isCurrent ? Color.parseColor("#1aFC4C02") : Color.TRANSPARENT);
+            row.setBackgroundColor(isCurrent ? ColorTokens.CURRENT_TRACK_BG : Color.TRANSPARENT);
 
             // 序号 / 播放图标
             TextView tvIdx = new TextView(getContext());
             tvIdx.setText(isCurrent && mediaPlayer != null && mediaPlayer.isPlaying() ? "▶" : String.valueOf(idx + 1));
-            tvIdx.setTextColor(isCurrent ? Color.parseColor("#FC4C02") : Color.parseColor("#6b7280"));
+            tvIdx.setTextColor(isCurrent ? ColorTokens.BRAND_ORANGE : ColorTokens.TEXT_HINT);
             tvIdx.setTextSize(11f); tvIdx.setGravity(Gravity.CENTER);
             tvIdx.setLayoutParams(new LinearLayout.LayoutParams(32, WRAP));
             row.addView(tvIdx);
@@ -288,14 +288,14 @@ public class MusicFragment extends Fragment {
             info.addView(tvT);
 
             TextView tvA = new TextView(getContext());
-            tvA.setText(t.artist); tvA.setTextColor(Color.parseColor("#9ca3af")); tvA.setTextSize(11f); tvA.setSingleLine(true);
+            tvA.setText(t.artist); tvA.setTextColor(ColorTokens.TEXT_SECONDARY); tvA.setTextSize(11f); tvA.setSingleLine(true);
             info.addView(tvA);
 
             row.addView(info);
 
             // 删除按钮
             TextView btnDel = new TextView(getContext());
-            btnDel.setText("✕"); btnDel.setTextColor(Color.parseColor("#ef4444")); btnDel.setTextSize(14f);
+            btnDel.setText("✕"); btnDel.setTextColor(ColorTokens.ACCENT_RED); btnDel.setTextSize(14f);
             btnDel.setGravity(Gravity.CENTER); btnDel.setPadding(12, 8, 8, 8);
             btnDel.setLayoutParams(new LinearLayout.LayoutParams(WRAP, WRAP));
             btnDel.setOnClickListener(v -> {
@@ -391,8 +391,8 @@ public class MusicFragment extends Fragment {
     private String formatTime(int ms) { int s = (ms / 1000) % 60, m = (ms / (1000 * 60)) % 60;
         return String.format(Locale.getDefault(), "%02d:%02d", m, s); }
 
-    private int dp(int d) { return (int) (d * getResources().getDisplayMetrics().density); }
-    static final int WRAP = ViewGroup.LayoutParams.WRAP_CONTENT;
+    private int dp(int d) { return UiUtils.dp(getContext(), d); }
+    static final int WRAP = UiUtils.WRAP;
 
     @Override public void onDestroyView() {
         super.onDestroyView();

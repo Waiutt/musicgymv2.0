@@ -72,7 +72,7 @@ public class ExercisePageAdapter extends RecyclerView.Adapter<ExercisePageAdapte
         // 进度指示器 (如 "2 / 5")
         TextView tvProgress = new TextView(activity);
         tvProgress.setText((exI + 1) + " / " + exerciseNames.size());
-        tvProgress.setTextColor(Color.parseColor("#6b7280"));
+        tvProgress.setTextColor(ColorTokens.TEXT_HINT);
         tvProgress.setTextSize(12f);
         tvProgress.setGravity(Gravity.CENTER);
         tvProgress.setPadding(0, 0, 0, dp(16));
@@ -108,7 +108,7 @@ public class ExercisePageAdapter extends RecyclerView.Adapter<ExercisePageAdapte
         // 分隔线
         View divider = new View(activity);
         divider.setLayoutParams(new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, 1));
-        divider.setBackgroundColor(Color.parseColor("#334155"));
+        divider.setBackgroundColor(ColorTokens.BG_INPUT);
         page.addView(divider);
 
         // 组行
@@ -158,7 +158,7 @@ public class ExercisePageAdapter extends RecyclerView.Adapter<ExercisePageAdapte
             String pct = oneRM > 0 ? String.format(Locale.getDefault(), "%.0f%%", se.weight / oneRM * 100) : "-";
             TextView tvPct = new TextView(activity);
             tvPct.setText(pct);
-            tvPct.setTextColor(Color.parseColor("#94a3b8"));
+            tvPct.setTextColor(ColorTokens.TEXT_MUTED);
             tvPct.setTextSize(13f);
             tvPct.setGravity(Gravity.CENTER);
             tvPct.setLayoutParams(new LinearLayout.LayoutParams(0, WRAP, 1));
@@ -167,7 +167,7 @@ public class ExercisePageAdapter extends RecyclerView.Adapter<ExercisePageAdapte
             // 删除
             TextView btnDel = new TextView(activity);
             btnDel.setText("−");
-            btnDel.setTextColor(Color.parseColor("#ef4444"));
+            btnDel.setTextColor(ColorTokens.ACCENT_RED);
             btnDel.setTextSize(20f);
             btnDel.setGravity(Gravity.CENTER);
             btnDel.setPadding(dp(12), dp(8), dp(4), dp(8));
@@ -185,7 +185,7 @@ public class ExercisePageAdapter extends RecyclerView.Adapter<ExercisePageAdapte
             if (i < sets.size() - 1) {
                 View sep = new View(activity);
                 sep.setLayoutParams(new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, 1));
-                sep.setBackgroundColor(Color.parseColor("#1e293b"));
+                sep.setBackgroundColor(ColorTokens.BG_CARD);
                 page.addView(sep);
             }
         }
@@ -193,7 +193,7 @@ public class ExercisePageAdapter extends RecyclerView.Adapter<ExercisePageAdapte
         // 分隔线
         View divider2 = new View(activity);
         divider2.setLayoutParams(new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, 1));
-        divider2.setBackgroundColor(Color.parseColor("#334155"));
+        divider2.setBackgroundColor(ColorTokens.BG_INPUT);
         page.addView(divider2);
 
         // %1RM 快捷填充
@@ -204,9 +204,9 @@ public class ExercisePageAdapter extends RecyclerView.Adapter<ExercisePageAdapte
             for (int pctVal : new int[]{50, 65, 75, 85, 95}) {
                 TextView pctBtn = new TextView(activity);
                 pctBtn.setText(pctVal + "%");
-                pctBtn.setTextColor(Color.parseColor("#38bdf8"));
+                pctBtn.setTextColor(ColorTokens.ACCENT_CYAN);
                 pctBtn.setTextSize(13f);
-                pctBtn.setBackgroundColor(Color.parseColor("#334155"));
+                pctBtn.setBackgroundColor(ColorTokens.BG_INPUT);
                 pctBtn.setPadding(dp(16), dp(8), dp(16), dp(8));
                 LinearLayout.LayoutParams plp = new LinearLayout.LayoutParams(WRAP, WRAP);
                 plp.setMargins(0, 0, dp(8), 0);
@@ -228,7 +228,7 @@ public class ExercisePageAdapter extends RecyclerView.Adapter<ExercisePageAdapte
 
         TextView btnAdd = new TextView(activity);
         btnAdd.setText("+ 添加组");
-        btnAdd.setTextColor(Color.parseColor("#38bdf8"));
+        btnAdd.setTextColor(ColorTokens.ACCENT_CYAN);
         btnAdd.setTextSize(16f);
         btnAdd.setPadding(0, 0, dp(32), 0);
         btnAdd.setOnClickListener(v -> {
@@ -239,7 +239,7 @@ public class ExercisePageAdapter extends RecyclerView.Adapter<ExercisePageAdapte
 
         TextView btnRest = new TextView(activity);
         btnRest.setText("⏱ 组间休息");
-        btnRest.setTextColor(Color.parseColor("#f59e0b"));
+        btnRest.setTextColor(ColorTokens.ACCENT_AMBER);
         btnRest.setTextSize(16f);
         btnRest.setOnClickListener(v -> activity.startRestTimer());
         actions.addView(btnRest);
@@ -256,7 +256,7 @@ public class ExercisePageAdapter extends RecyclerView.Adapter<ExercisePageAdapte
         for (String h : new String[]{"组", "重量(kg)", "次数", "%1RM", ""}) {
             TextView th = new TextView(activity);
             th.setText(h);
-            th.setTextColor(Color.parseColor("#6b7280"));
+            th.setTextColor(ColorTokens.TEXT_HINT);
             th.setTextSize(11f);
 
             LinearLayout.LayoutParams hlp;
@@ -275,7 +275,7 @@ public class ExercisePageAdapter extends RecyclerView.Adapter<ExercisePageAdapte
         et.setTextColor(Color.WHITE);
         et.setTextSize(15f);
         et.setInputType(decimal ? (InputType.TYPE_CLASS_NUMBER | InputType.TYPE_NUMBER_FLAG_DECIMAL) : InputType.TYPE_CLASS_NUMBER);
-        et.setBackgroundColor(Color.parseColor("#334155"));
+        et.setBackgroundColor(ColorTokens.BG_INPUT);
         et.setPadding(dp(8), dp(8), dp(8), dp(8));
         et.setGravity(Gravity.CENTER);
         LinearLayout.LayoutParams elp = new LinearLayout.LayoutParams(0, WRAP, 1);
@@ -289,7 +289,7 @@ public class ExercisePageAdapter extends RecyclerView.Adapter<ExercisePageAdapte
         tv.setText(text);
         tv.setTextColor(Color.parseColor(colorHex));
         tv.setTextSize(12f);
-        tv.setBackgroundColor(Color.parseColor("#334155"));
+        tv.setBackgroundColor(ColorTokens.BG_INPUT);
         tv.setPadding(dp(10), dp(4), dp(10), dp(4));
         LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(WRAP, WRAP);
         lp.setMargins(0, 0, dp(8), 0);
@@ -297,11 +297,8 @@ public class ExercisePageAdapter extends RecyclerView.Adapter<ExercisePageAdapte
         return tv;
     }
 
-    private int dp(int d) {
-        return (int) (d * activity.getResources().getDisplayMetrics().density);
-    }
-
-    static final int WRAP = ViewGroup.LayoutParams.WRAP_CONTENT;
+    private int dp(int d) { return UiUtils.dp(activity, d); }
+    static final int WRAP = UiUtils.WRAP;
 
     static class PageHolder extends RecyclerView.ViewHolder {
         LinearLayout content;

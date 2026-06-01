@@ -199,7 +199,7 @@ public class WorkoutActivity extends AppCompatActivity implements AMapLocationLi
                 if (pathPoints.size() >= 2) {
                     if (trajectoryLine != null) trajectoryLine.remove();
                     trajectoryLine = aMap.addPolyline(new PolylineOptions()
-                            .addAll(pathPoints).width(18f).color(Color.parseColor("#22c55e")).setUseTexture(false));
+                            .addAll(pathPoints).width(18f).color(ColorTokens.ACCENT_GREEN).setUseTexture(false));
                 }
 
                 float speedMs = loc.getSpeed();

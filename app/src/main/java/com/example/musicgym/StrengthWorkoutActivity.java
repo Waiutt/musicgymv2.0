@@ -177,7 +177,7 @@ public class StrengthWorkoutActivity extends AppCompatActivity {
                     int m = restSeconds / 60, s = restSeconds % 60;
                     tvRestTimer.setText(String.format(Locale.getDefault(), "休息 %02d:%02d", m, s));
                     if (restSeconds <= 10) {
-                        tvRestTimer.setTextColor(Color.parseColor("#ef4444"));
+                        tvRestTimer.setTextColor(ColorTokens.ACCENT_RED);
                     }
                     handler.postDelayed(this, 1000);
                 } else if (restRunning) {
@@ -190,7 +190,7 @@ public class StrengthWorkoutActivity extends AppCompatActivity {
     private void stopRestTimer() {
         restRunning = false;
         restOverlay.setVisibility(View.GONE);
-        tvRestTimer.setTextColor(Color.parseColor("#f59e0b"));
+        tvRestTimer.setTextColor(ColorTokens.ACCENT_AMBER);
         Toast.makeText(this, "休息结束，开始下一组!", Toast.LENGTH_SHORT).show();
     }
 
@@ -220,7 +220,7 @@ public class StrengthWorkoutActivity extends AppCompatActivity {
 
             LinearLayout card = new LinearLayout(this);
             card.setOrientation(LinearLayout.VERTICAL);
-            card.setBackgroundColor(Color.parseColor("#1e293b"));
+            card.setBackgroundColor(ColorTokens.BG_CARD);
             card.setPadding(16, 14, 16, 14);
             LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
             lp.setMargins(0, 0, 0, 12); card.setLayoutParams(lp);
@@ -231,7 +231,7 @@ public class StrengthWorkoutActivity extends AppCompatActivity {
             header.setGravity(Gravity.CENTER_VERTICAL);
 
             TextView tvNum = new TextView(this);
-            tvNum.setText(String.valueOf(exI + 1)); tvNum.setTextColor(Color.parseColor("#FC4C02"));
+            tvNum.setText(String.valueOf(exI + 1)); tvNum.setTextColor(ColorTokens.BRAND_ORANGE);
             tvNum.setTextSize(16f); tvNum.setTypeface(null, Typeface.BOLD); tvNum.setPadding(0, 0, 14, 0);
             header.addView(tvNum);
 
@@ -247,21 +247,21 @@ public class StrengthWorkoutActivity extends AppCompatActivity {
             if (pr != null) {
                 TextView tvPR = new TextView(this);
                 tvPR.setText(String.format(Locale.getDefault(), "PR %.0fkg", pr[0]));
-                tvPR.setTextColor(Color.parseColor("#fbbf24")); tvPR.setTextSize(11f);
+                tvPR.setTextColor(ColorTokens.PR_YELLOW); tvPR.setTextSize(11f);
                 tvPR.setPadding(0, 0, 10, 0);
                 header.addView(tvPR);
             }
 
             double vol = 0;
             for (SetEntry se : sets) vol += se.weight * se.reps;
-            TextView tvVol = addView(header, String.format(Locale.getDefault(), "%.0f kg", vol), Color.parseColor("#f59e0b"), 13f, WRAP);
+            TextView tvVol = addView(header, String.format(Locale.getDefault(), "%.0f kg", vol), ColorTokens.ACCENT_AMBER, 13f, WRAP);
             card.addView(header);
 
             // 表头
             LinearLayout labels = new LinearLayout(this);
             labels.setOrientation(LinearLayout.HORIZONTAL); labels.setPadding(0, 12, 0, 4);
             for (String h : new String[]{"组", "重量(kg)", "次数", "%1RM", ""}) {
-                TextView th = new TextView(this); th.setText(h); th.setTextColor(Color.parseColor("#6b7280")); th.setTextSize(10f);
+                TextView th = new TextView(this); th.setText(h); th.setTextColor(ColorTokens.TEXT_HINT); th.setTextSize(10f);
                 LinearLayout.LayoutParams hlp;
                 if (h.equals("重量(kg)") || h.equals("次数") || h.equals("%1RM")) hlp = new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1);
                 else if (h.equals("")) hlp = new LinearLayout.LayoutParams(34, ViewGroup.LayoutParams.WRAP_CONTENT);
@@ -294,9 +294,9 @@ public class StrengthWorkoutActivity extends AppCompatActivity {
                 // %1RM 显示
                 double oneRM = pr != null ? pr[0] : 0;
                 String pct = oneRM > 0 ? String.format(Locale.getDefault(), "%.0f%%", se.weight / oneRM * 100) : "-";
-                addView(row, pct, Color.parseColor("#94a3b8"), 11f, WRAP);
+                addView(row, pct, ColorTokens.TEXT_MUTED, 11f, WRAP);
 
-                TextView btnDel = addView(row, "−", Color.parseColor("#ef4444"), 18f, 34, Gravity.CENTER);
+                TextView btnDel = addView(row, "−", ColorTokens.ACCENT_RED, 18f, 34, Gravity.CENTER);
                 btnDel.setOnClickListener(v -> {
                     if (sets.size() > 1) { sets.remove(si); buildUI(); }
                 });
@@ -312,8 +312,8 @@ public class StrengthWorkoutActivity extends AppCompatActivity {
                 for (int pctVal : new int[]{50, 65, 75, 85, 95}) {
                     TextView pctBtn = new TextView(this);
                     pctBtn.setText(pctVal + "%");
-                    pctBtn.setTextColor(Color.parseColor("#38bdf8")); pctBtn.setTextSize(11f);
-                    pctBtn.setBackgroundColor(Color.parseColor("#334155"));
+                    pctBtn.setTextColor(ColorTokens.ACCENT_CYAN); pctBtn.setTextSize(11f);
+                    pctBtn.setBackgroundColor(ColorTokens.BG_INPUT);
                     pctBtn.setPadding(12, 6, 12, 6);
                     LinearLayout.LayoutParams plp = new LinearLayout.LayoutParams(WRAP, WRAP);
                     plp.setMargins(0, 0, 6, 0); pctBtn.setLayoutParams(plp);
@@ -333,13 +333,13 @@ public class StrengthWorkoutActivity extends AppCompatActivity {
             LinearLayout actions = new LinearLayout(this);
             actions.setOrientation(LinearLayout.HORIZONTAL); actions.setPadding(0, 10, 0, 0);
             TextView btnAdd = new TextView(this);
-            btnAdd.setText("+ 添加组"); btnAdd.setTextColor(Color.parseColor("#38bdf8")); btnAdd.setTextSize(13f);
+            btnAdd.setText("+ 添加组"); btnAdd.setTextColor(ColorTokens.ACCENT_CYAN); btnAdd.setTextSize(13f);
             btnAdd.setPadding(0, 0, 24, 0);
             btnAdd.setOnClickListener(v -> { sets.add(new SetEntry(0, 10)); buildUI(); });
             actions.addView(btnAdd);
 
             TextView btnRest = new TextView(this);
-            btnRest.setText("⏱ 组间休息"); btnRest.setTextColor(Color.parseColor("#f59e0b")); btnRest.setTextSize(13f);
+            btnRest.setText("⏱ 组间休息"); btnRest.setTextColor(ColorTokens.ACCENT_AMBER); btnRest.setTextSize(13f);
             btnRest.setOnClickListener(v -> startRestTimer());
             actions.addView(btnRest);
 
@@ -417,14 +417,14 @@ public class StrengthWorkoutActivity extends AppCompatActivity {
         EditText et = new EditText(this);
         et.setText(val); et.setTextColor(Color.WHITE); et.setTextSize(13f);
         et.setInputType(decimal ? (InputType.TYPE_CLASS_NUMBER | InputType.TYPE_NUMBER_FLAG_DECIMAL) : InputType.TYPE_CLASS_NUMBER);
-        et.setBackgroundColor(Color.parseColor("#334155")); et.setPadding(12, 8, 12, 8);
+        et.setBackgroundColor(ColorTokens.BG_INPUT); et.setPadding(12, 8, 12, 8);
         LinearLayout.LayoutParams elp = new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1);
         elp.setMargins(0, 0, 4, 0); et.setLayoutParams(elp);
         parent.addView(et);
         return et;
     }
 
-    private static final int WRAP = ViewGroup.LayoutParams.WRAP_CONTENT;
+    private static final int WRAP = UiUtils.WRAP;
     private TextView addView(LinearLayout parent, String text, int color, float size, int width) {
         return addView(parent, text, color, size, width, Gravity.START);
     }

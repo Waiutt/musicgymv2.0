@@ -15,7 +15,9 @@
       "Bash(git commit -m ' *)",
       "Bash(git tag *)",
       "Bash(Select-String \"BUILD\")",
-      "Bash(cmd /c \"gradlew.bat assembleDebug 2>&1\")"
+      "Bash(cmd /c \"gradlew.bat assembleDebug 2>&1\")",
+      "Bash(sed -i.bak -e 's/private int dp\\(int dp\\) { return \\(int\\)\\(dp \\\\* getResources\\(\\)\\\\.getDisplayMetrics\\(\\)\\\\.density\\); }/private int dp\\(int d\\) { return UiUtils.dp\\(this, d\\); }/' -e 's/static final int WRAP = ViewGroup.LayoutParams.WRAP_CONTENT, MATCH = ViewGroup.LayoutParams.MATCH_PARENT;/static final int WRAP = UiUtils.WRAP, MATCH = UiUtils.MATCH;/' StrengthActivity.java)",
+      "Bash(rm -f StrengthActivity.java.bak)"
     ]
   }
 }

@@ -100,13 +100,13 @@ public class ProfileFragment extends Fragment {
             requireActivity().runOnUiThread(() -> {
                 if (records.isEmpty()) {
                     TextView tv = new TextView(getContext());
-                    tv.setText("暂无体重记录"); tv.setTextColor(Color.parseColor("#9ca3af"));
+                    tv.setText("暂无体重记录"); tv.setTextColor(ColorTokens.TEXT_SECONDARY);
                     historyContainer.addView(tv); return;
                 }
                 for (WeightRecord r : records) {
                     TextView tv = new TextView(getContext());
                     tv.setText("• " + r.getDate() + " : " + r.getWeightKg() + " kg");
-                    tv.setTextColor(Color.parseColor("#34d399")); tv.setTextSize(14);
+                    tv.setTextColor(ColorTokens.ACCENT_GREEN_SOFT); tv.setTextSize(14);
                     tv.setPadding(0, 10, 0, 10); historyContainer.addView(tv);
                 }
             });
@@ -120,7 +120,7 @@ public class ProfileFragment extends Fragment {
             requireActivity().runOnUiThread(() -> {
                 if (latest == null) {
                     TextView tv = new TextView(getContext());
-                    tv.setText("暂无围度数据"); tv.setTextColor(Color.parseColor("#9ca3af"));
+                    tv.setText("暂无围度数据"); tv.setTextColor(ColorTokens.TEXT_SECONDARY);
                     measureContainer.addView(tv); return;
                 }
                 String[] labels = {"胸围","腰围","臀围","臂围","腿围"};
@@ -128,7 +128,7 @@ public class ProfileFragment extends Fragment {
                 for (int i=0;i<labels.length;i++) {
                     TextView tv = new TextView(getContext());
                     tv.setText(labels[i] + ": " + vals[i] + " cm");
-                    tv.setTextColor(Color.parseColor("#38bdf8")); tv.setTextSize(13);
+                    tv.setTextColor(ColorTokens.ACCENT_CYAN); tv.setTextSize(13);
                     tv.setPadding(0,6,0,6); measureContainer.addView(tv);
                 }
             });

@@ -137,7 +137,7 @@ public class StrengthActivity extends AppCompatActivity {
         if (results.isEmpty()) {
             TextView tv = new TextView(this);
             tv.setText("未找到匹配动作，点击添加自定义动作");
-            tv.setTextColor(Color.parseColor("#f59e0b")); tv.setTextSize(13f);
+            tv.setTextColor(ColorTokens.ACCENT_AMBER); tv.setTextSize(13f);
             tv.setPadding(8, 20, 8, 20);
             tv.setOnClickListener(v -> showAddCustomDialog());
             exerciseContainer.addView(tv);
@@ -173,7 +173,7 @@ public class StrengthActivity extends AppCompatActivity {
         if (selectedExercises.isEmpty()) { Toast.makeText(this, "请先选择动作", Toast.LENGTH_SHORT).show(); return; }
         EditText et = new EditText(this);
         et.setHint("模板名称 (如: 推日)"); et.setTextColor(Color.WHITE); et.setHintTextColor(Color.GRAY);
-        et.setBackgroundColor(Color.parseColor("#334155")); et.setPadding(20, 16, 20, 16);
+        et.setBackgroundColor(ColorTokens.BG_INPUT); et.setPadding(20, 16, 20, 16);
         new AlertDialog.Builder(this).setTitle("保存模板").setView(et)
                 .setPositiveButton("保存", (d, w) -> {
                     String name = et.getText().toString().trim();
@@ -222,7 +222,7 @@ public class StrengthActivity extends AppCompatActivity {
     private void showAddCustomDialog() {
         EditText et = new EditText(this);
         et.setHint("输入动作名称"); et.setTextColor(Color.WHITE); et.setHintTextColor(Color.GRAY);
-        et.setBackgroundColor(Color.parseColor("#334155")); et.setPadding(20, 16, 20, 16);
+        et.setBackgroundColor(ColorTokens.BG_INPUT); et.setPadding(20, 16, 20, 16);
         new AlertDialog.Builder(this).setTitle("添加自定义动作").setView(et)
                 .setPositiveButton("添加", (d, w) -> {
                     String name = et.getText().toString().trim();
@@ -245,16 +245,16 @@ public class StrengthActivity extends AppCompatActivity {
                 currentGroup = key; etSearch.setText(""); searchQuery = "";
                 for (int i = 0; i < tabContainer.getChildCount(); i++) {
                     TextView t = (TextView) tabContainer.getChildAt(i);
-                    t.setBackgroundColor(Color.TRANSPARENT); t.setTextColor(Color.parseColor("#9ca3af"));
+                    t.setBackgroundColor(Color.TRANSPARENT); t.setTextColor(ColorTokens.TEXT_SECONDARY);
                     t.setTypeface(null, Typeface.NORMAL);
                 }
-                tab.setBackgroundColor(Color.parseColor("#FC4C02")); tab.setTextColor(Color.WHITE);
+                tab.setBackgroundColor(ColorTokens.BRAND_ORANGE); tab.setTextColor(Color.WHITE);
                 tab.setTypeface(null, Typeface.BOLD); showGroup(key);
             });
             tabContainer.addView(tab);
         }
         TextView first = (TextView) tabContainer.getChildAt(0);
-        first.setBackgroundColor(Color.parseColor("#FC4C02")); first.setTextColor(Color.WHITE);
+        first.setBackgroundColor(ColorTokens.BRAND_ORANGE); first.setTextColor(Color.WHITE);
         first.setTypeface(null, Typeface.BOLD);
     }
 
@@ -267,7 +267,7 @@ public class StrengthActivity extends AppCompatActivity {
         // 先显示自定义动作
         if (!customExercises.isEmpty()) {
             TextView subTitle = new TextView(this);
-            subTitle.setText("自定义"); subTitle.setTextColor(Color.parseColor("#f59e0b")); subTitle.setTextSize(12f);
+            subTitle.setText("自定义"); subTitle.setTextColor(ColorTokens.ACCENT_AMBER); subTitle.setTextSize(12f);
             subTitle.setPadding(8, 12, 8, 8); exerciseContainer.addView(subTitle);
             LinearLayout row = null;
             for (int i = 0; i < customExercises.size(); i++) {
@@ -279,7 +279,7 @@ public class StrengthActivity extends AppCompatActivity {
 
         for (SubGroup sub : group.subGroups) {
             TextView subTitle = new TextView(this);
-            subTitle.setText(sub.name); subTitle.setTextColor(Color.parseColor("#94a3b8")); subTitle.setTextSize(12f);
+            subTitle.setText(sub.name); subTitle.setTextColor(ColorTokens.TEXT_MUTED); subTitle.setTextSize(12f);
             subTitle.setPadding(8, 16, 8, 8); exerciseContainer.addView(subTitle);
 
             LinearLayout row = null;
@@ -297,7 +297,7 @@ public class StrengthActivity extends AppCompatActivity {
         clp.setMargins(3, 0, 3, 6); card.setLayoutParams(clp);
 
         LinearLayout inner = new LinearLayout(this);
-        inner.setOrientation(LinearLayout.VERTICAL); inner.setBackgroundColor(Color.parseColor("#1e293b"));
+        inner.setOrientation(LinearLayout.VERTICAL); inner.setBackgroundColor(ColorTokens.BG_CARD);
         inner.setLayoutParams(new LinearLayout.LayoutParams(MATCH, MATCH)); inner.setPadding(8, 0, 8, 8);
 
         FrameLayout imgArea = new FrameLayout(this);
@@ -313,7 +313,7 @@ public class StrengthActivity extends AppCompatActivity {
 
         TextView tv = new TextView(this);
         tv.setText(name.length() > 5 ? name.substring(0, 4) + ".." : name);
-        tv.setTextColor(isSelected ? Color.parseColor("#FC4C02") : Color.WHITE);
+        tv.setTextColor(isSelected ? ColorTokens.BRAND_ORANGE : Color.WHITE);
         tv.setTextSize(11f); tv.setGravity(Gravity.CENTER); tv.setPadding(2, 6, 2, 2);
         inner.addView(tv);
 
@@ -321,7 +321,7 @@ public class StrengthActivity extends AppCompatActivity {
             TextView chk = new TextView(this); chk.setText("✓"); chk.setTextColor(Color.WHITE); chk.setTextSize(10f); chk.setGravity(Gravity.CENTER);
             FrameLayout.LayoutParams chklp = new FrameLayout.LayoutParams(22, 22); chklp.gravity = Gravity.TOP | Gravity.END;
             chklp.setMargins(0, 4, 4, 0);
-            GradientDrawable cb = new GradientDrawable(); cb.setShape(GradientDrawable.OVAL); cb.setColor(Color.parseColor("#FC4C02"));
+            GradientDrawable cb = new GradientDrawable(); cb.setShape(GradientDrawable.OVAL); cb.setColor(ColorTokens.BRAND_ORANGE);
             chk.setBackground(cb); card.addView(chk);
         }
         card.addView(inner);
@@ -350,11 +350,11 @@ public class StrengthActivity extends AppCompatActivity {
 
         String targets = findTargets(name);
         TextView targ = new TextView(this); targ.setText("目标肌群: " + targets);
-        targ.setTextColor(Color.parseColor("#94a3b8")); targ.setTextSize(14f); targ.setPadding(0, 0, 0, 16); detail.addView(targ);
+        targ.setTextColor(ColorTokens.TEXT_MUTED); targ.setTextSize(14f); targ.setPadding(0, 0, 0, 16); detail.addView(targ);
 
         TextView desc = new TextView(this);
         desc.setText("标准动作执行时，注意核心收紧、动作幅度完整。建议每组 8-12 次，组间休息 60-90 秒。初学者请用轻重量体会发力感，熟悉后再逐渐加重。");
-        desc.setTextColor(Color.parseColor("#cbd5e1")); desc.setTextSize(14f); desc.setLineSpacing(4, 1.2f); detail.addView(desc);
+        desc.setTextColor(ColorTokens.TEXT_PALE); desc.setTextSize(14f); desc.setLineSpacing(4, 1.2f); detail.addView(desc);
         sv.addView(detail);
 
         boolean sel = selectedExercises.containsKey(name);
@@ -383,7 +383,7 @@ public class StrengthActivity extends AppCompatActivity {
         startActivity(i);
     }
 
-    private int dp(int dp) { return (int)(dp * getResources().getDisplayMetrics().density); }
+    private int dp(int d) { return UiUtils.dp(this, d); }
     private String getEmoji(String n) {
         if (n.contains("卧推")||n.contains("推胸")) return "🏋️"; if (n.contains("深蹲")||n.contains("腿举")) return "🦵";
         if (n.contains("硬拉")) return "🏋️‍♂️"; if (n.contains("弯举")||n.contains("臂")) return "💪";
@@ -395,7 +395,7 @@ public class StrengthActivity extends AppCompatActivity {
         return "🎯";
     }
 
-    static final int WRAP = ViewGroup.LayoutParams.WRAP_CONTENT, MATCH = ViewGroup.LayoutParams.MATCH_PARENT;
+    static final int WRAP = UiUtils.WRAP, MATCH = UiUtils.MATCH;
 
     static class MuscleGroup { String name,key,color; List<SubGroup> subGroups;
         MuscleGroup(String n,String k,String c,SubGroup...ss){name=n;key=k;color=c;subGroups=Arrays.asList(ss);} }
