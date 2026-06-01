@@ -3,14 +3,14 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    android:background="#0f172a"
+    android:background="@color/bg_dark"
     android:padding="20dp">
 
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="UPLOAD NEW DATA"
-        android:textColor="#38bdf8"
+        android:textColor="@color/cyber_cyan"
         android:textSize="22sp"
         android:textStyle="bold"
         android:layout_marginBottom="20dp"/>
@@ -19,7 +19,7 @@
         android:id="@+id/create_iv_preview"
         android:layout_width="match_parent"
         android:layout_height="200dp"
-        android:background="#1e293b"
+        android:background="@color/bg_card"
         android:scaleType="centerCrop"
         android:layout_marginBottom="10dp"/>
 
@@ -35,7 +35,7 @@
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:text="CAMERA"
-            android:backgroundTint="#f43f5e"
+            android:backgroundTint="@color/cyber_rose"
             android:layout_marginEnd="5dp"/>
 
         <Button
@@ -44,7 +44,7 @@
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:text="GALLERY"
-            android:backgroundTint="#8b5cf6"
+            android:backgroundTint="@color/accent_purple"
             android:layout_marginStart="5dp"/>
     </LinearLayout>
 
@@ -53,9 +53,9 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:hint="Transmission Title"
-        android:textColorHint="#64748b"
-        android:textColor="#FFFFFF"
-        android:backgroundTint="#38bdf8"
+        android:textColorHint="@color/text_gray_mid"
+        android:textColor="@color/white"
+        android:backgroundTint="@color/cyber_cyan"
         android:layout_marginBottom="10dp"/>
 
     <EditText
@@ -65,9 +65,9 @@
         android:layout_weight="1"
         android:gravity="top"
         android:hint="Enter log details..."
-        android:textColorHint="#64748b"
-        android:textColor="#FFFFFF"
-        android:backgroundTint="#38bdf8"/>
+        android:textColorHint="@color/text_gray_mid"
+        android:textColor="@color/white"
+        android:backgroundTint="@color/cyber_cyan"/>
 
     <Button
         android:id="@+id/create_btn_publish"
@@ -76,7 +76,7 @@
         android:text="INITIATE UPLOAD"
         android:textSize="18sp"
         android:textStyle="bold"
-        android:backgroundTint="#10b981"
+        android:backgroundTint="@color/accent_emerald"
         android:layout_marginTop="20dp"/>
 
 </LinearLayout>

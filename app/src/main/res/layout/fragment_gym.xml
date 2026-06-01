@@ -3,7 +3,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#0f172a"
+    android:background="@color/bg_dark"
     android:fillViewport="true">
 
 <LinearLayout
@@ -19,7 +19,7 @@
         android:layout_height="wrap_content"
         android:layout_marginBottom="8dp"
         android:text="选择运动类型"
-        android:textColor="#FFFFFF"
+        android:textColor="@color/white"
         android:textSize="22sp"
         android:textStyle="bold" />
 
@@ -28,7 +28,7 @@
         android:layout_height="wrap_content"
         android:layout_marginBottom="28dp"
         android:text="开始记录你的每一次运动"
-        android:textColor="#6b7280"
+        android:textColor="@color/text_gray_dark"
         android:textSize="14sp" />
 
     <!-- 跑步卡片 -->
@@ -37,7 +37,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginBottom="16dp"
-        app:cardBackgroundColor="#1e293b"
+        app:cardBackgroundColor="@color/bg_card"
         app:cardCornerRadius="16dp"
         app:cardElevation="0dp"
         android:clickable="true"
@@ -71,7 +71,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="跑步"
-                    android:textColor="#FFFFFF"
+                    android:textColor="@color/white"
                     android:textSize="18sp"
                     android:textStyle="bold" />
 
@@ -80,7 +80,7 @@
                     android:layout_height="wrap_content"
                     android:layout_marginTop="4dp"
                     android:text="GPS 追踪 · 配速记录 · 卡路里计算"
-                    android:textColor="#9ca3af"
+                    android:textColor="@color/text_gray"
                     android:textSize="12sp" />
             </LinearLayout>
 
@@ -88,7 +88,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="›"
-                android:textColor="#6b7280"
+                android:textColor="@color/text_gray_dark"
                 android:textSize="24sp" />
         </LinearLayout>
     </androidx.cardview.widget.CardView>
@@ -99,7 +99,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginBottom="16dp"
-        app:cardBackgroundColor="#1e293b"
+        app:cardBackgroundColor="@color/bg_card"
         app:cardCornerRadius="16dp"
         app:cardElevation="0dp"
         android:clickable="true"
@@ -132,7 +132,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="骑行"
-                    android:textColor="#FFFFFF"
+                    android:textColor="@color/white"
                     android:textSize="18sp"
                     android:textStyle="bold" />
 
@@ -141,7 +141,7 @@
                     android:layout_height="wrap_content"
                     android:layout_marginTop="4dp"
                     android:text="速度追踪 · 路线记录 · 卡路里计算"
-                    android:textColor="#9ca3af"
+                    android:textColor="@color/text_gray"
                     android:textSize="12sp" />
             </LinearLayout>
 
@@ -149,7 +149,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="›"
-                android:textColor="#6b7280"
+                android:textColor="@color/text_gray_dark"
                 android:textSize="24sp" />
         </LinearLayout>
     </androidx.cardview.widget.CardView>
@@ -160,7 +160,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginBottom="16dp"
-        app:cardBackgroundColor="#1e293b"
+        app:cardBackgroundColor="@color/bg_card"
         app:cardCornerRadius="16dp"
         app:cardElevation="0dp"
         android:clickable="true"
@@ -193,7 +193,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="步行"
-                    android:textColor="#FFFFFF"
+                    android:textColor="@color/white"
                     android:textSize="18sp"
                     android:textStyle="bold" />
 
@@ -202,7 +202,7 @@
                     android:layout_height="wrap_content"
                     android:layout_marginTop="4dp"
                     android:text="步数估算 · 路线记录 · 卡路里计算"
-                    android:textColor="#9ca3af"
+                    android:textColor="@color/text_gray"
                     android:textSize="12sp" />
             </LinearLayout>
 
@@ -210,7 +210,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="›"
-                android:textColor="#6b7280"
+                android:textColor="@color/text_gray_dark"
                 android:textSize="24sp" />
         </LinearLayout>
     </androidx.cardview.widget.CardView>
@@ -220,7 +220,7 @@
         android:id="@+id/gym_card_strength"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        app:cardBackgroundColor="#1e293b"
+        app:cardBackgroundColor="@color/bg_card"
         app:cardCornerRadius="16dp"
         app:cardElevation="0dp"
         android:clickable="true"
@@ -253,7 +253,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="力量训练"
-                    android:textColor="#FFFFFF"
+                    android:textColor="@color/white"
                     android:textSize="18sp"
                     android:textStyle="bold" />
 
@@ -262,7 +262,7 @@
                     android:layout_height="wrap_content"
                     android:layout_marginTop="4dp"
                     android:text="50+ 动作库 · 部位细分 · 组数重量次数记录"
-                    android:textColor="#9ca3af"
+                    android:textColor="@color/text_gray"
                     android:textSize="12sp" />
             </LinearLayout>
 
@@ -270,7 +270,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="›"
-                android:textColor="#6b7280"
+                android:textColor="@color/text_gray_dark"
                 android:textSize="24sp" />
         </LinearLayout>
     </androidx.cardview.widget.CardView>

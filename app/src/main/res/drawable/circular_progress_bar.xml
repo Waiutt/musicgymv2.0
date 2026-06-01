@@ -2,15 +2,15 @@
 <layer-list xmlns:android="http://schemas.android.com/apk/res/android">
     <item android:id="@android:id/background">
         <shape android:shape="ring" android:thickness="12dp" android:useLevel="false">
-            <solid android:color="#1e293b" />
+            <solid android:color="@color/bg_card" />
         </shape>
     </item>
     <item android:id="@android:id/progress">
         <rotate android:fromDegrees="270" android:toDegrees="270">
             <shape android:shape="ring" android:thickness="12dp" android:useLevel="true">
                 <gradient
-                    android:endColor="#34d399"
-                    android:startColor="#38bdf8"
+                    android:endColor="@color/cyber_green"
+                    android:startColor="@color/cyber_cyan"
                     android:type="sweep" />
             </shape>
         </rotate>

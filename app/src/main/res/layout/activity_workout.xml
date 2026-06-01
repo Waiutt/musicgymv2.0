@@ -2,7 +2,7 @@
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#0f172a">
+    android:background="@color/bg_dark">
 
     <!-- 全屏地图 -->
     <com.amap.api.maps.MapView
@@ -14,7 +14,7 @@
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="56dp"
-        android:background="#cc0f172a"
+        android:background="@color/bg_overlay"
         android:gravity="center_vertical"
         android:orientation="horizontal"
         android:paddingStart="12dp"
@@ -27,7 +27,7 @@
             android:background="@drawable/stats_filter_unselected"
             android:gravity="center"
             android:text="✕"
-            android:textColor="#FFFFFF"
+            android:textColor="@color/white"
             android:textSize="16sp" />
 
         <TextView
@@ -37,7 +37,7 @@
             android:layout_marginStart="12dp"
             android:layout_weight="1"
             android:text="跑步"
-            android:textColor="#FFFFFF"
+            android:textColor="@color/white"
             android:textSize="18sp"
             android:textStyle="bold" />
 
@@ -46,7 +46,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="00:00"
-            android:textColor="#22c55e"
+            android:textColor="@color/accent_green"
             android:textSize="22sp"
             android:textStyle="bold" />
     </LinearLayout>
@@ -74,7 +74,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="0.00"
-                android:textColor="#FFFFFF"
+                android:textColor="@color/white"
                 android:textSize="28sp"
                 android:textStyle="bold" />
 
@@ -82,7 +82,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="公里"
-                android:textColor="#94a3b8"
+                android:textColor="@color/text_gray_light"
                 android:textSize="11sp" />
         </LinearLayout>
 
@@ -99,7 +99,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="0"
-                android:textColor="#f59e0b"
+                android:textColor="@color/accent_amber"
                 android:textSize="28sp"
                 android:textStyle="bold" />
 
@@ -107,7 +107,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="千卡"
-                android:textColor="#94a3b8"
+                android:textColor="@color/text_gray_light"
                 android:textSize="11sp" />
         </LinearLayout>
 
@@ -124,7 +124,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="0'00''"
-                android:textColor="#38bdf8"
+                android:textColor="@color/cyber_cyan"
                 android:textSize="28sp"
                 android:textStyle="bold" />
 
@@ -132,7 +132,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="配速"
-                android:textColor="#94a3b8"
+                android:textColor="@color/text_gray_light"
                 android:textSize="11sp" />
         </LinearLayout>
     </LinearLayout>
@@ -147,7 +147,7 @@
         android:background="@drawable/workout_btn_start"
         android:gravity="center"
         android:text="GO"
-        android:textColor="#FFFFFF"
+        android:textColor="@color/white"
         android:textSize="20sp"
         android:textStyle="bold" />
 
@@ -156,7 +156,7 @@
         android:id="@+id/workout_pause_overlay"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:background="#cc0f172a"
+        android:background="@color/bg_overlay"
         android:visibility="gone">
 
         <LinearLayout
@@ -178,7 +178,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="8dp"
                 android:text="运动已暂停"
-                android:textColor="#FFFFFF"
+                android:textColor="@color/white"
                 android:textSize="22sp"
                 android:textStyle="bold" />
 
@@ -194,10 +194,10 @@
                     android:layout_width="100dp"
                     android:layout_height="48dp"
                     android:layout_marginEnd="16dp"
-                    android:background="#22c55e"
+                    android:background="@color/accent_green"
                     android:gravity="center"
                     android:text="继续"
-                    android:textColor="#FFFFFF"
+                    android:textColor="@color/white"
                     android:textSize="16sp"
                     android:textStyle="bold" />
 
@@ -205,10 +205,10 @@
                     android:id="@+id/workout_btn_stop"
                     android:layout_width="100dp"
                     android:layout_height="48dp"
-                    android:background="#ef4444"
+                    android:background="@color/accent_red"
                     android:gravity="center"
                     android:text="结束"
-                    android:textColor="#FFFFFF"
+                    android:textColor="@color/white"
                     android:textSize="16sp"
                     android:textStyle="bold" />
             </LinearLayout>

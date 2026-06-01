@@ -2,14 +2,14 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#0f172a"
+    android:background="@color/bg_dark"
     android:orientation="vertical">
 
     <!-- 顶部栏 -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="56dp"
-        android:background="#1e293b"
+        android:background="@color/bg_card"
         android:gravity="center_vertical"
         android:orientation="horizontal"
         android:paddingStart="12dp"
@@ -22,7 +22,7 @@
             android:background="@drawable/stats_filter_unselected"
             android:gravity="center"
             android:text="✕"
-            android:textColor="#FFFFFF"
+            android:textColor="@color/white"
             android:textSize="16sp" />
 
         <TextView
@@ -31,7 +31,7 @@
             android:layout_marginStart="12dp"
             android:layout_weight="1"
             android:text="力量训练"
-            android:textColor="#FFFFFF"
+            android:textColor="@color/white"
             android:textSize="18sp"
             android:textStyle="bold" />
 
@@ -40,7 +40,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="已选 0 项"
-            android:textColor="#FC4C02"
+            android:textColor="@color/brand_orange"
             android:textSize="13sp" />
     </LinearLayout>
 
@@ -48,7 +48,7 @@
     <HorizontalScrollView
         android:layout_width="match_parent"
         android:layout_height="44dp"
-        android:background="#1e293b"
+        android:background="@color/bg_card"
         android:scrollbars="none">
 
         <LinearLayout
@@ -65,7 +65,7 @@
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="40dp"
-        android:background="#1e293b"
+        android:background="@color/bg_card"
         android:gravity="center_vertical"
         android:orientation="horizontal"
         android:paddingStart="12dp"
@@ -76,12 +76,12 @@
             android:layout_width="0dp"
             android:layout_height="32dp"
             android:layout_weight="1"
-            android:background="#334155"
+            android:background="@color/bg_input"
             android:hint="搜索动作..."
-            android:textColorHint="#6b7280"
+            android:textColorHint="@color/text_gray_dark"
             android:paddingStart="12dp"
             android:paddingEnd="12dp"
-            android:textColor="#FFFFFF"
+            android:textColor="@color/white"
             android:textSize="13sp" />
 
         <TextView
@@ -89,7 +89,7 @@
             android:layout_width="36dp"
             android:layout_height="32dp"
             android:layout_marginStart="8dp"
-            android:background="#334155"
+            android:background="@color/bg_input"
             android:gravity="center"
             android:text="📋"
             android:textSize="14sp" />
@@ -114,7 +114,7 @@
         android:id="@+id/strength_bottom_bar"
         android:layout_width="match_parent"
         android:layout_height="60dp"
-        android:background="#1e293b"
+        android:background="@color/bg_card"
         android:gravity="center_vertical"
         android:orientation="horizontal"
         android:paddingStart="16dp"
@@ -126,19 +126,19 @@
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:text="0 个动作已选"
-            android:textColor="#FFFFFF"
+            android:textColor="@color/white"
             android:textSize="15sp" />
 
         <TextView
             android:id="@+id/strength_btn_start"
             android:layout_width="wrap_content"
             android:layout_height="40dp"
-            android:background="#FC4C02"
+            android:background="@color/brand_orange"
             android:gravity="center"
             android:paddingStart="28dp"
             android:paddingEnd="28dp"
             android:text="开始训练"
-            android:textColor="#FFFFFF"
+            android:textColor="@color/white"
             android:textSize="15sp"
             android:textStyle="bold" />
     </LinearLayout>

@@ -3,7 +3,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#0f172a"
+    android:background="@color/bg_dark"
     android:fillViewport="true"> <RelativeLayout
     android:layout_width="match_parent"
     android:layout_height="wrap_content">
@@ -21,14 +21,14 @@
         android:layout_margin="16dp"
         android:background="?attr/selectableItemBackgroundBorderless"
         android:src="@android:drawable/ic_menu_revert"
-        app:tint="#FFFFFF" />
+        app:tint="@color/white" />
 
     <androidx.cardview.widget.CardView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_below="@id/detail_iv_image"
         android:layout_marginTop="-40dp"
-        app:cardBackgroundColor="#1e293b"
+        app:cardBackgroundColor="@color/bg_card"
         app:cardCornerRadius="30dp"
         app:cardElevation="10dp">
 
@@ -43,7 +43,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:text="Title Loading..."
-                android:textColor="#38bdf8"
+                android:textColor="@color/cyber_cyan"
                 android:textSize="26sp"
                 android:textStyle="bold"
                 android:letterSpacing="0.05" />
@@ -60,7 +60,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="Author"
-                    android:textColor="#f43f5e"
+                    android:textColor="@color/cyber_rose"
                     android:textSize="14sp"
                     android:textStyle="bold" />
 
@@ -68,14 +68,14 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="  |  "
-                    android:textColor="#475569" />
+                    android:textColor="@color/divider_dark" />
 
                 <TextView
                     android:id="@+id/detail_tv_date"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="0000-00-00"
-                    android:textColor="#9ca3af"
+                    android:textColor="@color/text_gray"
                     android:textSize="14sp" />
             </LinearLayout>
 
@@ -92,7 +92,7 @@
                 android:layout_height="wrap_content"
                 android:lineSpacingExtra="10dp"
                 android:text="Data streaming..."
-                android:textColor="#f8fafc"
+                android:textColor="@color/text_white_soft"
                 android:textSize="16sp" />
 
             <View

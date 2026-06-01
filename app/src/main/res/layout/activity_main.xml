@@ -3,7 +3,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#0f172a">
+    android:background="@color/bg_dark">
 
     <FrameLayout
         android:id="@+id/fragment_container"
@@ -16,9 +16,9 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
-        android:background="#1e293b"
-        app:itemIconTint="#9ca3af"
-        app:itemTextColor="#9ca3af"
+        android:background="@color/bg_card"
+        app:itemIconTint="@color/text_gray"
+        app:itemTextColor="@color/text_gray"
         app:labelVisibilityMode="labeled"
         app:menu="@menu/bottom_nav_menu" />
 

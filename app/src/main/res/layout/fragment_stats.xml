@@ -3,7 +3,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#0f172a"
+    android:background="@color/bg_dark"
     android:orientation="vertical">
 
     <!-- Header: Month Title -->
@@ -23,7 +23,7 @@
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:text="May 2026"
-            android:textColor="#FFFFFF"
+            android:textColor="@color/white"
             android:textSize="24sp"
             android:textStyle="bold" />
 
@@ -32,7 +32,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="vs Apr"
-            android:textColor="#9ca3af"
+            android:textColor="@color/text_gray"
             android:textSize="14sp" />
     </LinearLayout>
 
@@ -57,7 +57,7 @@
             android:paddingStart="16dp"
             android:paddingEnd="16dp"
             android:text="All"
-            android:textColor="#FFFFFF"
+            android:textColor="@color/white"
             android:textSize="13sp"
             android:textStyle="bold" />
 
@@ -71,7 +71,7 @@
             android:paddingStart="16dp"
             android:paddingEnd="16dp"
             android:text="Run"
-            android:textColor="#9ca3af"
+            android:textColor="@color/text_gray"
             android:textSize="13sp" />
 
         <TextView
@@ -84,7 +84,7 @@
             android:paddingStart="16dp"
             android:paddingEnd="16dp"
             android:text="Ride"
-            android:textColor="#9ca3af"
+            android:textColor="@color/text_gray"
             android:textSize="13sp" />
 
         <TextView
@@ -97,7 +97,7 @@
             android:paddingStart="16dp"
             android:paddingEnd="16dp"
             android:text="Walk"
-            android:textColor="#9ca3af"
+            android:textColor="@color/text_gray"
             android:textSize="13sp" />
 
         <TextView
@@ -109,7 +109,7 @@
             android:paddingStart="16dp"
             android:paddingEnd="16dp"
             android:text="Strength"
-            android:textColor="#9ca3af"
+            android:textColor="@color/text_gray"
             android:textSize="13sp" />
     </LinearLayout>
 
@@ -120,7 +120,7 @@
         android:layout_marginStart="16dp"
         android:layout_marginEnd="16dp"
         android:layout_marginBottom="4dp"
-        app:cardBackgroundColor="#1e293b"
+        app:cardBackgroundColor="@color/bg_card"
         app:cardCornerRadius="12dp"
         app:cardElevation="0dp">
 
@@ -139,7 +139,7 @@
         android:layout_marginStart="16dp"
         android:layout_marginEnd="16dp"
         android:layout_marginBottom="8dp"
-        app:cardBackgroundColor="#1e293b"
+        app:cardBackgroundColor="@color/bg_card"
         app:cardCornerRadius="12dp"
         app:cardElevation="0dp">
 
@@ -165,7 +165,7 @@
             android:layout_height="wrap_content"
             android:layout_marginEnd="6dp"
             android:layout_weight="1"
-            app:cardBackgroundColor="#1e293b"
+            app:cardBackgroundColor="@color/bg_card"
             app:cardCornerRadius="10dp"
             app:cardElevation="0dp">
 
@@ -181,7 +181,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="0.0"
-                    android:textColor="#FFFFFF"
+                    android:textColor="@color/white"
                     android:textSize="20sp"
                     android:textStyle="bold" />
 
@@ -190,7 +190,7 @@
                     android:layout_height="wrap_content"
                     android:layout_marginTop="2dp"
                     android:text="km"
-                    android:textColor="#9ca3af"
+                    android:textColor="@color/text_gray"
                     android:textSize="11sp" />
             </LinearLayout>
         </androidx.cardview.widget.CardView>
@@ -200,7 +200,7 @@
             android:layout_height="wrap_content"
             android:layout_marginEnd="6dp"
             android:layout_weight="1"
-            app:cardBackgroundColor="#1e293b"
+            app:cardBackgroundColor="@color/bg_card"
             app:cardCornerRadius="10dp"
             app:cardElevation="0dp">
 
@@ -216,7 +216,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="0h 0m"
-                    android:textColor="#FFFFFF"
+                    android:textColor="@color/white"
                     android:textSize="20sp"
                     android:textStyle="bold" />
 
@@ -225,7 +225,7 @@
                     android:layout_height="wrap_content"
                     android:layout_marginTop="2dp"
                     android:text="duration"
-                    android:textColor="#9ca3af"
+                    android:textColor="@color/text_gray"
                     android:textSize="11sp" />
             </LinearLayout>
         </androidx.cardview.widget.CardView>
@@ -235,7 +235,7 @@
             android:layout_height="wrap_content"
             android:layout_marginEnd="6dp"
             android:layout_weight="1"
-            app:cardBackgroundColor="#1e293b"
+            app:cardBackgroundColor="@color/bg_card"
             app:cardCornerRadius="10dp"
             app:cardElevation="0dp">
 
@@ -251,7 +251,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="0"
-                    android:textColor="#FFFFFF"
+                    android:textColor="@color/white"
                     android:textSize="20sp"
                     android:textStyle="bold" />
 
@@ -260,7 +260,7 @@
                     android:layout_height="wrap_content"
                     android:layout_marginTop="2dp"
                     android:text="workouts"
-                    android:textColor="#9ca3af"
+                    android:textColor="@color/text_gray"
                     android:textSize="11sp" />
             </LinearLayout>
         </androidx.cardview.widget.CardView>
@@ -269,7 +269,7 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            app:cardBackgroundColor="#1e293b"
+            app:cardBackgroundColor="@color/bg_card"
             app:cardCornerRadius="10dp"
             app:cardElevation="0dp">
 
@@ -285,7 +285,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="0"
-                    android:textColor="#FFFFFF"
+                    android:textColor="@color/white"
                     android:textSize="20sp"
                     android:textStyle="bold" />
 
@@ -294,7 +294,7 @@
                     android:layout_height="wrap_content"
                     android:layout_marginTop="2dp"
                     android:text="kcal"
-                    android:textColor="#9ca3af"
+                    android:textColor="@color/text_gray"
                     android:textSize="11sp" />
             </LinearLayout>
         </androidx.cardview.widget.CardView>
@@ -308,7 +308,7 @@
         android:paddingTop="10dp"
         android:paddingBottom="2dp"
         android:text="HISTORY"
-        android:textColor="#6b7280"
+        android:textColor="@color/text_gray_dark"
         android:textSize="11sp"
         android:textStyle="bold"
         android:letterSpacing="0.1" />
