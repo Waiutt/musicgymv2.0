@@ -6,34 +6,15 @@
     android:orientation="vertical">
 
     <!-- 顶部栏 -->
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="56dp"
-        android:background="@color/bg_card"
-        android:gravity="center_vertical"
-        android:orientation="horizontal"
-        android:paddingStart="12dp"
-        android:paddingEnd="16dp">
+    <LinearLayout style="@style/TopBar">
 
         <TextView
             android:id="@+id/strength_btn_back"
-            android:layout_width="36dp"
-            android:layout_height="36dp"
-            android:background="@drawable/stats_filter_unselected"
-            android:gravity="center"
-            android:text="✕"
-            android:textColor="@color/white"
-            android:textSize="16sp" />
+            style="@style/CloseButton" />
 
         <TextView
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="12dp"
-            android:layout_weight="1"
-            android:text="力量训练"
-            android:textColor="@color/white"
-            android:textSize="18sp"
-            android:textStyle="bold" />
+            style="@style/ToolbarTitle"
+            android:text="力量训练" />
 
         <TextView
             android:id="@+id/strength_selected_count"

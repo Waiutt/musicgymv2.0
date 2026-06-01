@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <!-- ═══ 顶部栏 ═══ -->
+    <style name="TopBar" parent="">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">56dp</item>
+        <item name="android:background">@color/bg_card</item>
+        <item name="android:gravity">center_vertical</item>
+        <item name="android:orientation">horizontal</item>
+        <item name="android:paddingStart">12dp</item>
+        <item name="android:paddingEnd">16dp</item>
+    </style>
+
+    <!-- ═══ 关闭按钮 ═══ -->
+    <style name="CloseButton" parent="">
+        <item name="android:layout_width">36dp</item>
+        <item name="android:layout_height">36dp</item>
+        <item name="android:background">@drawable/stats_filter_unselected</item>
+        <item name="android:gravity">center</item>
+        <item name="android:text">✕</item>
+        <item name="android:textColor">@color/white</item>
+        <item name="android:textSize">16sp</item>
+    </style>
+
+    <!-- ═══ 工具栏标题 ═══ -->
+    <style name="ToolbarTitle" parent="">
+        <item name="android:layout_width">0dp</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:layout_marginStart">12dp</item>
+        <item name="android:layout_weight">1</item>
+        <item name="android:textColor">@color/white</item>
+        <item name="android:textSize">18sp</item>
+        <item name="android:textStyle">bold</item>
+    </style>
+
+    <!-- ═══ 个人资料按钮 ═══ -->
+    <style name="ProfileButton">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">50dp</item>
+        <item name="android:layout_marginTop">8dp</item>
+        <item name="android:backgroundTint">@color/bg_card</item>
+        <item name="android:textColor">@color/white</item>
+    </style>
+
+    <!-- ═══ 过滤芯片 ═══ -->
+    <style name="FilterChip">
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_height">36dp</item>
+        <item name="android:layout_marginEnd">8dp</item>
+        <item name="android:gravity">center</item>
+        <item name="android:paddingStart">16dp</item>
+        <item name="android:paddingEnd">16dp</item>
+        <item name="android:textSize">13sp</item>
+        <item name="android:textColor">@color/text_gray</item>
+        <item name="android:background">@drawable/stats_filter_unselected</item>
+    </style>
+
+    <!-- ═══ 统计摘要小卡片 ═══ -->
+    <style name="StatsMiniCard">
+        <item name="cardBackgroundColor">@color/bg_card</item>
+        <item name="cardCornerRadius">10dp</item>
+        <item name="cardElevation">0dp</item>
+    </style>
+
+    <!-- ═══ 运动选择卡片 ═══ -->
+    <style name="SportCard">
+        <item name="cardBackgroundColor">@color/bg_card</item>
+        <item name="cardCornerRadius">16dp</item>
+        <item name="cardElevation">0dp</item>
+        <item name="android:clickable">true</item>
+        <item name="android:focusable">true</item>
+        <item name="android:foreground">?attr/selectableItemBackground</item>
+    </style>
+
+    <!-- ═══ 内容卡片 ═══ -->
+    <style name="ContentCard">
+        <item name="cardBackgroundColor">@color/bg_card</item>
+        <item name="cardCornerRadius">12dp</item>
+        <item name="cardElevation">0dp</item>
+    </style>
+
+</resources>

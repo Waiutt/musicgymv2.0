@@ -49,68 +49,31 @@
 
         <TextView
             android:id="@+id/stats_filter_all"
-            android:layout_width="wrap_content"
-            android:layout_height="36dp"
-            android:layout_marginEnd="8dp"
+            style="@style/FilterChip"
             android:background="@drawable/stats_filter_selected"
-            android:gravity="center"
-            android:paddingStart="16dp"
-            android:paddingEnd="16dp"
             android:text="All"
             android:textColor="@color/white"
-            android:textSize="13sp"
             android:textStyle="bold" />
 
         <TextView
             android:id="@+id/stats_filter_running"
-            android:layout_width="wrap_content"
-            android:layout_height="36dp"
-            android:layout_marginEnd="8dp"
-            android:background="@drawable/stats_filter_unselected"
-            android:gravity="center"
-            android:paddingStart="16dp"
-            android:paddingEnd="16dp"
-            android:text="Run"
-            android:textColor="@color/text_gray"
-            android:textSize="13sp" />
+            style="@style/FilterChip"
+            android:text="Run" />
 
         <TextView
             android:id="@+id/stats_filter_cycling"
-            android:layout_width="wrap_content"
-            android:layout_height="36dp"
-            android:layout_marginEnd="8dp"
-            android:background="@drawable/stats_filter_unselected"
-            android:gravity="center"
-            android:paddingStart="16dp"
-            android:paddingEnd="16dp"
-            android:text="Ride"
-            android:textColor="@color/text_gray"
-            android:textSize="13sp" />
+            style="@style/FilterChip"
+            android:text="Ride" />
 
         <TextView
             android:id="@+id/stats_filter_walking"
-            android:layout_width="wrap_content"
-            android:layout_height="36dp"
-            android:layout_marginEnd="8dp"
-            android:background="@drawable/stats_filter_unselected"
-            android:gravity="center"
-            android:paddingStart="16dp"
-            android:paddingEnd="16dp"
-            android:text="Walk"
-            android:textColor="@color/text_gray"
-            android:textSize="13sp" />
+            style="@style/FilterChip"
+            android:text="Walk" />
 
         <TextView
             android:id="@+id/stats_filter_strength"
-            android:layout_width="wrap_content"
-            android:layout_height="36dp"
-            android:background="@drawable/stats_filter_unselected"
-            android:gravity="center"
-            android:paddingStart="16dp"
-            android:paddingEnd="16dp"
-            android:text="Strength"
-            android:textColor="@color/text_gray"
-            android:textSize="13sp" />
+            style="@style/FilterChip"
+            android:text="Strength" />
     </LinearLayout>
 
     <!-- 日历热力图 -->

@@ -70,39 +70,24 @@
 
         <Button
             android:id="@+id/btn_edit_profile"
-            android:layout_width="match_parent"
-            android:layout_height="50dp"
+            style="@style/ProfileButton"
             android:layout_marginTop="30dp"
-            android:backgroundTint="@color/bg_card"
-            android:text="编辑资料"
-            android:textColor="@color/white" />
+            android:text="编辑资料" />
 
         <Button
             android:id="@+id/btn_measurements"
-            android:layout_width="match_parent"
-            android:layout_height="50dp"
-            android:layout_marginTop="8dp"
-            android:backgroundTint="@color/bg_card"
-            android:text="身体围度"
-            android:textColor="@color/white" />
+            style="@style/ProfileButton"
+            android:text="身体围度" />
 
         <Button
             android:id="@+id/btn_export"
-            android:layout_width="match_parent"
-            android:layout_height="50dp"
-            android:layout_marginTop="8dp"
-            android:backgroundTint="@color/bg_card"
-            android:text="导出数据 CSV"
-            android:textColor="@color/white" />
+            style="@style/ProfileButton"
+            android:text="导出数据 CSV" />
 
         <Button
             android:id="@+id/btn_reminder"
-            android:layout_width="match_parent"
-            android:layout_height="50dp"
-            android:layout_marginTop="8dp"
-            android:backgroundTint="@color/bg_card"
-            android:text="训练提醒"
-            android:textColor="@color/white" />
+            style="@style/ProfileButton"
+            android:text="训练提醒" />
 
         <TextView
             android:layout_width="match_parent"
