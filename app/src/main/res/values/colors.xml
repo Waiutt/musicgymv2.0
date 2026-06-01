@@ -12,4 +12,23 @@
 
     <color name="white">#FFFFFF</color>
     <color name="text_gray">#9ca3af</color>
+
+    <!-- 新增统一色值定义 -->
+    <color name="brand_orange">#FC4C02</color>
+    <color name="accent_amber">#f59e0b</color>
+    <color name="accent_green">#22c55e</color>
+    <color name="accent_emerald">#10b981</color>
+    <color name="accent_red">#ef4444</color>
+    <color name="accent_purple">#a78bfa</color>
+    <color name="accent_orange_strong">#fb923c</color>
+    <color name="text_gray_dark">#6b7280</color>
+    <color name="text_gray_mid">#64748b</color>
+    <color name="text_gray_light">#94a3b8</color>
+    <color name="text_gray_pale">#cbd5e1</color>
+    <color name="bg_input">#334155</color>
+    <color name="bg_panel">#1a1e2e</color>
+    <color name="bg_overlay">#cc0f172a</color>
+    <color name="pr_yellow">#fbbf24</color>
+    <color name="text_white_soft">#f8fafc</color>
+    <color name="divider_dark">#475569</color>
 </resources>

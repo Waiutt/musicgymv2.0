@@ -11,7 +11,11 @@
       "Bash(git -C \"C:\\\\Users\\\\ASUS\\\\Desktop\\\\DraggableProgressBar - 副本\\\\MusicGym\" log --oneline -5)",
       "Bash(git init *)",
       "Bash(git config *)",
-      "Bash(git add *)"
+      "Bash(git add *)",
+      "Bash(git commit -m ' *)",
+      "Bash(git tag *)",
+      "Bash(Select-String \"BUILD\")",
+      "Bash(cmd /c \"gradlew.bat assembleDebug 2>&1\")"
     ]
   }
 }
