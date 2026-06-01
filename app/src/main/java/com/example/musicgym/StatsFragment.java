@@ -430,7 +430,7 @@ public class StatsFragment extends Fragment {
 
     private void updateHistoryList() {
         if ("Strength".equals(currentFilter)) {
-            adapter = new StrengthHistoryAdapter(new ArrayList<>(allStrengthRecords));
+            adapter = new WorkoutHistoryAdapter(new ArrayList<>(allStrengthRecords), true);
         } else {
             adapter = new WorkoutHistoryAdapter(new ArrayList<>(allRecords));
         }
