@@ -44,6 +44,10 @@ android {
         sourceCompatibility JavaVersion.VERSION_11
         targetCompatibility JavaVersion.VERSION_11
     }
+
+    testOptions {
+        unitTests.includeAndroidResources = true
+    }
 }
 
 dependencies {
@@ -73,4 +77,9 @@ dependencies {
     // ⚡ MVVM 架构 ⚡
     implementation "androidx.lifecycle:lifecycle-viewmodel:2.7.0"
     implementation "androidx.lifecycle:lifecycle-livedata:2.7.0"
+
+    // ⚡ 测试 ⚡
+    testImplementation "junit:junit:4.13.2"
+    testImplementation "org.robolectric:robolectric:4.12.2"
+    androidTestImplementation "androidx.room:room-testing:2.6.1"
 }

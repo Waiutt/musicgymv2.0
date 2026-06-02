@@ -19,7 +19,16 @@
       "Bash(sed -i.bak -e 's/private int dp\\(int dp\\) { return \\(int\\)\\(dp \\\\* getResources\\(\\)\\\\.getDisplayMetrics\\(\\)\\\\.density\\); }/private int dp\\(int d\\) { return UiUtils.dp\\(this, d\\); }/' -e 's/static final int WRAP = ViewGroup.LayoutParams.WRAP_CONTENT, MATCH = ViewGroup.LayoutParams.MATCH_PARENT;/static final int WRAP = UiUtils.WRAP, MATCH = UiUtils.MATCH;/' StrengthActivity.java)",
       "Bash(rm -f StrengthActivity.java.bak)",
       "Bash(git remote *)",
-      "Bash(git push *)"
+      "Bash(git push *)",
+      "Bash(./gradlew testDebugUnitTest)",
+      "Bash(./gradlew testDebugUnitTest --stacktrace)",
+      "Bash(./gradlew compileDebugUnitTestJava)",
+      "Bash(./gradlew compileDebugUnitTestJava --info)",
+      "Bash(./gradlew clean *)",
+      "Bash(./gradlew :app:compileDebugUnitTestJava --info)",
+      "Bash(./gradlew :app:compileDebugUnitTestJavaWithJavac --rerun-tasks)",
+      "Bash(./gradlew :app:testDebugUnitTest)",
+      "Bash(./gradlew :app:testDebugUnitTest --rerun-tasks)"
     ]
   }
 }
