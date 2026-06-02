@@ -2,6 +2,13 @@ plugins {
     alias(libs.plugins.android.application)
 }
 
+// 从 local.properties 读取敏感信息（不提交到 Git）
+def localProperties = new Properties()
+def localFile = rootProject.file('local.properties')
+if (localFile.exists()) {
+    localFile.withInputStream { localProperties.load(it) }
+}
+
 android {
     namespace 'com.example.musicgym'
     compileSdk {
@@ -23,6 +30,8 @@ android {
             abiFilters 'armeabi-v7a', 'arm64-v8a', 'x86', 'x86_64'
         }
 
+        // 高德地图 API Key（从 local.properties 注入，不暴露在代码中）
+        manifestPlaceholders = [AMAP_API_KEY: localProperties.getProperty('AMAP_API_KEY', '')]
     }
 
     buildTypes {

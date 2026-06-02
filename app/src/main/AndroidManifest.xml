@@ -19,7 +19,7 @@
         android:theme="@style/Theme.MusicGym">
         <meta-data
             android:name="com.amap.api.v2.apikey"
-            android:value="7d6e22560873c92370eb3a30bb8d7cff" />
+            android:value="${AMAP_API_KEY}" />
 
         <activity android:name=".WorkoutSummaryActivity" />
         <activity android:name=".StrengthWorkoutActivity" />
