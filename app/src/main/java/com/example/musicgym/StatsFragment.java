@@ -3,8 +3,6 @@ package com.example.musicgym;
 import android.graphics.Color;
 import android.graphics.DashPathEffect;
 import android.os.Bundle;
-import android.os.Handler;
-import android.os.Looper;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -15,6 +13,7 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
+import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -27,55 +26,35 @@ import com.github.mikephil.charting.data.LineData;
 import com.github.mikephil.charting.data.LineDataSet;
 import com.github.mikephil.charting.interfaces.datasets.ILineDataSet;
 
-import org.json.JSONArray;
-import org.json.JSONObject;
-
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
-import java.util.Random;
-import java.util.Set;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 
+/**
+ * 统计页 — MVVM 重构版。
+ * Fragment 只负责 UI 渲染，数据逻辑全部在 StatsViewModel 中。
+ */
 public class StatsFragment extends Fragment {
+
+    private StatsViewModel vm;
 
     private TextView tvMonthTitle, tvVsLabel;
     private TextView tvFilterAll, tvFilterRunning, tvFilterCycling, tvFilterWalking, tvFilterStrength;
     private LineChart lineChart;
     private TextView tvCardDistance, tvCardDuration, tvCardWorkouts, tvCardCalories;
     private RecyclerView recyclerView;
-    private RecyclerView.Adapter<?> adapter;
     private LinearLayout calendarContainer;
 
-    private AppDatabase db;
-    private ExecutorService executorService;
-    private Handler mainHandler;
-
-    private List<WorkoutRecord> allRecords = new ArrayList<>();
-    private List<StrengthRecord> allStrengthRecords = new ArrayList<>();
-    private String currentFilter = "All";
-
-    private int currentYear, currentMonth, currentDayCount;
-    private int lastYear, lastMonth, lastDayCount;
-
-    private static final int COLOR_RUN = ColorTokens.BRAND_ORANGE;
-    private static final int COLOR_CYCLE = ColorTokens.ACCENT_CYAN;
-    private static final int COLOR_WALK = ColorTokens.ACCENT_GREEN_SOFT;
-    private static final int COLOR_STRENGTH = ColorTokens.ACCENT_AMBER;
-    private static final int COLOR_CUR_MONTH = ColorTokens.BRAND_ORANGE;
     private static final int COLOR_LAST_MONTH = ColorTokens.TEXT_SECONDARY;
 
     @Nullable
     @Override
-    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
+    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container,
+                             @Nullable Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_stats, container, false);
-
         tvMonthTitle = view.findViewById(R.id.stats_month_title);
         tvVsLabel = view.findViewById(R.id.stats_vs_label);
         tvFilterAll = view.findViewById(R.id.stats_filter_all);
@@ -92,27 +71,52 @@ public class StatsFragment extends Fragment {
         calendarContainer = view.findViewById(R.id.stats_calendar_container);
 
         recyclerView.setLayoutManager(new LinearLayoutManager(requireContext()));
-        adapter = new WorkoutHistoryAdapter(new ArrayList<>());
-        recyclerView.setAdapter(adapter);
+        recyclerView.setAdapter(new WorkoutHistoryAdapter(new ArrayList<>()));
 
-        db = AppDatabase.getInstance(requireContext());
-        executorService = Executors.newSingleThreadExecutor();
-        mainHandler = new Handler(Looper.getMainLooper());
+        vm = new ViewModelProvider(this).get(StatsViewModel.class);
 
         initChart();
         initFilters();
-        computeDateRange();
+        observeViewModel();
         return view;
     }
 
-    private void computeDateRange() {
-        Calendar cal = Calendar.getInstance();
-        currentYear = cal.get(Calendar.YEAR); currentMonth = cal.get(Calendar.MONTH);
-        currentDayCount = cal.getActualMaximum(Calendar.DAY_OF_MONTH);
-        cal.add(Calendar.MONTH, -1);
-        lastYear = cal.get(Calendar.YEAR); lastMonth = cal.get(Calendar.MONTH);
-        lastDayCount = cal.getActualMaximum(Calendar.DAY_OF_MONTH);
+    // ═══════════ Observe ViewModel ═══════════
+
+    private void observeViewModel() {
+        // 标题
+        vm.getMonthTitle().observe(getViewLifecycleOwner(), t -> tvMonthTitle.setText(t));
+        vm.getVsLabel().observe(getViewLifecycleOwner(), t -> tvVsLabel.setText(t));
+
+        // 折线图
+        vm.getChartBundle().observe(getViewLifecycleOwner(), this::renderChart);
+
+        // 摘要卡片
+        vm.getSummaryStats().observe(getViewLifecycleOwner(), s -> {
+            tvCardDistance.setText(s.distance);
+            tvCardDuration.setText(s.duration);
+            tvCardWorkouts.setText(s.workouts);
+            tvCardCalories.setText(s.calories);
+        });
+
+        // 模式切换 → 更新单位标签和过滤 UI
+        vm.getIsStrengthMode().observe(getViewLifecycleOwner(), isStrength -> {
+            TextView label = (TextView) ((ViewGroup) tvCardDistance.getParent()).getChildAt(1);
+            label.setText(isStrength ? "sessions" : "公里");
+            updateFilterUI();
+        });
+
+        // 日历热力图
+        vm.getCalendarDays().observe(getViewLifecycleOwner(), this::buildCalendar);
+
+        // 过滤状态
+        vm.getCurrentFilter().observe(getViewLifecycleOwner(), f -> {
+            updateHistoryList();
+            updateFilterUI();
+        });
     }
+
+    // ═══════════ 折线图 ═══════════
 
     private void initChart() {
         lineChart.getDescription().setEnabled(false);
@@ -120,7 +124,8 @@ public class StatsFragment extends Fragment {
         lineChart.setScaleEnabled(true); lineChart.setPinchZoom(true);
         lineChart.setDrawGridBackground(false);
         lineChart.setBackgroundColor(ColorTokens.BG_CARD);
-        lineChart.setNoDataText("No data"); lineChart.setNoDataTextColor(ColorTokens.TEXT_SECONDARY);
+        lineChart.setNoDataText("No data");
+        lineChart.setNoDataTextColor(ColorTokens.TEXT_SECONDARY);
 
         Legend legend = lineChart.getLegend();
         legend.setTextColor(Color.WHITE); legend.setTextSize(11f);
@@ -142,165 +147,16 @@ public class StatsFragment extends Fragment {
         lineChart.getAxisRight().setEnabled(false);
     }
 
-    private void initFilters() {
-        View.OnClickListener fl = v -> {
-            int id = v.getId();
-            if (id == R.id.stats_filter_all) currentFilter = "All";
-            else if (id == R.id.stats_filter_running) currentFilter = "Running";
-            else if (id == R.id.stats_filter_cycling) currentFilter = "Cycling";
-            else if (id == R.id.stats_filter_walking) currentFilter = "Walking";
-            else if (id == R.id.stats_filter_strength) currentFilter = "Strength";
-            updateFilterUI(); refreshChartOnly(); updateHistoryList();
-        };
-        tvFilterAll.setOnClickListener(fl); tvFilterRunning.setOnClickListener(fl);
-        tvFilterCycling.setOnClickListener(fl); tvFilterWalking.setOnClickListener(fl);
-        tvFilterStrength.setOnClickListener(fl);
-    }
-
-    private void updateFilterUI() {
-        for (TextView tv : new TextView[]{tvFilterAll, tvFilterRunning, tvFilterCycling, tvFilterWalking, tvFilterStrength}) {
-            tv.setBackgroundResource(R.drawable.stats_filter_unselected); tv.setTextColor(ColorTokens.TEXT_SECONDARY);
-        }
-        TextView sel;
-        switch (currentFilter) {
-            case "Running": sel = tvFilterRunning; break;
-            case "Cycling": sel = tvFilterCycling; break;
-            case "Walking": sel = tvFilterWalking; break;
-            case "Strength": sel = tvFilterStrength; break;
-            default: sel = tvFilterAll; break;
-        }
-        sel.setBackgroundResource(R.drawable.stats_filter_selected); sel.setTextColor(Color.WHITE);
-    }
-
-    @Override public void onResume() { super.onResume(); loadData(); }
-
-    private void loadData() {
-        executorService.execute(() -> {
-            allRecords = db.workoutRecordDao().getAllRecords();
-            allStrengthRecords = db.strengthRecordDao().getAllRecords();
-            if (allRecords.isEmpty() && allStrengthRecords.isEmpty()) {
-                seedMockData();
-                allRecords = db.workoutRecordDao().getAllRecords();
-            }
-            mainHandler.post(this::refreshAll);
-        });
-    }
-
-    private void seedMockData() {
-        Random r = new Random(42);
-        String[] sports = {"Running","Cycling","Walking"};
-        int[][] lp = {{1,4,7,10,13,16,19,22,25,28},{3,9,15,21,27},{2,5,8,11,14,17,20,23,26,29}};
-        int[][] cp = {{1,3,5,8,11,14,17,20,23,26,29},{2,7,12,17,22,27},{1,4,6,9,12,15,18,21,24,27,30}};
-        double[][] dr = {{4,10},{15,40},{2,5.5}};
-        int[][] dur = {{1200,3300},{2400,6000},{1500,4200}};
-        for (int si=0;si<3;si++) {
-            for (int d : lp[si]) {
-                double dist = dr[si][0]+r.nextDouble()*(dr[si][1]-dr[si][0]);
-                db.workoutRecordDao().insertRecord(new WorkoutRecord(
-                    String.format(Locale.getDefault(),"%04d-%02d-%02d",lastYear,lastMonth+1,d),
-                    sports[si],Math.round(dist*100.0)/100.0,dur[si][0]+r.nextInt(dur[si][1]-dur[si][0]),
-                    (int)(dist*65*(si==1?0.7:si==2?0.85:1.0)),"[]"));
-            }
-            for (int d : cp[si]) {
-                double dist = dr[si][0]+r.nextDouble()*(dr[si][1]-dr[si][0]);
-                db.workoutRecordDao().insertRecord(new WorkoutRecord(
-                    String.format(Locale.getDefault(),"%04d-%02d-%02d",currentYear,currentMonth+1,d),
-                    sports[si],Math.round(dist*100.0)/100.0,dur[si][0]+r.nextInt(dur[si][1]-dur[si][0]),
-                    (int)(dist*65*(si==1?0.7:si==2?0.85:1.0)),"[]"));
-            }
-        }
-    }
-
-    private void refreshAll() {
-        updateHeader();
-        refreshChartOnly();
-        buildCalendar();
-        updateHistoryList();
-    }
-    private void refreshChartOnly() {
-        if ("Strength".equals(currentFilter)) refreshStrengthChart();
-        else refreshCardioChart();
-    }
-
-    private void updateHeader() {
+    private void renderChart(StatsViewModel.ChartBundle bundle) {
         Calendar cal = Calendar.getInstance();
-        cal.set(currentYear, currentMonth, 1);
-        tvMonthTitle.setText(new SimpleDateFormat("MMMM yyyy", Locale.getDefault()).format(cal.getTime()));
-        cal.set(lastYear, lastMonth, 1);
-        tvVsLabel.setText("vs " + new SimpleDateFormat("MMM", Locale.getDefault()).format(cal.getTime()));
-    }
 
-    // ======= 力量图表 =======
-    private void refreshStrengthChart() {
-        Map<Integer, Float> curVol = new HashMap<>(), lastVol = new HashMap<>();
-        String curP = String.format(Locale.getDefault(), "%04d-%02d", currentYear, currentMonth + 1);
-        String lastP = String.format(Locale.getDefault(), "%04d-%02d", lastYear, lastMonth + 1);
-
-        for (StrengthRecord r : allStrengthRecords) {
-            if (r.getDate() == null) continue;
-            try {
-                int day = Integer.parseInt(r.getDate().substring(8, 10));
-                JSONArray arr = new JSONArray(r.getExercisesJson());
-                float vol = 0;
-                for (int i = 0; i < arr.length(); i++) {
-                    JSONArray sets = arr.getJSONObject(i).getJSONArray("sets");
-                    for (int j = 0; j < sets.length(); j++) {
-                        JSONObject s = sets.getJSONObject(j);
-                        vol += s.optDouble("weight") * s.optInt("reps");
-                    }
-                }
-                if (r.getDate().startsWith(curP)) curVol.put(day, curVol.getOrDefault(day, 0f) + vol);
-                else if (r.getDate().startsWith(lastP)) lastVol.put(day, lastVol.getOrDefault(day, 0f) + vol);
-            } catch (Exception ignored) {}
-        }
-
-        int maxDays = Math.max(currentDayCount, lastDayCount);
-        List<Entry> curE = new ArrayList<>(), lastE = new ArrayList<>();
-        float curMax = 0;
-        for (int d = 1; d <= maxDays; d++) {
-            float cv = curVol.getOrDefault(d, 0f), lv = lastVol.getOrDefault(d, 0f);
-            curE.add(new Entry(d, cv)); lastE.add(new Entry(d, lv));
-            if (cv > curMax) curMax = cv; if (lv > curMax) curMax = lv;
-        }
-        setChartData(curE, lastE, curMax, COLOR_STRENGTH, "kg");
-
-        float dist = 0; int dur = 0, count = 0;
-        for (StrengthRecord r : allStrengthRecords)
-            if (r.getDate() != null && r.getDate().startsWith(curP)) { dur += r.getDurationSeconds(); count++; }
-        tvCardDistance.setText(String.format(Locale.getDefault(), "%.0f", (double)count));
-        int h = dur / 3600, m = (dur % 3600) / 60;
-        tvCardDuration.setText(String.format(Locale.getDefault(), "%dh %dm", h, m));
-        tvCardWorkouts.setText(String.valueOf(count));
-        tvCardCalories.setText("—");
-        // change labels
-        ((TextView)((ViewGroup)tvCardDistance.getParent()).getChildAt(1)).setText("sessions");
-    }
-
-    // ======= 有氧图表 =======
-    private void refreshCardioChart() {
-        ((TextView)((ViewGroup)tvCardDistance.getParent()).getChildAt(1)).setText("公里");
-        Map<Integer, Float> curD = aggMonthly(currentYear, currentMonth, currentDayCount, currentFilter);
-        Map<Integer, Float> lastD = aggMonthly(lastYear, lastMonth, lastDayCount, currentFilter);
-        int maxDays = Math.max(currentDayCount, lastDayCount);
-        List<Entry> curE = new ArrayList<>(), lastE = new ArrayList<>();
-        float curMax = 0;
-        for (int d = 1; d <= maxDays; d++) {
-            float cv = curD.getOrDefault(d, 0f), lv = lastD.getOrDefault(d, 0f);
-            curE.add(new Entry(d, cv)); lastE.add(new Entry(d, lv));
-            if (cv > curMax) curMax = cv; if (lv > curMax) curMax = lv;
-        }
-        setChartData(curE, lastE, curMax, getAccentColor(), "km");
-        updateSummaryCards(curD, lastD);
-    }
-
-    private void setChartData(List<Entry> curE, List<Entry> lastE, float max, int accent, String unit) {
-        LineDataSet curS = new LineDataSet(curE, getCurMonthLabel());
-        curS.setColor(accent); curS.setCircleColor(accent);
+        LineDataSet curS = new LineDataSet(bundle.curEntries, getMonthLabel(vm.getCurDays()));
+        curS.setColor(bundle.accentColor); curS.setCircleColor(bundle.accentColor);
         curS.setLineWidth(3f); curS.setCircleRadius(4f); curS.setDrawCircleHole(false);
         curS.setValueTextSize(0f); curS.setMode(LineDataSet.Mode.CUBIC_BEZIER);
-        curS.setDrawFilled(true); curS.setFillColor(accent); curS.setFillAlpha(30);
+        curS.setDrawFilled(true); curS.setFillColor(bundle.accentColor); curS.setFillAlpha(30);
 
-        LineDataSet lastS = new LineDataSet(lastE, getLastMonthLabel());
+        LineDataSet lastS = new LineDataSet(bundle.lastEntries, "上月");
         lastS.setColor(COLOR_LAST_MONTH); lastS.setCircleColor(COLOR_LAST_MONTH);
         lastS.setLineWidth(2f); lastS.setCircleRadius(3f); lastS.setDrawCircleHole(false);
         lastS.setValueTextSize(0f); lastS.setMode(LineDataSet.Mode.CUBIC_BEZIER);
@@ -310,77 +166,33 @@ public class StatsFragment extends Fragment {
 
         List<ILineDataSet> sets = new ArrayList<>(); sets.add(curS); sets.add(lastS);
         lineChart.clear(); lineChart.setData(new LineData(sets));
+
+        int maxDays = Math.max(vm.getCurDays(), vm.getLastDays());
         lineChart.getXAxis().setAxisMinimum(1f);
-        lineChart.getXAxis().setAxisMaximum(Math.max(currentDayCount, lastDayCount));
-        lineChart.getAxisLeft().setAxisMaximum(max * 1.2f + 1f);
+        lineChart.getXAxis().setAxisMaximum(maxDays);
+        lineChart.getAxisLeft().setAxisMaximum(bundle.maxValue * 1.2f + 1f);
         lineChart.getAxisLeft().setAxisMinimum(0f);
         lineChart.animateX(600); lineChart.invalidate();
     }
 
-    private Map<Integer, Float> aggMonthly(int y, int m, int days, String filter) {
-        Map<Integer, Float> sum = new HashMap<>();
-        String p = String.format(Locale.getDefault(), "%04d-%02d", y, m + 1);
-        for (WorkoutRecord r : allRecords) {
-            if (r.getDate() == null || !r.getDate().startsWith(p)) continue;
-            if (!"All".equals(filter) && !filter.equals(r.getSportType())) continue;
-            try { int d = Integer.parseInt(r.getDate().substring(8, 10));
-                sum.put(d, sum.getOrDefault(d, 0f) + (float) r.getDistanceKm());
-            } catch (Exception ignored) {}
-        }
-        return sum;
+    private String getMonthLabel(int days) {
+        Calendar c = Calendar.getInstance();
+        return new SimpleDateFormat("MMM", Locale.getDefault()).format(c.getTime());
     }
 
-    private int getAccentColor() {
-        switch (currentFilter) {
-            case "Running": return COLOR_RUN; case "Cycling": return COLOR_CYCLE;
-            case "Walking": return COLOR_WALK; default: return COLOR_CUR_MONTH;
-        }
-    }
+    // ═══════════ 日历热力图 ═══════════
 
-    private String getCurMonthLabel() { Calendar c = Calendar.getInstance(); c.set(currentYear, currentMonth, 1);
-        return new SimpleDateFormat("MMM", Locale.getDefault()).format(c.getTime()); }
-    private String getLastMonthLabel() { Calendar c = Calendar.getInstance(); c.set(lastYear, lastMonth, 1);
-        return new SimpleDateFormat("MMM", Locale.getDefault()).format(c.getTime()); }
-
-    private void updateSummaryCards(Map<Integer, Float> curD, Map<Integer, Float> lastD) {
-        float dist=0,dur=0,cal=0; int cnt=0;
-        String p = String.format(Locale.getDefault(), "%04d-%02d", currentYear, currentMonth + 1);
-        for (WorkoutRecord r : allRecords) {
-            if (r.getDate() == null || !r.getDate().startsWith(p)) continue;
-            if (!"All".equals(currentFilter) && !currentFilter.equals(r.getSportType())) continue;
-            dist += r.getDistanceKm(); dur += r.getDurationSeconds(); cal += r.getCalories(); cnt++;
-        }
-        tvCardDistance.setText(String.format(Locale.getDefault(), "%.1f", dist));
-        int h = (int) dur / 3600, m = ((int) dur % 3600) / 60;
-        tvCardDuration.setText(String.format(Locale.getDefault(), "%dh %dm", h, m));
-        tvCardWorkouts.setText(String.valueOf(cnt));
-        tvCardCalories.setText(String.valueOf((int) cal));
-    }
-
-    // ======= 日历热力图 =======
-    private void buildCalendar() {
+    private void buildCalendar(Map<Integer, Integer> activeDays) {
         calendarContainer.removeAllViews();
         Calendar cal = Calendar.getInstance();
-        cal.set(currentYear, currentMonth, 1);
+        cal.set(Calendar.DAY_OF_MONTH, 1);
         int firstDow = cal.get(Calendar.DAY_OF_WEEK);
-        int totalDays = currentDayCount;
-        String prefix = String.format(Locale.getDefault(), "%04d-%02d", currentYear, currentMonth + 1);
-
-        // 收集有数据的天
-        Set<Integer> cardioDays = new HashSet<>(), strengthDays = new HashSet<>();
-        for (WorkoutRecord r : allRecords) {
-            if (r.getDate() != null && r.getDate().startsWith(prefix))
-                try { cardioDays.add(Integer.parseInt(r.getDate().substring(8, 10))); } catch (Exception ignored) {}
-        }
-        for (StrengthRecord r : allStrengthRecords) {
-            if (r.getDate() != null && r.getDate().startsWith(prefix))
-                try { strengthDays.add(Integer.parseInt(r.getDate().substring(8, 10))); } catch (Exception ignored) {}
-        }
+        int totalDays = vm.getCurDays();
 
         // 星期头
         LinearLayout weekRow = new LinearLayout(getContext());
-        weekRow.setOrientation(LinearLayout.HORIZONTAL); weekRow.setPadding(0,0,0,4);
-        for (String w : new String[]{"日","一","二","三","四","五","六"}) {
+        weekRow.setOrientation(LinearLayout.HORIZONTAL); weekRow.setPadding(0, 0, 0, 4);
+        for (String w : new String[]{"日", "一", "二", "三", "四", "五", "六"}) {
             TextView tw = new TextView(getContext());
             tw.setText(w); tw.setTextColor(ColorTokens.TEXT_HINT); tw.setTextSize(10f);
             tw.setGravity(Gravity.CENTER);
@@ -391,51 +203,90 @@ public class StatsFragment extends Fragment {
 
         LinearLayout gridRow = null;
         int cellIdx = 0;
-        // fill leading empty cells
         for (int i = 1; i < firstDow; i++) {
-            if (cellIdx % 7 == 0 || gridRow == null) {
+            if (cellIdx % 7 == 0) {
                 gridRow = new LinearLayout(getContext());
-                gridRow.setOrientation(LinearLayout.HORIZONTAL); gridRow.setPadding(0,0,0,2);
+                gridRow.setOrientation(LinearLayout.HORIZONTAL); gridRow.setPadding(0, 0, 0, 2);
                 calendarContainer.addView(gridRow);
             }
             View empty = new View(getContext());
             empty.setLayoutParams(new LinearLayout.LayoutParams(0, 38, 1));
-            gridRow.addView(empty);
-            cellIdx++;
+            gridRow.addView(empty); cellIdx++;
         }
         for (int day = 1; day <= totalDays; day++) {
-            if (cellIdx % 7 == 0 || gridRow == null) {
+            if (cellIdx % 7 == 0) {
                 gridRow = new LinearLayout(getContext());
-                gridRow.setOrientation(LinearLayout.HORIZONTAL); gridRow.setPadding(0,0,0,2);
+                gridRow.setOrientation(LinearLayout.HORIZONTAL); gridRow.setPadding(0, 0, 0, 2);
                 calendarContainer.addView(gridRow);
             }
-            boolean cardio = cardioDays.contains(day);
-            boolean strength = strengthDays.contains(day);
+            Integer flag = activeDays.getOrDefault(day, 0);
             int bg;
-            if (cardio && strength) bg = ColorTokens.BRAND_ORANGE;
-            else if (cardio) bg = ColorTokens.ACCENT_GREEN;
-            else if (strength) bg = ColorTokens.ACCENT_AMBER;
+            if (flag == 3) bg = ColorTokens.BRAND_ORANGE;
+            else if (flag == 1) bg = ColorTokens.ACCENT_GREEN;
+            else if (flag == 2) bg = ColorTokens.ACCENT_AMBER;
             else bg = ColorTokens.BG_INPUT;
 
             TextView tv = new TextView(getContext());
             tv.setText(String.valueOf(day)); tv.setTextColor(Color.WHITE); tv.setTextSize(11f);
             tv.setGravity(Gravity.CENTER); tv.setBackgroundColor(bg);
             ViewGroup.LayoutParams lp = new LinearLayout.LayoutParams(0, 38, 1);
-            lp.width = (int)(getResources().getDisplayMetrics().widthPixels / 7.5);
+            lp.width = (int) (getResources().getDisplayMetrics().widthPixels / 7.5);
             tv.setLayoutParams(lp);
-            gridRow.addView(tv);
-            cellIdx++;
+            gridRow.addView(tv); cellIdx++;
         }
     }
+
+    // ═══════════ 过滤 ═══════════
+
+    private void initFilters() {
+        View.OnClickListener fl = v -> {
+            int id = v.getId();
+            String filter;
+            if (id == R.id.stats_filter_running) filter = "Running";
+            else if (id == R.id.stats_filter_cycling) filter = "Cycling";
+            else if (id == R.id.stats_filter_walking) filter = "Walking";
+            else if (id == R.id.stats_filter_strength) filter = "Strength";
+            else filter = "All";
+            vm.setFilter(filter);
+        };
+        tvFilterAll.setOnClickListener(fl); tvFilterRunning.setOnClickListener(fl);
+        tvFilterCycling.setOnClickListener(fl); tvFilterWalking.setOnClickListener(fl);
+        tvFilterStrength.setOnClickListener(fl);
+    }
+
+    private void updateFilterUI() {
+        String f = vm.getFilter();
+        for (TextView tv : new TextView[]{tvFilterAll, tvFilterRunning, tvFilterCycling,
+                tvFilterWalking, tvFilterStrength}) {
+            tv.setBackgroundResource(R.drawable.stats_filter_unselected);
+            tv.setTextColor(ColorTokens.TEXT_SECONDARY);
+        }
+        TextView sel;
+        switch (f) {
+            case "Running": sel = tvFilterRunning; break;
+            case "Cycling": sel = tvFilterCycling; break;
+            case "Walking": sel = tvFilterWalking; break;
+            case "Strength": sel = tvFilterStrength; break;
+            default: sel = tvFilterAll; break;
+        }
+        sel.setBackgroundResource(R.drawable.stats_filter_selected); sel.setTextColor(Color.WHITE);
+    }
+
+    // ═══════════ 历史列表 ═══════════
 
     private void updateHistoryList() {
-        if ("Strength".equals(currentFilter)) {
-            adapter = new WorkoutHistoryAdapter(new ArrayList<>(allStrengthRecords), true);
+        if ("Strength".equals(vm.getFilter())) {
+            recyclerView.setAdapter(new WorkoutHistoryAdapter(
+                    new ArrayList<>(vm.getStrengthRecords()), true));
         } else {
-            adapter = new WorkoutHistoryAdapter(new ArrayList<>(allRecords));
+            recyclerView.setAdapter(new WorkoutHistoryAdapter(
+                    new ArrayList<>(vm.getCardioRecords())));
         }
-        recyclerView.setAdapter(adapter);
     }
 
-    @Override public void onDestroy() { super.onDestroy(); executorService.shutdown(); }
+    @Override
+    public void onResume() {
+        super.onResume();
+        vm.loadData();
+    }
 }
