@@ -50,7 +50,8 @@ public class StrengthWorkoutActivity extends AppCompatActivity {
     // PR 缓存: 动作名 → (maxWeight, reps)
     final Map<String, double[]> prCache = new LinkedHashMap<>();
 
-    private int totalSeconds, restSeconds;
+    private int totalSeconds, restSeconds, restDuration = 90;
+    private TextView[] restDurBtns;
     private boolean timerRunning, restRunning;
     private boolean isSwipeMode;
     private final Handler handler = new Handler(Looper.getMainLooper());
@@ -114,6 +115,24 @@ public class StrengthWorkoutActivity extends AppCompatActivity {
         btnSave.setOnClickListener(v -> saveWorkout());
         tvRestTimer.setOnClickListener(v -> stopRestTimer());
 
+        // 休息时长选择按钮
+        restDurBtns = new TextView[]{
+                findViewById(R.id.rest_dur_60),
+                findViewById(R.id.rest_dur_90),
+                findViewById(R.id.rest_dur_120),
+                findViewById(R.id.rest_dur_180)
+        };
+        int[] durations = {60, 90, 120, 180};
+        for (int i = 0; i < restDurBtns.length; i++) {
+            final int dur = durations[i];
+            restDurBtns[i].setOnClickListener(v -> {
+                restDuration = dur;
+                highlightRestDuration();
+                stopRestTimer();
+                startRestTimer();
+            });
+        }
+
         loadPRData();
         buildUI();
         startTimer();
@@ -164,7 +183,7 @@ public class StrengthWorkoutActivity extends AppCompatActivity {
     }
 
     void startRestTimer() {
-        restSeconds = 90;
+        restSeconds = restDuration;
         restRunning = true;
         restOverlay.setVisibility(View.VISIBLE);
 
@@ -185,6 +204,15 @@ public class StrengthWorkoutActivity extends AppCompatActivity {
                 }
             }
         }, 1000);
+    }
+
+    private void highlightRestDuration() {
+        int[] durations = {60, 90, 120, 180};
+        for (int i = 0; i < restDurBtns.length; i++) {
+            boolean sel = durations[i] == restDuration;
+            restDurBtns[i].setBackgroundColor(sel ? ColorTokens.BRAND_ORANGE : ColorTokens.BG_INPUT);
+            restDurBtns[i].setTextColor(sel ? Color.WHITE : ColorTokens.TEXT_MUTED);
+        }
     }
 
     private void stopRestTimer() {

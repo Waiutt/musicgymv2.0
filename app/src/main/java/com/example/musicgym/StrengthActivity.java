@@ -302,40 +302,86 @@ public class StrengthActivity extends AppCompatActivity {
 
     private View buildExerciseCard(String name, String accentColor, boolean isSelected) {
         FrameLayout card = new FrameLayout(this);
-        LinearLayout.LayoutParams clp = new LinearLayout.LayoutParams(0, dp(140), 1f);
-        clp.setMargins(3, 0, 3, 6); card.setLayoutParams(clp);
+        LinearLayout.LayoutParams clp = new LinearLayout.LayoutParams(0, dp(150), 1f);
+        clp.setMargins(3, 0, 3, 8); card.setLayoutParams(clp);
 
+        // 卡片主体
         LinearLayout inner = new LinearLayout(this);
-        inner.setOrientation(LinearLayout.VERTICAL); inner.setBackgroundColor(ColorTokens.BG_CARD);
-        inner.setLayoutParams(new LinearLayout.LayoutParams(MATCH, MATCH)); inner.setPadding(8, 0, 8, 8);
+        inner.setOrientation(LinearLayout.VERTICAL);
+        inner.setBackgroundColor(ColorTokens.BG_CARD);
+        inner.setGravity(Gravity.CENTER_HORIZONTAL);
+        inner.setPadding(8, 12, 8, 10);
+        FrameLayout.LayoutParams innerLp = new FrameLayout.LayoutParams(MATCH, MATCH);
+        card.addView(inner, innerLp);
 
-        FrameLayout imgArea = new FrameLayout(this);
-        imgArea.setLayoutParams(new LinearLayout.LayoutParams(MATCH, 0, 1f));
-        int ci = Color.parseColor(accentColor);
-        GradientDrawable gd = new GradientDrawable(GradientDrawable.Orientation.TL_BR,
-                new int[]{Color.argb(120, Color.red(ci), Color.green(ci), Color.blue(ci)),
-                        Color.argb(40, Color.red(ci), Color.green(ci), Color.blue(ci))});
-        imgArea.setBackground(gd);
-        TextView ic = new TextView(this); ic.setText(getEmoji(name)); ic.setTextSize(28f); ic.setGravity(Gravity.CENTER);
-        ic.setLayoutParams(new FrameLayout.LayoutParams(MATCH, MATCH)); imgArea.addView(ic);
-        inner.addView(imgArea);
+        // Emoji 图标区
+        TextView ic = new TextView(this);
+        ic.setText(getEmoji(name));
+        ic.setTextSize(32f);
+        ic.setGravity(Gravity.CENTER);
+        ic.setLayoutParams(new LinearLayout.LayoutParams(MATCH, 0, 1f));
+        inner.addView(ic);
 
+        // 动作名称
         TextView tv = new TextView(this);
         tv.setText(name.length() > 5 ? name.substring(0, 4) + ".." : name);
         tv.setTextColor(isSelected ? ColorTokens.BRAND_ORANGE : Color.WHITE);
-        tv.setTextSize(11f); tv.setGravity(Gravity.CENTER); tv.setPadding(2, 6, 2, 2);
+        tv.setTextSize(12f);
+        tv.setTypeface(null, android.graphics.Typeface.BOLD);
+        tv.setGravity(Gravity.CENTER);
+        tv.setPadding(2, 8, 2, 2);
         inner.addView(tv);
 
-        if (isSelected) {
-            TextView chk = new TextView(this); chk.setText("✓"); chk.setTextColor(Color.WHITE); chk.setTextSize(10f); chk.setGravity(Gravity.CENTER);
-            FrameLayout.LayoutParams chklp = new FrameLayout.LayoutParams(22, 22); chklp.gravity = Gravity.TOP | Gravity.END;
-            chklp.setMargins(0, 4, 4, 0);
-            GradientDrawable cb = new GradientDrawable(); cb.setShape(GradientDrawable.OVAL); cb.setColor(ColorTokens.BRAND_ORANGE);
-            chk.setBackground(cb); card.addView(chk);
+        // 上次训练数据
+        String lastInfo = getLastWorkoutInfo(name);
+        if (!lastInfo.isEmpty()) {
+            TextView tvLast = new TextView(this);
+            tvLast.setText(lastInfo);
+            tvLast.setTextColor(ColorTokens.TEXT_HINT);
+            tvLast.setTextSize(10f);
+            tvLast.setGravity(Gravity.CENTER);
+            tvLast.setSingleLine(true);
+            inner.addView(tvLast);
         }
-        card.addView(inner);
+
+        // 选中标记
+        if (isSelected) {
+            TextView chk = new TextView(this);
+            chk.setText("✓"); chk.setTextColor(Color.WHITE); chk.setTextSize(10f);
+            chk.setGravity(Gravity.CENTER);
+            FrameLayout.LayoutParams chklp = new FrameLayout.LayoutParams(UiUtils.dp(this, 22), UiUtils.dp(this, 22));
+            chklp.gravity = Gravity.TOP | Gravity.END;
+            chklp.setMargins(0, 4, 4, 0);
+            GradientDrawable cb = new GradientDrawable(); cb.setShape(GradientDrawable.OVAL);
+            cb.setColor(ColorTokens.BRAND_ORANGE);
+            chk.setBackground(cb); card.addView(chk, chklp);
+        }
+
         card.setOnClickListener(v -> showExerciseDetail(name, accentColor));
         return card;
+    }
+
+    /** 查询该动作的上次训练记录摘要 */
+    private String getLastWorkoutInfo(String exerciseName) {
+        try {
+            List<StrengthRecord> all = AppDatabase.getInstance(this).strengthRecordDao().getAllRecords();
+            for (int i = all.size() - 1; i >= 0; i--) {
+                StrengthRecord r = all.get(i);
+                if (r.getExercisesJson() == null) continue;
+                org.json.JSONArray arr = new org.json.JSONArray(r.getExercisesJson());
+                for (int j = 0; j < arr.length(); j++) {
+                    org.json.JSONObject ex = arr.getJSONObject(j);
+                    if (exerciseName.equals(ex.optString("name"))) {
+                        org.json.JSONArray sets = ex.getJSONArray("sets");
+                        if (sets.length() > 0) {
+                            org.json.JSONObject last = sets.getJSONObject(sets.length() - 1);
+                            return last.optInt("weight") + "kg×" + last.optInt("reps");
+                        }
+                    }
+                }
+            }
+        } catch (Exception ignored) {}
+        return "";
     }
 
     private void showExerciseDetail(String name, String accentColor) {
