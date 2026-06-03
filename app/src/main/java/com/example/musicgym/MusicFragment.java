@@ -3,6 +3,7 @@ package com.example.musicgym;
 import android.Manifest;
 import android.animation.ObjectAnimator;
 import android.animation.ValueAnimator;
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.graphics.Bitmap;
@@ -353,7 +354,8 @@ public class MusicFragment extends Fragment {
                 else currentTrackIndex = (currentTrackIndex + 1) % playlist.size();
                 loadTrack(currentTrackIndex, true);
             });
-            if (autoPlay) { mediaPlayer.start(); btnPlay.setImageResource(android.R.drawable.ic_media_pause); recordAnimator.start(); updateSeekBar(); }
+            if (autoPlay) { mediaPlayer.start(); btnPlay.setImageResource(android.R.drawable.ic_media_pause);
+                recordAnimator.start(); updateSeekBar(); notifyService(true); }
             else btnPlay.setImageResource(android.R.drawable.ic_media_play);
         } catch (Exception e) {
             Toast.makeText(getContext(), "无法播放", Toast.LENGTH_SHORT).show();
@@ -363,10 +365,31 @@ public class MusicFragment extends Fragment {
 
     private void togglePlayPause() {
         if (mediaPlayer == null) return;
-        if (mediaPlayer.isPlaying()) { mediaPlayer.pause(); btnPlay.setImageResource(android.R.drawable.ic_media_play); recordAnimator.pause(); }
-        else { mediaPlayer.start(); btnPlay.setImageResource(android.R.drawable.ic_media_pause);
-            if (recordAnimator.isPaused()) recordAnimator.resume(); else recordAnimator.start(); updateSeekBar(); }
+        if (mediaPlayer.isPlaying()) {
+            mediaPlayer.pause(); btnPlay.setImageResource(android.R.drawable.ic_media_play);
+            recordAnimator.pause(); notifyService(false);
+        } else {
+            mediaPlayer.start(); btnPlay.setImageResource(android.R.drawable.ic_media_pause);
+            if (recordAnimator.isPaused()) recordAnimator.resume(); else recordAnimator.start();
+            updateSeekBar(); notifyService(true);
+        }
         buildPlaylistUI();
+    }
+
+    private void notifyService(boolean playing) {
+        if (getContext() == null) return;
+        Intent intent = new Intent(getContext(), MusicService.class);
+        intent.setAction(MusicService.ACTION_UPDATE);
+        Track t = currentTrackIndex >= 0 && currentTrackIndex < playlist.size()
+                ? playlist.get(currentTrackIndex) : null;
+        intent.putExtra(MusicService.EXTRA_TITLE, t != null ? t.title : "");
+        intent.putExtra(MusicService.EXTRA_ARTIST, t != null ? t.artist : "");
+        intent.putExtra(MusicService.EXTRA_IS_PLAYING, playing);
+        if (playing) {
+            getContext().startForegroundService(intent);
+        } else {
+            getContext().startService(intent);
+        }
     }
 
     private void playNext() {
@@ -400,5 +423,9 @@ public class MusicFragment extends Fragment {
         handler.removeCallbacksAndMessages(null);
         if (recordAnimator != null) recordAnimator.cancel();
         executor.shutdown();
+        // 停止音乐通知
+        if (getContext() != null) {
+            getContext().stopService(new Intent(getContext(), MusicService.class));
+        }
     }
 }

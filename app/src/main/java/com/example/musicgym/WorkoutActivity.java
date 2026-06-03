@@ -173,10 +173,13 @@ public class WorkoutActivity extends AppCompatActivity implements AMapLocationLi
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-        if (requestCode == LOCATION_PERMISSION_CODE && grantResults.length > 0
-                && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-            initMapLocationStyle();
-            startOnceLocation();
+        if (requestCode == LOCATION_PERMISSION_CODE && grantResults.length > 0) {
+            if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                initMapLocationStyle();
+                startOnceLocation();
+            } else {
+                Toast.makeText(this, "需要位置权限才能记录运动轨迹", Toast.LENGTH_LONG).show();
+            }
         }
     }
 
