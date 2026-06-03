@@ -24,14 +24,30 @@
             android:textSize="17sp"
             android:textStyle="bold" />
 
-        <TextView
-            android:id="@+id/music_btn_shuffle"
-            android:layout_width="34dp"
-            android:layout_height="34dp"
-            android:background="@drawable/stats_filter_unselected"
-            android:gravity="center"
-            android:text="🔀"
-            android:textSize="13sp" />
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:gravity="center">
+
+            <TextView
+                android:id="@+id/music_btn_shuffle"
+                android:layout_width="34dp"
+                android:layout_height="34dp"
+                android:background="@drawable/stats_filter_unselected"
+                android:gravity="center"
+                android:text="🔀"
+                android:textSize="13sp" />
+
+            <TextView
+                android:id="@+id/music_mode_label"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="🔁 顺序"
+                android:textColor="@color/text_gray"
+                android:textSize="9sp"
+                android:layout_marginTop="2dp" />
+        </LinearLayout>
 
         <TextView
             android:id="@+id/music_btn_rescan"
@@ -192,11 +208,29 @@
                 android:background="@drawable/drag_handle_pill" />
         </LinearLayout>
 
+        <!-- 搜索栏 -->
+        <EditText
+            android:id="@+id/music_search"
+            android:layout_width="match_parent"
+            android:layout_height="36dp"
+            android:layout_marginTop="32dp"
+            android:layout_marginStart="12dp"
+            android:layout_marginEnd="12dp"
+            android:background="@color/bg_input"
+            android:hint="🔍 搜索歌曲或歌手..."
+            android:textColor="@color/white"
+            android:textColorHint="@color/text_gray_dark"
+            android:textSize="13sp"
+            android:paddingStart="12dp"
+            android:paddingEnd="12dp"
+            android:maxLines="1"
+            android:singleLine="true" />
+
         <!-- 列表头部 -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="32dp"
+            android:layout_marginTop="8dp"
             android:gravity="center_vertical"
             android:orientation="horizontal"
             android:paddingStart="16dp"
@@ -235,6 +269,18 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="vertical" />
+
+            <TextView
+                android:id="@+id/music_empty_hint"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="60dp"
+                android:gravity="center"
+                android:text="没有找到音乐文件\n请将 MP3 放入 Music 或 Download 文件夹\n然后点击 🔄 重新扫描"
+                android:textColor="@color/text_gray"
+                android:textSize="13sp"
+                android:lineSpacingExtra="4dp"
+                android:visibility="gone" />
         </ScrollView>
     </FrameLayout>
 

@@ -3,26 +3,36 @@ package com.example.musicgym;
 import android.Manifest;
 import android.animation.ObjectAnimator;
 import android.animation.ValueAnimator;
+import android.content.ComponentName;
+import android.content.Context;
 import android.content.Intent;
+import android.content.ServiceConnection;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
+import android.media.AudioAttributes;
+import android.media.AudioFocusRequest;
+import android.media.AudioManager;
 import android.media.MediaMetadataRetriever;
 import android.media.MediaPlayer;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
+import android.os.IBinder;
 import android.os.Looper;
 import android.provider.MediaStore;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.animation.LinearInterpolator;
+import android.widget.EditText;
 import android.widget.FrameLayout;
 import android.widget.ImageButton;
 import android.widget.ImageView;
@@ -50,29 +60,55 @@ import java.util.concurrent.Executors;
 
 public class MusicFragment extends Fragment {
 
+    // ── 播放模式 ──
+    private static final int MODE_SEQUENTIAL = 0;
+    private static final int MODE_REPEAT_ONE = 1;
+    private static final int MODE_SHUFFLE = 2;
+
     private MediaPlayer mediaPlayer;
     private ImageView ivAlbum;
-    private TextView tvTitle, tvArtist, tvCurrentTime, tvTotalTime, tvPlaylistTitle, tvTrackCount;
-    private TextView btnShuffle, btnRescan;
+    private TextView tvTitle, tvArtist, tvCurrentTime, tvTotalTime, tvTrackCount;
+    private TextView btnShuffle, btnRescan, btnModeLabel;
     private SeekBar seekBar;
     private ImageButton btnPlay, btnPrev, btnNext;
     private LinearLayout playlistContainer;
     private FrameLayout panel;
     private View dragHandle;
     private ScrollView playlistScroll;
+    private EditText etSearch;
+    private TextView tvEmptyHint;
 
     private final List<Track> playlist = new ArrayList<>();
     private int currentTrackIndex = -1;
+    private int playMode = MODE_SEQUENTIAL;
     private final Handler handler = new Handler(Looper.getMainLooper());
     private ObjectAnimator recordAnimator;
     private ExecutorService executor;
-    private boolean isShuffle;
 
-    // 提拉面板状态
+    // ── 提拉面板 ──
     private int panelExpandedHeight, panelCollapsedHeight;
     private boolean panelExpanded;
     private float dragStartY, panelStartHeight;
     private static final int COLLAPSED_DP = 48;
+
+    // ── 音频焦点 ──
+    private AudioManager audioManager;
+    private AudioFocusRequest focusRequest;
+    private boolean hasAudioFocus;
+
+    // ── 后台 Service ──
+    private MusicService musicService;
+    private final ServiceConnection serviceConn = new ServiceConnection() {
+        @Override public void onServiceConnected(ComponentName name, IBinder binder) {
+            musicService = ((MusicService.LocalBinder) binder).getService();
+            musicService.setCallback(new MusicService.MusicCallback() {
+                @Override public void onPlayPause() { handler.post(() -> togglePlayPause()); }
+                @Override public void onNext() { handler.post(() -> playNext()); }
+                @Override public void onPrev() { handler.post(() -> playPrevious()); }
+            });
+        }
+        @Override public void onServiceDisconnected(ComponentName name) { musicService = null; }
+    };
 
     private static class Track {
         String title, artist, dataPath;
@@ -82,12 +118,16 @@ public class MusicFragment extends Fragment {
     private final ActivityResultLauncher<String> permLauncher =
             registerForActivityResult(new ActivityResultContracts.RequestPermission(), granted -> {
                 if (granted) autoScan(); else {
-                    tvTitle.setText("需要存储权限"); tvArtist.setText("无法访问音频");
+                    tvTitle.setText("需要存储权限");
+                    tvArtist.setText("请到设置中授予媒体访问权限");
+                    tvEmptyHint.setVisibility(View.VISIBLE);
+                    tvEmptyHint.setText("未授权访问音频文件\n请授予权限后点击 🔄 重新扫描");
                 }
             });
 
     @Nullable @Override
-    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
+    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container,
+                             @Nullable Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_music, container, false);
 
         ivAlbum = view.findViewById(R.id.music_iv_album);
@@ -101,15 +141,35 @@ public class MusicFragment extends Fragment {
         btnNext = view.findViewById(R.id.music_btn_next);
         btnShuffle = view.findViewById(R.id.music_btn_shuffle);
         btnRescan = view.findViewById(R.id.music_btn_rescan);
-        tvPlaylistTitle = view.findViewById(R.id.music_playlist_title);
+        btnModeLabel = view.findViewById(R.id.music_mode_label);
         tvTrackCount = view.findViewById(R.id.music_track_count);
         playlistContainer = view.findViewById(R.id.music_playlist_container);
         panel = view.findViewById(R.id.music_panel);
         dragHandle = view.findViewById(R.id.music_drag_handle);
         playlistScroll = view.findViewById(R.id.music_playlist_scroll);
+        etSearch = view.findViewById(R.id.music_search);
+        tvEmptyHint = view.findViewById(R.id.music_empty_hint);
 
         executor = Executors.newSingleThreadExecutor();
 
+        // ── 音频焦点 ──
+        audioManager = (AudioManager) requireContext().getSystemService(Context.AUDIO_SERVICE);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            AudioAttributes attrs = new AudioAttributes.Builder()
+                    .setUsage(AudioAttributes.USAGE_MEDIA)
+                    .setContentType(AudioAttributes.CONTENT_TYPE_MUSIC)
+                    .build();
+            focusRequest = new AudioFocusRequest.Builder(AudioManager.AUDIOFOCUS_GAIN)
+                    .setAudioAttributes(attrs)
+                    .setOnAudioFocusChangeListener(this::handleAudioFocusChange)
+                    .build();
+        }
+
+        // ── 绑定 Service ──
+        requireContext().bindService(new Intent(requireContext(), MusicService.class),
+                serviceConn, Context.BIND_AUTO_CREATE);
+
+        // ── 提拉面板 ──
         panelCollapsedHeight = dp(COLLAPSED_DP);
         panel.post(() -> {
             panelExpandedHeight = (int) (view.getHeight() * 0.55);
@@ -119,27 +179,22 @@ public class MusicFragment extends Fragment {
             panelExpanded = false;
         });
 
-        // 提拉手势 + 点击切换
         dragHandle.setOnTouchListener(new View.OnTouchListener() {
             private float downX, downY;
             private boolean isDragging;
-            @Override
-            public boolean onTouch(View v, MotionEvent event) {
+            @Override public boolean onTouch(View v, MotionEvent event) {
                 switch (event.getAction()) {
                     case MotionEvent.ACTION_DOWN:
                         downX = event.getX(); downY = event.getY();
                         dragStartY = event.getRawY();
                         panelStartHeight = panel.getHeight();
                         isDragging = false;
-                        // 按下时把手变亮
                         dragHandle.setAlpha(0.7f);
                         return true;
                     case MotionEvent.ACTION_MOVE:
                         float dx = Math.abs(event.getX() - downX);
                         float dy = Math.abs(event.getY() - downY);
-                        if (!isDragging && (dx > 10 || dy > 5)) {
-                            isDragging = true;
-                        }
+                        if (!isDragging && (dx > 10 || dy > 5)) isDragging = true;
                         if (isDragging) {
                             float moveDy = dragStartY - event.getRawY();
                             int newH = (int) (panelStartHeight + moveDy);
@@ -155,7 +210,6 @@ public class MusicFragment extends Fragment {
                             int mid = (panelCollapsedHeight + panelExpandedHeight) / 2;
                             animatePanel(curH > mid ? panelExpandedHeight : panelCollapsedHeight);
                         } else {
-                            // 点击切换
                             animatePanel(panelExpanded ? panelCollapsedHeight : panelExpandedHeight);
                         }
                         isDragging = false;
@@ -165,22 +219,18 @@ public class MusicFragment extends Fragment {
             }
         });
 
+        // ── 唱片旋转动画 ──
         recordAnimator = ObjectAnimator.ofFloat(ivAlbum, "rotation", 0f, 360f);
         recordAnimator.setDuration(8000);
         recordAnimator.setRepeatCount(ObjectAnimator.INFINITE);
         recordAnimator.setInterpolator(new LinearInterpolator());
 
+        // ── 按钮事件 ──
         btnPlay.setOnClickListener(v -> togglePlayPause());
         btnPrev.setOnClickListener(v -> playPrevious());
         btnNext.setOnClickListener(v -> playNext());
-        btnShuffle.setOnClickListener(v -> {
-            isShuffle = !isShuffle;
-            Toast.makeText(getContext(), isShuffle ? "随机播放" : "顺序播放", Toast.LENGTH_SHORT).show();
-        });
-        btnRescan.setOnClickListener(v -> {
-            tvTitle.setText("正在扫描..."); tvArtist.setText("搜索所有音乐");
-            autoScan();
-        });
+        btnShuffle.setOnClickListener(v -> cyclePlayMode());
+        btnRescan.setOnClickListener(v -> { tvTitle.setText("正在扫描..."); tvArtist.setText("搜索所有音乐"); autoScan(); });
         seekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override public void onProgressChanged(SeekBar s, int p, boolean fromUser) {
                 if (fromUser && mediaPlayer != null) mediaPlayer.seekTo(p);
@@ -189,11 +239,99 @@ public class MusicFragment extends Fragment {
             @Override public void onStopTrackingTouch(SeekBar s) {}
         });
 
+        // ── 歌单搜索 ──
+        etSearch.addTextChangedListener(new TextWatcher() {
+            @Override public void beforeTextChanged(CharSequence s, int st, int c, int a) {}
+            @Override public void onTextChanged(CharSequence s, int st, int b, int c) {
+                buildPlaylistUI(s.toString().trim().toLowerCase());
+            }
+            @Override public void afterTextChanged(Editable s) {}
+        });
+
         checkPermissionAndScan();
         return view;
     }
 
-    // ======= 提拉面板 =======
+    // ═══════════ 音频焦点 ═══════════
+
+    private boolean requestAudioFocus() {
+        if (audioManager == null) return true;
+        int result;
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O && focusRequest != null) {
+            result = audioManager.requestAudioFocus(focusRequest);
+        } else {
+            result = audioManager.requestAudioFocus(focusChangeListener,
+                    AudioManager.STREAM_MUSIC, AudioManager.AUDIOFOCUS_GAIN);
+        }
+        hasAudioFocus = result == AudioManager.AUDIOFOCUS_REQUEST_GRANTED;
+        return hasAudioFocus;
+    }
+
+    private void abandonAudioFocus() {
+        if (audioManager == null) return;
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O && focusRequest != null) {
+            audioManager.abandonAudioFocusRequest(focusRequest);
+        } else {
+            audioManager.abandonAudioFocus(focusChangeListener);
+        }
+        hasAudioFocus = false;
+    }
+
+    private void handleAudioFocusChange(int change) {
+        switch (change) {
+            case AudioManager.AUDIOFOCUS_LOSS:
+                // 永久失去焦点（如电话来了）
+                if (mediaPlayer != null && mediaPlayer.isPlaying()) togglePlayPause();
+                abandonAudioFocus();
+                break;
+            case AudioManager.AUDIOFOCUS_LOSS_TRANSIENT:
+                // 短暂失去焦点（如通知音）
+                if (mediaPlayer != null && mediaPlayer.isPlaying()) togglePlayPause();
+                break;
+            case AudioManager.AUDIOFOCUS_LOSS_TRANSIENT_CAN_DUCK:
+                // 需要降低音量
+                if (mediaPlayer != null) mediaPlayer.setVolume(0.3f, 0.3f);
+                break;
+            case AudioManager.AUDIOFOCUS_GAIN:
+                // 恢复焦点
+                if (mediaPlayer != null) mediaPlayer.setVolume(1.0f, 1.0f);
+                if (!mediaPlayer.isPlaying() && hasAudioFocus) {
+                    mediaPlayer.start(); btnPlay.setImageResource(android.R.drawable.ic_media_pause);
+                    if (recordAnimator.isPaused()) recordAnimator.resume(); else recordAnimator.start();
+                    updateSeekBar(); notifyService(true);
+                }
+                break;
+        }
+    }
+
+    private final AudioManager.OnAudioFocusChangeListener focusChangeListener =
+            this::handleAudioFocusChange;
+
+    // ═══════════ 播放模式 ═══════════
+
+    private void cyclePlayMode() {
+        playMode = (playMode + 1) % 3;
+        String[] labels = {"🔁 顺序", "🔂 单曲", "🔀 随机"};
+        String[] toasts = {"顺序播放", "单曲循环", "随机播放"};
+        btnModeLabel.setText(labels[playMode]);
+        btnModeLabel.setTextColor(playMode > 0 ? ColorTokens.BRAND_ORANGE : ColorTokens.TEXT_SECONDARY);
+        Toast.makeText(getContext(), toasts[playMode], Toast.LENGTH_SHORT).show();
+    }
+
+    private int getNextIndex() {
+        if (playlist.isEmpty()) return -1;
+        switch (playMode) {
+            case MODE_SHUFFLE:
+                return (int) (Math.random() * playlist.size());
+            case MODE_REPEAT_ONE:
+                return currentTrackIndex;
+            default: // MODE_SEQUENTIAL
+                return (currentTrackIndex + 1) % playlist.size();
+        }
+    }
+
+    // ═══════════ 提拉面板 ═══════════
+
     private void setPanelHeight(int h) {
         ViewGroup.LayoutParams lp = panel.getLayoutParams();
         lp.height = h; panel.setLayoutParams(lp);
@@ -208,7 +346,8 @@ public class MusicFragment extends Fragment {
         panelExpanded = targetH == panelExpandedHeight;
     }
 
-    // ======= 扫描 =======
+    // ═══════════ 扫描 ═══════════
+
     private void checkPermissionAndScan() {
         String perm = Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU ?
                 Manifest.permission.READ_MEDIA_AUDIO : Manifest.permission.READ_EXTERNAL_STORAGE;
@@ -220,7 +359,6 @@ public class MusicFragment extends Fragment {
         executor.execute(() -> {
             Set<String> seen = new LinkedHashSet<>();
             List<Track> found = new ArrayList<>();
-
             String[] proj = {MediaStore.Audio.Media.TITLE, MediaStore.Audio.Media.ARTIST, MediaStore.Audio.Media.DATA};
             Cursor c = requireContext().getContentResolver().query(
                     MediaStore.Audio.Media.EXTERNAL_CONTENT_URI, proj,
@@ -233,7 +371,6 @@ public class MusicFragment extends Fragment {
                 }
                 c.close();
             }
-
             for (File dir : new File[]{
                     Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS),
                     Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_MUSIC),
@@ -245,24 +382,38 @@ public class MusicFragment extends Fragment {
                             found.add(new Track(f.getName().replace(".mp3","").replace(".MP3",""), "本地", f.getAbsolutePath()));
                 }
             }
-
             requireActivity().runOnUiThread(() -> {
                 playlist.clear(); playlist.addAll(found);
                 tvTrackCount.setText(playlist.size() + " 首");
+                if (playlist.isEmpty()) {
+                    tvEmptyHint.setVisibility(View.VISIBLE);
+                    tvEmptyHint.setText("没有找到音乐文件\n请将 MP3 放入 Music 或 Download 文件夹\n然后点击 🔄 重新扫描");
+                } else {
+                    tvEmptyHint.setVisibility(View.GONE);
+                }
                 if (!playlist.isEmpty() && currentTrackIndex < 0) { currentTrackIndex = 0; loadTrack(0, false); }
-                buildPlaylistUI();
+                buildPlaylistUI("");
             });
         });
     }
 
     private String nn(String s) { return s != null ? s : "未知"; }
 
-    // ======= 列表 UI =======
+    // ═══════════ 歌单 UI（含搜索过滤） ═══════════
+
     private void buildPlaylistUI() {
+        buildPlaylistUI(etSearch != null ? etSearch.getText().toString().trim().toLowerCase() : "");
+    }
+
+    private void buildPlaylistUI(String filter) {
         playlistContainer.removeAllViews();
         for (int i = 0; i < playlist.size(); i++) {
             final int idx = i;
             Track t = playlist.get(i);
+
+            // 搜索过滤
+            if (!filter.isEmpty() && !t.title.toLowerCase().contains(filter)
+                    && !t.artist.toLowerCase().contains(filter)) continue;
 
             LinearLayout row = new LinearLayout(getContext());
             row.setOrientation(LinearLayout.HORIZONTAL);
@@ -271,7 +422,6 @@ public class MusicFragment extends Fragment {
             boolean isCurrent = idx == currentTrackIndex;
             row.setBackgroundColor(isCurrent ? ColorTokens.CURRENT_TRACK_BG : Color.TRANSPARENT);
 
-            // 序号 / 播放图标
             TextView tvIdx = new TextView(getContext());
             tvIdx.setText(isCurrent && mediaPlayer != null && mediaPlayer.isPlaying() ? "▶" : String.valueOf(idx + 1));
             tvIdx.setTextColor(isCurrent ? ColorTokens.BRAND_ORANGE : ColorTokens.TEXT_HINT);
@@ -279,22 +429,17 @@ public class MusicFragment extends Fragment {
             tvIdx.setLayoutParams(new LinearLayout.LayoutParams(32, WRAP));
             row.addView(tvIdx);
 
-            // 歌曲信息
             LinearLayout info = new LinearLayout(getContext());
             info.setOrientation(LinearLayout.VERTICAL);
             info.setLayoutParams(new LinearLayout.LayoutParams(0, WRAP, 1));
-
             TextView tvT = new TextView(getContext());
             tvT.setText(t.title); tvT.setTextColor(Color.WHITE); tvT.setTextSize(14f); tvT.setSingleLine(true);
             info.addView(tvT);
-
             TextView tvA = new TextView(getContext());
             tvA.setText(t.artist); tvA.setTextColor(ColorTokens.TEXT_SECONDARY); tvA.setTextSize(11f); tvA.setSingleLine(true);
             info.addView(tvA);
-
             row.addView(info);
 
-            // 删除按钮
             TextView btnDel = new TextView(getContext());
             btnDel.setText("✕"); btnDel.setTextColor(ColorTokens.ACCENT_RED); btnDel.setTextSize(14f);
             btnDel.setGravity(Gravity.CENTER); btnDel.setPadding(12, 8, 8, 8);
@@ -302,32 +447,31 @@ public class MusicFragment extends Fragment {
             btnDel.setOnClickListener(v -> {
                 if (idx == currentTrackIndex) {
                     if (mediaPlayer != null) { mediaPlayer.release(); mediaPlayer = null; }
-                    currentTrackIndex = -1;
+                    currentTrackIndex = -1; abandonAudioFocus();
                     tvTitle.setText("未在播放"); tvArtist.setText("");
                     btnPlay.setImageResource(android.R.drawable.ic_media_play);
-                    recordAnimator.pause();
-                } else if (idx < currentTrackIndex) {
-                    currentTrackIndex--;
-                }
+                    recordAnimator.pause(); notifyService(false);
+                } else if (idx < currentTrackIndex) currentTrackIndex--;
                 playlist.remove(idx);
                 tvTrackCount.setText(playlist.size() + " 首");
-                if (playlist.isEmpty()) { tvTitle.setText("列表已清空"); tvArtist.setText("点击 🔄 重新扫描"); }
+                if (playlist.isEmpty()) {
+                    tvTitle.setText("列表已清空"); tvArtist.setText("点击 🔄 重新扫描");
+                    tvEmptyHint.setVisibility(View.VISIBLE);
+                    tvEmptyHint.setText("列表已清空\n点击 🔄 重新扫描本地音乐");
+                }
                 buildPlaylistUI();
             });
             row.addView(btnDel);
-
-            row.setOnClickListener(v -> {
-                currentTrackIndex = idx; loadTrack(idx, true);
-            });
-
+            row.setOnClickListener(v -> { currentTrackIndex = idx; loadTrack(idx, true); });
             playlistContainer.addView(row);
         }
     }
 
-    // ======= 播放引擎 =======
+    // ═══════════ 播放引擎 ═══════════
+
     private void loadTrack(int index, boolean autoPlay) {
         if (playlist.isEmpty()) return;
-        if (mediaPlayer != null) mediaPlayer.release();
+        if (mediaPlayer != null) { mediaPlayer.release(); abandonAudioFocus(); }
 
         Track track = playlist.get(index);
         tvTitle.setText(track.title); tvArtist.setText(track.artist);
@@ -350,17 +494,27 @@ public class MusicFragment extends Fragment {
             tvTotalTime.setText(formatTime(mediaPlayer.getDuration()));
             mediaPlayer.setOnCompletionListener(mp -> {
                 if (playlist.isEmpty()) return;
-                if (isShuffle) currentTrackIndex = (int) (Math.random() * playlist.size());
-                else currentTrackIndex = (currentTrackIndex + 1) % playlist.size();
+                currentTrackIndex = getNextIndex();
                 loadTrack(currentTrackIndex, true);
             });
-            if (autoPlay) { mediaPlayer.start(); btnPlay.setImageResource(android.R.drawable.ic_media_pause);
-                recordAnimator.start(); updateSeekBar(); notifyService(true); }
-            else btnPlay.setImageResource(android.R.drawable.ic_media_play);
+            if (autoPlay) startPlayback(); else btnPlay.setImageResource(android.R.drawable.ic_media_play);
         } catch (Exception e) {
             Toast.makeText(getContext(), "无法播放", Toast.LENGTH_SHORT).show();
         }
         buildPlaylistUI();
+    }
+
+    private void startPlayback() {
+        if (mediaPlayer == null) return;
+        if (!requestAudioFocus()) {
+            Toast.makeText(getContext(), "无法获取音频焦点", Toast.LENGTH_SHORT).show();
+            return;
+        }
+        mediaPlayer.start();
+        btnPlay.setImageResource(android.R.drawable.ic_media_pause);
+        recordAnimator.start();
+        updateSeekBar();
+        notifyService(true);
     }
 
     private void togglePlayPause() {
@@ -369,6 +523,7 @@ public class MusicFragment extends Fragment {
             mediaPlayer.pause(); btnPlay.setImageResource(android.R.drawable.ic_media_play);
             recordAnimator.pause(); notifyService(false);
         } else {
+            if (!requestAudioFocus()) return;
             mediaPlayer.start(); btnPlay.setImageResource(android.R.drawable.ic_media_pause);
             if (recordAnimator.isPaused()) recordAnimator.resume(); else recordAnimator.start();
             updateSeekBar(); notifyService(true);
@@ -385,18 +540,16 @@ public class MusicFragment extends Fragment {
         intent.putExtra(MusicService.EXTRA_TITLE, t != null ? t.title : "");
         intent.putExtra(MusicService.EXTRA_ARTIST, t != null ? t.artist : "");
         intent.putExtra(MusicService.EXTRA_IS_PLAYING, playing);
-        if (playing) {
-            getContext().startForegroundService(intent);
-        } else {
-            getContext().startService(intent);
-        }
+        if (playing) getContext().startForegroundService(intent);
+        else getContext().startService(intent);
     }
 
     private void playNext() {
         if (playlist.isEmpty()) return;
-        currentTrackIndex = isShuffle ? (int) (Math.random() * playlist.size()) : (currentTrackIndex + 1) % playlist.size();
+        currentTrackIndex = getNextIndex();
         loadTrack(currentTrackIndex, true);
     }
+
     private void playPrevious() {
         if (playlist.isEmpty()) return;
         currentTrackIndex = (currentTrackIndex - 1 + playlist.size()) % playlist.size();
@@ -420,11 +573,12 @@ public class MusicFragment extends Fragment {
     @Override public void onDestroyView() {
         super.onDestroyView();
         if (mediaPlayer != null) { mediaPlayer.release(); mediaPlayer = null; }
+        abandonAudioFocus();
         handler.removeCallbacksAndMessages(null);
         if (recordAnimator != null) recordAnimator.cancel();
         executor.shutdown();
-        // 停止音乐通知
         if (getContext() != null) {
+            getContext().unbindService(serviceConn);
             getContext().stopService(new Intent(getContext(), MusicService.class));
         }
     }
