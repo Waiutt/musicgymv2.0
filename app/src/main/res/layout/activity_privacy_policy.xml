@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/bg_dark"
+    android:orientation="vertical">
+
+    <LinearLayout style="@style/TopBar">
+        <TextView style="@style/CloseButton"
+            android:id="@+id/privacy_btn_back" />
+        <TextView style="@style/ToolbarTitle"
+            android:text="隐私政策" />
+    </LinearLayout>
+
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:padding="20dp">
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textColor="@color/text_white_soft"
+            android:textSize="15sp"
+            android:lineSpacingExtra="6dp"
+            android:text="@string/privacy_policy_text" />
+    </ScrollView>
+</LinearLayout>

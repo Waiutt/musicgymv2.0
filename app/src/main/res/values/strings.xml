@@ -1,3 +1,22 @@
 <resources>
     <string name="app_name">MusicGym</string>
+
+    <string name="privacy_policy_text">
+        隐私政策\n\n
+        最后更新日期：2026年6月\n\n
+        1. 信息收集\n
+        MusicGym 仅收集您主动记录的运动数据（运动类型、距离、时长、卡路里、训练动作和重量），以及您选择记录的体重和身体围度数据。所有数据均存储在您的设备本地，我们不会上传、分享或出售您的任何数据。\n\n
+        2. 位置信息\n
+        当您使用运动追踪功能时，MusicGym 会通过高德地图 SDK 获取您的位置信息以记录运动轨迹。此信息仅用于在您的设备上绘制运动路线，不会被传输到我们的服务器。\n\n
+        3. 存储权限\n
+        MusicGym 需要访问您的设备存储以扫描本地音乐文件和导出 CSV 数据。我们不会访问您的其他文件。\n\n
+        4. 数据安全\n
+        您的所有数据存储在设备本地 SQLite 数据库中。卸载应用将导致所有数据被永久删除。您可以通过设置页导出 CSV 格式的数据进行备份。\n\n
+        5. 第三方服务\n
+        本应用使用高德地图 SDK 提供地图和定位服务。高德地图的隐私政策请参考：https://lbs.amap.com/pages/privacy/\n\n
+        6. 联系我们\n
+        如有任何关于隐私的问题，请通过 GitHub Issues 联系我们：https://github.com/Waiutt/musicgymv2.0/issues\n\n
+        7. 变更\n\
+        我们可能会不时更新本隐私政策。更新后的政策将在应用内公布。
+    </string>
 </resources>

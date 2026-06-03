@@ -68,6 +68,8 @@ public class ProfileFragment extends Fragment {
         btnMeasurements.setOnClickListener(v -> showMeasurementsDialog());
         btnExport.setOnClickListener(v -> exportCSV());
         btnReminder.setOnClickListener(v -> setupReminder());
+        view.findViewById(R.id.btn_settings).setOnClickListener(v ->
+                startActivity(new Intent(requireContext(), SettingsActivity.class)));
 
         return view;
     }

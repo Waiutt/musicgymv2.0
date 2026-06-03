@@ -89,6 +89,12 @@
             style="@style/ProfileButton"
             android:text="训练提醒" />
 
+        <Button
+            android:id="@+id/btn_settings"
+            style="@style/ProfileButton"
+            android:layout_marginTop="24dp"
+            android:text="⚙ 设置" />
+
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"

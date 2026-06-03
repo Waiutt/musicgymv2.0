@@ -36,7 +36,10 @@
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
-        </activity> <activity android:name=".PostDetailActivity" />
+        </activity>
+        <activity android:name=".PostDetailActivity" />
+        <activity android:name=".SettingsActivity" />
+        <activity android:name=".PrivacyPolicyActivity" />
 
     </application>
 

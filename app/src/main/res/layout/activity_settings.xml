@@ -1,0 +1,195 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/bg_dark"
+    android:orientation="vertical">
+
+    <!-- 顶栏 -->
+    <LinearLayout
+        style="@style/TopBar">
+
+        <TextView
+            style="@style/CloseButton"
+            android:id="@+id/settings_btn_back" />
+
+        <TextView
+            style="@style/ToolbarTitle"
+            android:text="设置" />
+    </LinearLayout>
+
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:padding="20dp">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+
+            <!-- ═══ 数据管理 ═══ -->
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="12dp"
+                android:text="数据管理"
+                android:textColor="@color/text_gray_light"
+                android:textSize="12sp"
+                android:textStyle="bold"
+                android:letterSpacing="0.1" />
+
+            <androidx.cardview.widget.CardView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="24dp"
+                app:cardBackgroundColor="@color/bg_card"
+                app:cardCornerRadius="12dp"
+                app:cardElevation="0dp">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical">
+
+                    <TextView
+                        android:id="@+id/settings_btn_export"
+                        android:layout_width="match_parent"
+                        android:layout_height="56dp"
+                        android:gravity="center_vertical"
+                        android:paddingStart="20dp"
+                        android:paddingEnd="20dp"
+                        android:text="导出全部数据 (CSV)"
+                        android:textColor="@color/white"
+                        android:textSize="15sp"
+                        android:background="?attr/selectableItemBackground"
+                        android:clickable="true"
+                        android:focusable="true" />
+
+                    <View
+                        android:layout_width="match_parent"
+                        android:layout_height="1dp"
+                        android:layout_marginStart="20dp"
+                        android:background="@color/bg_input" />
+
+                    <TextView
+                        android:id="@+id/settings_btn_clear"
+                        android:layout_width="match_parent"
+                        android:layout_height="56dp"
+                        android:gravity="center_vertical"
+                        android:paddingStart="20dp"
+                        android:paddingEnd="20dp"
+                        android:text="清除所有数据"
+                        android:textColor="@color/accent_red"
+                        android:textSize="15sp"
+                        android:background="?attr/selectableItemBackground"
+                        android:clickable="true"
+                        android:focusable="true" />
+                </LinearLayout>
+            </androidx.cardview.widget.CardView>
+
+            <!-- ═══ 关于 ═══ -->
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="12dp"
+                android:text="关于"
+                android:textColor="@color/text_gray_light"
+                android:textSize="12sp"
+                android:textStyle="bold"
+                android:letterSpacing="0.1" />
+
+            <androidx.cardview.widget.CardView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="24dp"
+                app:cardBackgroundColor="@color/bg_card"
+                app:cardCornerRadius="12dp"
+                app:cardElevation="0dp">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical">
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="56dp"
+                        android:gravity="center_vertical"
+                        android:paddingStart="20dp"
+                        android:paddingEnd="20dp"
+                        android:orientation="horizontal">
+
+                        <TextView
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:text="版本号"
+                            android:textColor="@color/white"
+                            android:textSize="15sp" />
+
+                        <TextView
+                            android:id="@+id/settings_tv_version"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="v2.0"
+                            android:textColor="@color/text_gray"
+                            android:textSize="14sp" />
+                    </LinearLayout>
+
+                    <View
+                        android:layout_width="match_parent"
+                        android:layout_height="1dp"
+                        android:layout_marginStart="20dp"
+                        android:background="@color/bg_input" />
+
+                    <TextView
+                        android:id="@+id/settings_btn_privacy"
+                        android:layout_width="match_parent"
+                        android:layout_height="56dp"
+                        android:gravity="center_vertical"
+                        android:paddingStart="20dp"
+                        android:paddingEnd="20dp"
+                        android:text="隐私政策"
+                        android:textColor="@color/cyber_cyan"
+                        android:textSize="15sp"
+                        android:background="?attr/selectableItemBackground"
+                        android:clickable="true"
+                        android:focusable="true" />
+
+                    <View
+                        android:layout_width="match_parent"
+                        android:layout_height="1dp"
+                        android:layout_marginStart="20dp"
+                        android:background="@color/bg_input" />
+
+                    <TextView
+                        android:id="@+id/settings_btn_about"
+                        android:layout_width="match_parent"
+                        android:layout_height="56dp"
+                        android:gravity="center_vertical"
+                        android:paddingStart="20dp"
+                        android:paddingEnd="20dp"
+                        android:text="关于 MusicGym"
+                        android:textColor="@color/white"
+                        android:textSize="15sp"
+                        android:background="?attr/selectableItemBackground"
+                        android:clickable="true"
+                        android:focusable="true" />
+                </LinearLayout>
+            </androidx.cardview.widget.CardView>
+
+            <!-- ═══ 底部版权 ═══ -->
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                android:gravity="center"
+                android:text="MusicGym v2.0 — Made with ❤️"
+                android:textColor="@color/text_gray_dark"
+                android:textSize="12sp" />
+
+        </LinearLayout>
+    </ScrollView>
+</LinearLayout>
