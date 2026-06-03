@@ -232,8 +232,65 @@ public class StatsFragment extends Fragment {
             ViewGroup.LayoutParams lp = new LinearLayout.LayoutParams(0, 38, 1);
             lp.width = (int) (getResources().getDisplayMetrics().widthPixels / 7.5);
             tv.setLayoutParams(lp);
+
+            // 点击日期查看当天详情
+            final int dayNum = day;
+            final int bgColor = bg;
+            tv.setOnClickListener(v -> showDayDetail(dayNum, bgColor));
+
             gridRow.addView(tv); cellIdx++;
         }
+    }
+
+    private void showDayDetail(int day, int bgColor) {
+        java.util.Calendar cal = java.util.Calendar.getInstance();
+        cal.set(java.util.Calendar.DAY_OF_MONTH, 1);
+        String prefix = new java.text.SimpleDateFormat("yyyy-MM", java.util.Locale.getDefault())
+                .format(cal.getTime());
+        String date = prefix + "-" + String.format(java.util.Locale.getDefault(), "%02d", day);
+
+        StringBuilder sb = new StringBuilder();
+
+        // 有氧记录
+        for (WorkoutRecord r : vm.getCardioRecords()) {
+            if (date.equals(r.getDate())) {
+                sb.append("🏃 ").append(r.getSportType())
+                  .append("  ").append(String.format("%.1f km", r.getDistanceKm()))
+                  .append("  ").append(r.getCalories()).append(" kcal\n");
+            }
+        }
+
+        // 力量记录
+        for (StrengthRecord r : vm.getStrengthRecords()) {
+            if (date.equals(r.getDate())) {
+                int m = r.getDurationSeconds() / 60;
+                if (sb.length() > 0) sb.append("\n");
+                try {
+                    org.json.JSONArray arr = new org.json.JSONArray(r.getExercisesJson());
+                    sb.append("🏋️ 力量训练  ").append(arr.length())
+                      .append("个动作  ").append(m).append("分钟\n");
+                    for (int i = 0; i < Math.min(arr.length(), 5); i++) {
+                        org.json.JSONObject ex = arr.getJSONObject(i);
+                        org.json.JSONArray sets = ex.getJSONArray("sets");
+                        sb.append("  · ").append(ex.optString("name"))
+                          .append("  ").append(sets.length()).append("组\n");
+                    }
+                    if (arr.length() > 5) sb.append("  ... 等").append(arr.length()).append("个动作");
+                } catch (Exception e) {
+                    sb.append("🏋️ 力量训练  ").append(m).append("分钟");
+                }
+            }
+        }
+
+        if (sb.length() == 0) {
+            sb.append("当天没有运动记录\n\n去运动一下吧！💪");
+        }
+
+        new android.app.AlertDialog.Builder(requireContext())
+                .setTitle(date + " 运动记录")
+                .setMessage(sb.toString().trim())
+                .setPositiveButton("确定", null)
+                .show();
     }
 
     // ═══════════ 过滤 ═══════════

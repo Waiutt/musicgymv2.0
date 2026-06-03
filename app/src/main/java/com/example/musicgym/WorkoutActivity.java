@@ -62,6 +62,9 @@ public class WorkoutActivity extends AppCompatActivity implements AMapLocationLi
     private int totalSeconds;
     private double calorieMultiplier = 1.036;
     private LatLng lastLatLng;
+    private long lastMovementTime;
+    private boolean autoPaused;
+    private static final int AUTO_PAUSE_SECONDS = 8;
 
     private Handler timerHandler = new Handler(Looper.getMainLooper());
     private Runnable timerRunnable;
@@ -194,6 +197,8 @@ public class WorkoutActivity extends AppCompatActivity implements AMapLocationLi
                     float distance = AMapUtils.calculateLineDistance(lastLatLng, latLng);
                     if (distance > 1.0f && distance < 100.0f) {
                         totalDistanceMeters += distance;
+                        lastMovementTime = System.currentTimeMillis();
+                        if (autoPaused) resumeFromAutoPause();
                     }
                 }
                 lastLatLng = latLng;
@@ -353,10 +358,23 @@ public class WorkoutActivity extends AppCompatActivity implements AMapLocationLi
                 if (isTracking) {
                     totalSeconds++;
                     updateDashboardUI();
-                    timerHandler.postDelayed(this, 1000);
+                    // 自动暂停检测
+                    if (!autoPaused && lastMovementTime > 0
+                            && System.currentTimeMillis() - lastMovementTime > AUTO_PAUSE_SECONDS * 1000L) {
+                        autoPaused = true;
+                        Toast.makeText(WorkoutActivity.this,
+                                "检测到停止移动，运动已自动暂停", Toast.LENGTH_SHORT).show();
+                    }
+                    if (!autoPaused) timerHandler.postDelayed(this, 1000);
                 }
             }
         };
+    }
+
+    private void resumeFromAutoPause() {
+        autoPaused = false;
+        timerHandler.postDelayed(timerRunnable, 1000);
+        Toast.makeText(this, "检测到移动，运动已恢复", Toast.LENGTH_SHORT).show();
     }
 
     private void updateDashboardUI() {
