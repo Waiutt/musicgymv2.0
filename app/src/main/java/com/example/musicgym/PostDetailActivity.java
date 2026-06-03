@@ -1,49 +1,127 @@
 package com.example.musicgym;
 
+import android.app.AlertDialog;
 import android.os.Bundle;
+import android.text.format.DateFormat;
+import android.view.View;
+import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
+
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.bumptech.glide.Glide;
 
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
+
 public class PostDetailActivity extends AppCompatActivity {
+
+    private CommunityRepository repo;
+    private UserManager userManager;
+    private String postId;
+
+    private TextView tvTitle, tvAuthor, tvDate, tvContent, tvLikes, tvComments;
+    private ImageView ivImage;
+    private View btnLike, btnComment;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_post_detail);
 
-        // 1. 扫描并绑定所有 UI 控件
-        ImageView ivImage = findViewById(R.id.detail_iv_image);
-        TextView tvTitle = findViewById(R.id.detail_tv_title);
-        TextView tvAuthor = findViewById(R.id.detail_tv_author);
-        TextView tvDate = findViewById(R.id.detail_tv_date);
-        TextView tvContent = findViewById(R.id.detail_tv_content);
+        ivImage = findViewById(R.id.detail_iv_image);
+        tvTitle = findViewById(R.id.detail_tv_title);
+        tvAuthor = findViewById(R.id.detail_tv_author);
+        tvDate = findViewById(R.id.detail_tv_date);
+        tvContent = findViewById(R.id.detail_tv_content);
+        tvLikes = findViewById(R.id.detail_tv_likes);
+        tvComments = findViewById(R.id.detail_tv_comments);
+        btnLike = findViewById(R.id.detail_btn_like);
+        btnComment = findViewById(R.id.detail_btn_comment);
         ImageButton btnBack = findViewById(R.id.detail_btn_back);
+        btnBack.setOnClickListener(v -> finish());
 
-        // 2. 接收从 ShareFragment 传过来的数据包裹
+        repo = new CommunityRepository();
+        userManager = UserManager.get(this);
+        userManager.signIn((uid, nick) -> loadPost());
+
+        postId = getIntent().getStringExtra("POST_ID");
+
+        // 降级：如果没有 Firestore postId，显示旧版本地数据
         String title = getIntent().getStringExtra("POST_TITLE");
-        String author = getIntent().getStringExtra("POST_AUTHOR");
-        String date = getIntent().getStringExtra("POST_DATE");
-        String content = getIntent().getStringExtra("POST_CONTENT");
-
-        // ⚡ 核心修改区：改为接收 String 类型的图片 URI ⚡
-        String imageUri = getIntent().getStringExtra("POST_IMAGE_URI");
-
-        // 3. 将数据装填到页面上
-        tvTitle.setText(title != null ? title : "Unknown Title");
-        tvAuthor.setText(author != null ? author : "Unknown Author");
-        tvDate.setText(date != null ? date : "0000-00-00");
-        tvContent.setText(content != null ? content : "No content available.");
-
-        // ⚡ 使用 Glide 引擎加载 String 类型的真实路径图片
-        if (imageUri != null && !imageUri.isEmpty()) {
-            Glide.with(this).load(imageUri).into(ivImage);
+        if (postId == null && title != null) {
+            showLocalData(title);
+            return;
         }
 
-        // 4. 给左上角的返回按钮装上“撤退”逻辑
-        btnBack.setOnClickListener(v -> finish());
+        btnLike.setOnClickListener(v -> toggleLike());
+        btnComment.setOnClickListener(v -> addComment());
+    }
+
+    private void showLocalData(String title) {
+        tvTitle.setText(title);
+        tvAuthor.setText(getIntent().getStringExtra("POST_AUTHOR"));
+        tvDate.setText(getIntent().getStringExtra("POST_DATE"));
+        tvContent.setText(getIntent().getStringExtra("POST_CONTENT"));
+        String uri = getIntent().getStringExtra("POST_IMAGE_URI");
+        if (uri != null && !uri.isEmpty()) Glide.with(this).load(uri).into(ivImage);
+        tvLikes.setVisibility(View.GONE);
+        tvComments.setVisibility(View.GONE);
+        btnLike.setVisibility(View.GONE);
+        btnComment.setVisibility(View.GONE);
+    }
+
+    private void loadPost() {
+        if (postId == null) return;
+        repo.loadPost(postId, post -> {
+            if (post == null) return;
+            tvTitle.setText(post.title);
+            tvAuthor.setText(post.nickname);
+            tvDate.setText(post.timestamp > 0
+                    ? new SimpleDateFormat("yyyy-MM-dd HH:mm", Locale.getDefault()).format(new Date(post.timestamp))
+                    : "");
+            tvContent.setText(post.content);
+            tvLikes.setText("❤ " + post.likeCount);
+            tvComments.setText("💬 " + post.commentCount);
+
+            if (post.imageUri != null && !post.imageUri.isEmpty()) {
+                Glide.with(this).load(post.imageUri).into(ivImage);
+            }
+        });
+    }
+
+    private void toggleLike() {
+        if (postId == null || userManager.getUserId() == null) return;
+        repo.toggleLike(postId, userManager.getUserId(), liked -> {
+            Toast.makeText(this, liked ? "已点赞 ❤" : "已取消点赞", Toast.LENGTH_SHORT).show();
+            loadPost();
+        });
+    }
+
+    private void addComment() {
+        if (postId == null || userManager.getUserId() == null) return;
+        EditText et = new EditText(this);
+        et.setHint("写评论...");
+        new AlertDialog.Builder(this)
+                .setTitle("添加评论")
+                .setView(et)
+                .setPositiveButton("发送", (d, w) -> {
+                    String text = et.getText().toString().trim();
+                    if (!text.isEmpty()) {
+                        repo.addComment(postId, userManager.getUserId(),
+                                userManager.getNickname(), text, ok -> {
+                                    Toast.makeText(this, "评论已发送", Toast.LENGTH_SHORT).show();
+                                    loadPost();
+                                });
+                    }
+                })
+                .setNegativeButton("取消", null)
+                .show();
     }
 }

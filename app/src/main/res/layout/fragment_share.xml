@@ -10,17 +10,28 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:padding="20dp"
-        android:text="COMMUNITY FEED"
+        android:text="🏘 运动社区"
         android:textColor="@color/cyber_cyan"
         android:textSize="24sp"
         android:textStyle="bold"
         android:letterSpacing="0.1" />
 
+    <TextView
+        android:id="@+id/share_status"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/tv_header"
+        android:gravity="center"
+        android:paddingBottom="8dp"
+        android:text="加载中..."
+        android:textColor="@color/text_gray"
+        android:textSize="14sp" />
+
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/rv_blog_posts"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_below="@id/tv_header"
+        android:layout_below="@id/share_status"
         android:clipToPadding="false"
         android:paddingHorizontal="16dp"
         android:paddingBottom="80dp" />

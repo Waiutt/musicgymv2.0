@@ -1,5 +1,6 @@
 plugins {
     alias(libs.plugins.android.application)
+    id 'com.google.gms.google-services'
 }
 
 // 从 local.properties 读取敏感信息（不提交到 Git）
@@ -83,4 +84,9 @@ dependencies {
     testImplementation "junit:junit:4.13.2"
     testImplementation "org.robolectric:robolectric:4.12.2"
     androidTestImplementation "androidx.room:room-testing:2.6.1"
+
+    // 🔥 Firebase 社交后端 🔥
+    implementation platform('com.google.firebase:firebase-bom:33.2.0')
+    implementation 'com.google.firebase:firebase-firestore'
+    implementation 'com.google.firebase:firebase-auth'
 }

@@ -62,6 +62,15 @@
                     android:textColor="@color/text_gray_mid"
                     android:textSize="10sp" />
             </LinearLayout>
+
+            <TextView
+                android:id="@+id/tv_post_stats"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="6dp"
+                android:text="❤ 0  💬 0"
+                android:textColor="@color/cyber_rose"
+                android:textSize="11sp" />
         </LinearLayout>
     </LinearLayout>
 </androidx.cardview.widget.CardView>

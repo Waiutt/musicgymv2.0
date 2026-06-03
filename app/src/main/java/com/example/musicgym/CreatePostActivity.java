@@ -27,8 +27,9 @@ import java.util.concurrent.Executors;
 public class CreatePostActivity extends AppCompatActivity {
 
     private ImageView ivPreview;
-    private String currentImageUri = ""; // ⚡ 用来保存最终要写进数据库的图片路径
-    private AppDatabase db;
+    private String currentImageUri = "";
+    private CommunityRepository repo;
+    private UserManager userManager;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -42,7 +43,9 @@ public class CreatePostActivity extends AppCompatActivity {
         Button btnGallery = findViewById(R.id.create_btn_gallery);
         Button btnPublish = findViewById(R.id.create_btn_publish);
 
-        db = AppDatabase.getInstance(this);
+        repo = new CommunityRepository();
+        userManager = UserManager.get(this);
+        userManager.signIn((uid, nick) -> {});
 
         // ⚡ 触发相机：获取拍下的照片
         btnCamera.setOnClickListener(v -> {
@@ -68,18 +71,21 @@ public class CreatePostActivity extends AppCompatActivity {
                 return;
             }
 
-            String currentDate = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(new Date());
-            BlogPost newPost = new BlogPost(title, currentDate, content, "Me (Admin)", content, currentImageUri);
+            if (userManager.getUserId() == null) {
+                Toast.makeText(this, "正在连接社区...", Toast.LENGTH_SHORT).show();
+                return;
+            }
 
-            // 存入底层数据库
-            ExecutorService executorService = Executors.newSingleThreadExecutor();
-            executorService.execute(() -> {
-                db.blogPostDao().insertPost(newPost);
-                runOnUiThread(() -> {
-                    Toast.makeText(this, "UPLOAD SUCCESSFUL", Toast.LENGTH_SHORT).show();
-                    finish(); // 销毁当前页面，退回 Share 页面
-                });
-            });
+            // 发布到 Firestore 社区
+            repo.publishPost(userManager.getUserId(), userManager.getNickname(),
+                    title, content, currentImageUri, postId -> {
+                        if (postId != null) {
+                            Toast.makeText(this, "发布成功！", Toast.LENGTH_SHORT).show();
+                            finish();
+                        } else {
+                            Toast.makeText(this, "发布失败，请重试", Toast.LENGTH_SHORT).show();
+                        }
+                    });
         });
     }
 
