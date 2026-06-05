@@ -200,6 +200,40 @@ public class StrengthActivity extends AppCompatActivity {
     }
 
     private void loadTemplate() {
+        // 先显示预设模板
+        String[] presets = {"推日 (胸+肩+三头)", "拉日 (背+二头)", "腿日 (股四+腘绳+臀+小腿)",
+                "全身入门 (新手)", "核心日 (腹部+稳定)", "上肢强化 (胸+肩+手臂)"};
+        String[] names = new String[presets.length + 1];
+        System.arraycopy(presets, 0, names, 0, presets.length);
+        names[presets.length] = "📂 我的模板...";
+
+        new AlertDialog.Builder(this).setTitle("选择训练模板")
+                .setItems(names, (d, which) -> {
+                    if (which < presets.length) {
+                        try {
+                            java.io.InputStream is = getAssets().open("presets.json");
+                            String json = new java.util.Scanner(is, "UTF-8").useDelimiter("\\A").next();
+                            is.close();
+                            org.json.JSONArray arr = new org.json.JSONArray(json);
+                            org.json.JSONObject preset = arr.getJSONObject(which);
+                            org.json.JSONArray exercises = preset.getJSONArray("exercises");
+                            selectedExercises.clear();
+                            for (int i = 0; i < exercises.length(); i++) {
+                                String en = exercises.getString(i);
+                                selectedExercises.put(en, new ExerciseInfo(en));
+                            }
+                            updateSelectionUI(); showGroup(currentGroup);
+                            Toast.makeText(this, "已加载: " + preset.getString("name"), Toast.LENGTH_SHORT).show();
+                        } catch (Exception e) {
+                            Toast.makeText(this, "加载失败", Toast.LENGTH_SHORT).show();
+                        }
+                    } else {
+                        loadSavedTemplates();
+                    }
+                }).show();
+    }
+
+    private void loadSavedTemplates() {
         executor.execute(() -> {
             List<WorkoutTemplate> temps = AppDatabase.getInstance(this).workoutTemplateDao().getAll();
             runOnUiThread(() -> {
