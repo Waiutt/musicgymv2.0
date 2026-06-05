@@ -6,6 +6,7 @@
     android:background="@color/bg_dark">
 
     <LinearLayout
+        android:id="@+id/profile_root"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:gravity="center_horizontal"
@@ -29,7 +30,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="16dp"
-            android:text="Sarah Connor"
+            android:text="点击设置昵称"
             android:textColor="@color/white"
             android:textSize="24sp"
             android:textStyle="bold" />

@@ -25,11 +25,18 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
+import com.github.mikephil.charting.charts.LineChart;
+import com.github.mikephil.charting.data.Entry;
+import com.github.mikephil.charting.data.LineData;
+import com.github.mikephil.charting.data.LineDataSet;
+
 import java.io.File;
 import java.io.FileWriter;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.concurrent.ExecutorService;
@@ -40,6 +47,7 @@ public class ProfileFragment extends Fragment {
     private TextView tvUserName, tvWeight, tvHeight;
     private Button btnEditProfile, btnMeasurements, btnExport, btnReminder;
     private LinearLayout historyContainer, measureContainer;
+    private LineChart weightChart;
     private SharedPreferences prefs;
     private AppDatabase db;
     private ExecutorService executor;
@@ -64,6 +72,29 @@ public class ProfileFragment extends Fragment {
         executor.execute(this::migrateWeightHistoryIfNeeded);
         loadUserData();
 
+        // 体重趋势图 — 动态插入到按钮上方
+        ViewGroup rootLayout = (ViewGroup) view.findViewById(R.id.profile_root);
+        View btnFirst = view.findViewById(R.id.btn_edit_profile);
+        int btnIdx = rootLayout.indexOfChild(btnFirst);
+
+        weightChart = new LineChart(requireContext());
+        weightChart.setLayoutParams(new LinearLayout.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT, dp2px(180)));
+        weightChart.setPadding(dp2px(4), dp2px(12), dp2px(4), 0);
+        weightChart.getDescription().setEnabled(false);
+        weightChart.setTouchEnabled(false);
+        weightChart.setBackgroundColor(ColorTokens.BG_CARD);
+        weightChart.getLegend().setTextColor(Color.WHITE);
+        weightChart.getLegend().setTextSize(10f);
+        weightChart.getXAxis().setTextColor(ColorTokens.TEXT_SECONDARY);
+        weightChart.getXAxis().setTextSize(9f);
+        weightChart.getXAxis().setPosition(
+                com.github.mikephil.charting.components.XAxis.XAxisPosition.BOTTOM);
+        weightChart.getAxisLeft().setTextColor(ColorTokens.TEXT_SECONDARY);
+        weightChart.getAxisLeft().setTextSize(9f);
+        weightChart.getAxisRight().setEnabled(false);
+        rootLayout.addView(weightChart, btnIdx);
+
         btnEditProfile.setOnClickListener(v -> showEditDialog());
         btnMeasurements.setOnClickListener(v -> showMeasurementsDialog());
         btnExport.setOnClickListener(v -> exportCSV());
@@ -75,7 +106,7 @@ public class ProfileFragment extends Fragment {
     }
 
     private void loadUserData() {
-        tvUserName.setText(prefs.getString("USER_NAME", "Guest User"));
+        tvUserName.setText(prefs.getString("USER_NAME", "点击设置昵称"));
         tvWeight.setText(prefs.getString("USER_WEIGHT", "70.0"));
         tvHeight.setText(prefs.getString("USER_HEIGHT", "170.0"));
         loadHistoryUI();
@@ -99,21 +130,102 @@ public class ProfileFragment extends Fragment {
         historyContainer.removeAllViews();
         executor.execute(() -> {
             List<WeightRecord> records = db.weightRecordDao().getAllRecords();
+            // 计算连续打卡天数
+            int streak = calcStreak();
+            List<Entry> wtEntries = new ArrayList<>();
+            for (int i = 0; i < Math.min(records.size(), 60); i++) {
+                WeightRecord r = records.get(i);
+                wtEntries.add(new Entry(i, (float) r.getWeightKg()));
+            }
+            java.util.Collections.reverse(wtEntries);
+
             requireActivity().runOnUiThread(() -> {
-                if (records.isEmpty()) {
-                    TextView tv = new TextView(getContext());
-                    tv.setText("暂无体重记录"); tv.setTextColor(ColorTokens.TEXT_SECONDARY);
-                    historyContainer.addView(tv); return;
+                // 连续打卡
+                TextView tvStreak = new TextView(getContext());
+                tvStreak.setText("🔥 连续运动 " + streak + " 天");
+                tvStreak.setTextColor(streak >= 7 ? ColorTokens.BRAND_ORANGE : ColorTokens.TEXT_SECONDARY);
+                tvStreak.setTextSize(15f);
+                tvStreak.setPadding(0, 0, 0, dp2px(8));
+                historyContainer.addView(tvStreak);
+
+                // 体重折线图
+                if (wtEntries.size() >= 2) {
+                    LineDataSet ds = new LineDataSet(wtEntries, "体重(kg)");
+                    ds.setColor(ColorTokens.ACCENT_CYAN);
+                    ds.setCircleColor(ColorTokens.ACCENT_CYAN);
+                    ds.setLineWidth(2.5f);
+                    ds.setCircleRadius(4f);
+                    ds.setMode(LineDataSet.Mode.CUBIC_BEZIER);
+                    ds.setValueTextSize(0f);
+                    ds.setDrawFilled(true);
+                    ds.setFillColor(ColorTokens.ACCENT_CYAN);
+                    ds.setFillAlpha(30);
+
+                    LineData data = new LineData(ds);
+                    weightChart.setData(data);
+                    weightChart.getXAxis().setAxisMinimum(0f);
+                    weightChart.getXAxis().setAxisMaximum(wtEntries.size() - 1f);
+                    weightChart.getAxisLeft().setAxisMinimum(
+                            (float) (getMinWeight(wtEntries) - 2));
+                    weightChart.animateX(500);
+                    weightChart.invalidate();
+                    weightChart.setVisibility(View.VISIBLE);
+                } else {
+                    weightChart.setVisibility(View.GONE);
                 }
-                for (WeightRecord r : records) {
+
+                // 最近记录文字
+                if (records.size() >= 2) {
+                    WeightRecord latest = records.get(0);
+                    WeightRecord prev = records.get(1);
+                    double diff = latest.getWeightKg() - prev.getWeightKg();
+                    String trend = diff < 0 ? "↓ " + String.format("%.1f", Math.abs(diff)) + "kg"
+                            : diff > 0 ? "↑ +" + String.format("%.1f", diff) + "kg" : "→ 持平";
+                    TextView tvTrend = new TextView(getContext());
+                    tvTrend.setText("最近: " + latest.getWeightKg() + "kg  " + trend);
+                    tvTrend.setTextColor(diff < 0 ? ColorTokens.ACCENT_GREEN_SOFT :
+                            diff > 0 ? ColorTokens.ACCENT_AMBER : ColorTokens.TEXT_SECONDARY);
+                    tvTrend.setTextSize(14f);
+                    tvTrend.setPadding(0, dp2px(4), 0, 0);
+                    historyContainer.addView(tvTrend);
+                } else if (!records.isEmpty()) {
                     TextView tv = new TextView(getContext());
-                    tv.setText("• " + r.getDate() + " : " + r.getWeightKg() + " kg");
-                    tv.setTextColor(ColorTokens.ACCENT_GREEN_SOFT); tv.setTextSize(14);
-                    tv.setPadding(0, 10, 0, 10); historyContainer.addView(tv);
+                    tv.setText("最新: " + records.get(0).getWeightKg() + " kg (至少需2条记录才能显示趋势)");
+                    tv.setTextColor(ColorTokens.TEXT_SECONDARY);
+                    tv.setTextSize(13f);
+                    tv.setPadding(0, dp2px(4), 0, 0);
+                    historyContainer.addView(tv);
                 }
             });
         });
     }
+
+    private float getMinWeight(List<Entry> entries) {
+        float min = Float.MAX_VALUE;
+        for (Entry e : entries) if (e.getY() < min) min = e.getY();
+        return min == Float.MAX_VALUE ? 60 : min;
+    }
+
+    private int calcStreak() {
+        try {
+            HashSet<String> activeDays = new HashSet<>();
+            for (WorkoutRecord r : db.workoutRecordDao().getAllRecords())
+                if (r.getDate() != null) activeDays.add(r.getDate());
+            for (StrengthRecord r : db.strengthRecordDao().getAllRecords())
+                if (r.getDate() != null) activeDays.add(r.getDate());
+            java.text.SimpleDateFormat sdf = new java.text.SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
+            Calendar cal = Calendar.getInstance();
+            int streak = 0;
+            while (streak < 365) {
+                String day = sdf.format(cal.getTime());
+                if (activeDays.contains(day)) { streak++; cal.add(Calendar.DAY_OF_YEAR, -1); }
+                else break;
+            }
+            return streak;
+        } catch (Exception e) { return 0; }
+    }
+
+    private int dp2px(int dp) { return (int) (dp * getResources().getDisplayMetrics().density); }
 
     private void loadMeasurementsUI() {
         measureContainer.removeAllViews();
