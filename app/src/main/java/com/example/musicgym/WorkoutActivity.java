@@ -231,6 +231,8 @@ public class WorkoutActivity extends AppCompatActivity implements AMapLocationLi
     private void startTracking() {
         isTracking = true;
         isPaused = false;
+        autoPaused = false;
+        lastMovementTime = 0;
         pauseOverlay.setVisibility(View.GONE);
         btnAction.setBackgroundResource(R.drawable.workout_btn_stop);
         btnAction.setText("⏸");
