@@ -3,6 +3,7 @@ package com.example.musicgym;
 import android.content.Context;
 import android.content.SharedPreferences;
 
+import com.google.firebase.FirebaseApp;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.FirebaseFirestore;
@@ -10,12 +11,13 @@ import com.google.firebase.firestore.FirebaseFirestore;
 import java.util.HashMap;
 import java.util.Map;
 
-/** Firebase 用户管理 — 匿名登录 + 昵称/头像 */
+/** Firebase 用户管理 — 匿名登录 + 昵称/头像。Firebase 不可用时降级为离线模式 */
 public class UserManager {
 
     private static UserManager instance;
-    private final FirebaseAuth auth;
-    private final FirebaseFirestore db;
+    private FirebaseAuth auth;
+    private FirebaseFirestore db;
+    private boolean firebaseAvailable;
     private final SharedPreferences prefs;
 
     private String userId, nickname;
@@ -26,10 +28,17 @@ public class UserManager {
     }
 
     private UserManager(Context ctx) {
-        auth = FirebaseAuth.getInstance();
-        db = FirebaseFirestore.getInstance();
         prefs = ctx.getSharedPreferences("user_prefs", Context.MODE_PRIVATE);
         nickname = prefs.getString("nickname", "健身达人");
+        try {
+            FirebaseApp.initializeApp(ctx.getApplicationContext());
+            auth = FirebaseAuth.getInstance();
+            db = FirebaseFirestore.getInstance();
+            firebaseAvailable = true;
+        } catch (Exception e) {
+            firebaseAvailable = false;
+            userId = "offline_user";
+        }
     }
 
     public static UserManager get(Context ctx) {
@@ -37,42 +46,56 @@ public class UserManager {
         return instance;
     }
 
-    /** 自动匿名登录 */
+    public boolean isFirebaseAvailable() { return firebaseAvailable; }
+
+    /** 自动匿名登录。不可用时直接回退离线模式 */
     public void signIn(OnUserReadyListener listener) {
         this.listener = listener;
-        FirebaseUser user = auth.getCurrentUser();
-        if (user != null) {
-            onSignedIn(user);
-        } else {
-            auth.signInAnonymously().addOnCompleteListener(task -> {
-                if (task.isSuccessful() && task.getResult() != null) {
-                    onSignedIn(task.getResult().getUser());
-                }
-            });
+        if (!firebaseAvailable) {
+            listener.onReady(userId, nickname);
+            return;
+        }
+        try {
+            FirebaseUser user = auth.getCurrentUser();
+            if (user != null) {
+                onSignedIn(user);
+            } else {
+                auth.signInAnonymously().addOnCompleteListener(task -> {
+                    if (task.isSuccessful() && task.getResult() != null) {
+                        onSignedIn(task.getResult().getUser());
+                    } else {
+                        userId = "offline_user";
+                        listener.onReady(userId, nickname);
+                    }
+                });
+            }
+        } catch (Exception e) {
+            userId = "offline_user";
+            listener.onReady(userId, nickname);
         }
     }
 
     private void onSignedIn(FirebaseUser user) {
         userId = user.getUid();
-        // 首次登录初始化 Firestore 用户文档
-        db.collection("users").document(userId).get()
-                .addOnCompleteListener(task -> {
-                    if (!task.isSuccessful() || !task.getResult().exists()) {
-                        Map<String, Object> data = new HashMap<>();
-                        data.put("nickname", nickname);
-                        data.put("createdAt", System.currentTimeMillis());
-                        db.collection("users").document(userId).set(data);
-                    }
-                    if (listener != null) listener.onReady(userId, nickname);
-                });
+        try {
+            db.collection("users").document(userId).get()
+                    .addOnCompleteListener(task -> {
+                        if (!task.isSuccessful() || !task.getResult().exists()) {
+                            Map<String, Object> data = new HashMap<>();
+                            data.put("nickname", nickname);
+                            data.put("createdAt", System.currentTimeMillis());
+                            db.collection("users").document(userId).set(data);
+                        }
+                        if (listener != null) listener.onReady(userId, nickname);
+                    });
+        } catch (Exception e) {
+            if (listener != null) listener.onReady(userId, nickname);
+        }
     }
 
     public void setNickname(String name) {
         this.nickname = name;
         prefs.edit().putString("nickname", name).apply();
-        if (userId != null) {
-            db.collection("users").document(userId).update("nickname", name);
-        }
     }
 
     public String getUserId() { return userId; }
