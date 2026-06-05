@@ -264,23 +264,28 @@
             android:layout_marginTop="52dp"
             android:scrollbars="none">
 
-            <LinearLayout
-                android:id="@+id/music_playlist_container"
+            <FrameLayout
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="vertical" />
+                android:layout_height="wrap_content">
 
-            <TextView
-                android:id="@+id/music_empty_hint"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="60dp"
-                android:gravity="center"
-                android:text="没有找到音乐文件\n请将 MP3 放入 Music 或 Download 文件夹\n然后点击 🔄 重新扫描"
-                android:textColor="@color/text_gray"
-                android:textSize="13sp"
-                android:lineSpacingExtra="4dp"
-                android:visibility="gone" />
+                <LinearLayout
+                    android:id="@+id/music_playlist_container"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical" />
+
+                <TextView
+                    android:id="@+id/music_empty_hint"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="60dp"
+                    android:gravity="center"
+                    android:text="没有找到音乐文件\n请将 MP3 放入 Music 或 Download 文件夹\n然后点击 🔄 重新扫描"
+                    android:textColor="@color/text_gray"
+                    android:textSize="13sp"
+                    android:lineSpacingExtra="4dp"
+                    android:visibility="gone" />
+            </FrameLayout>
         </ScrollView>
     </FrameLayout>
 
