@@ -245,13 +245,50 @@ public class StrengthActivity extends AppCompatActivity {
 
     // ==================== 标签 ====================
     private void buildTabs() {
+        // 异步加载恢复状态
+        executor.execute(() -> {
+            Map<String, Long> recoveryMap = new LinkedHashMap<>();
+            for (MuscleGroup g : GROUPS) recoveryMap.put(g.key, -1L);
+            List<StrengthRecord> all = AppDatabase.getInstance(this).strengthRecordDao().getAllRecords();
+            for (MuscleGroup g : GROUPS) {
+                outer: for (int i = all.size() - 1; i >= 0; i--) {
+                    StrengthRecord r = all.get(i);
+                    if (r.getDate() == null || r.getExercisesJson() == null) continue;
+                    try {
+                        org.json.JSONArray arr = new org.json.JSONArray(r.getExercisesJson());
+                        for (int j = 0; j < arr.length(); j++) {
+                            String en = arr.getJSONObject(j).optString("name");
+                            for (SubGroup sg : g.subGroups)
+                                if (sg.exercises.contains(en)) {
+                                    java.text.SimpleDateFormat sdf = new java.text.SimpleDateFormat("yyyy-MM-dd", java.util.Locale.getDefault());
+                                    long trainedAt = sdf.parse(r.getDate()).getTime();
+                                    recoveryMap.put(g.key, trainedAt);
+                                    break outer;
+                                }
+                        }
+                    } catch (Exception ignored) {}
+                }
+            }
+            Map<String, Long> finalMap = recoveryMap;
+            runOnUiThread(() -> buildTabViews(finalMap));
+        });
+    }
+
+    private void buildTabViews(Map<String, Long> recoveryMap) {
+        tabContainer.removeAllViews();
         for (MuscleGroup g : GROUPS) {
             TextView tab = new TextView(this);
-            tab.setText(g.name); tab.setTextSize(13f); tab.setPadding(24, 8, 24, 8); tab.setGravity(Gravity.CENTER);
+            Long lastTrain = recoveryMap.get(g.key);
+            String indicator = "";
+            if (lastTrain != null && lastTrain > 0) {
+                long hoursAgo = (System.currentTimeMillis() - lastTrain) / 3600000;
+                indicator = hoursAgo < 24 ? " 🔴" : hoursAgo < 48 ? " 🟡" : " 🟢";
+            }
+            tab.setText(g.name + indicator);
+            tab.setTextSize(13f); tab.setPadding(20, 8, 20, 8); tab.setGravity(Gravity.CENTER);
             tab.setLayoutParams(new LinearLayout.LayoutParams(WRAP, UiUtils.dp(this, 34)));
             ((LinearLayout.LayoutParams) tab.getLayoutParams()).setMargins(0, 0, 8, 0);
 
-            // 未选中: 圆角灰底
             GradientDrawable unselBg = new GradientDrawable();
             unselBg.setColor(ColorTokens.BG_INPUT);
             unselBg.setCornerRadius(UiUtils.dp(this, 18));
@@ -396,7 +433,7 @@ public class StrengthActivity extends AppCompatActivity {
         return card;
     }
 
-    /** 查询该动作的上次训练记录摘要 */
+    /** 查询该动作的上次训练记录摘要 + 渐进超负荷建议 */
     private String getLastWorkoutInfo(String exerciseName) {
         try {
             List<StrengthRecord> all = AppDatabase.getInstance(this).strengthRecordDao().getAllRecords();
@@ -410,7 +447,11 @@ public class StrengthActivity extends AppCompatActivity {
                         org.json.JSONArray sets = ex.getJSONArray("sets");
                         if (sets.length() > 0) {
                             org.json.JSONObject last = sets.getJSONObject(sets.length() - 1);
-                            return last.optInt("weight") + "kg×" + last.optInt("reps");
+                            double w = last.optDouble("weight");
+                            int reps = last.optInt("reps");
+                            // 如果完成了8次以上，建议+2.5kg
+                            double suggest = reps >= 8 ? Math.round((w + 2.5) / 2.5) * 2.5 : w;
+                            return suggest > w ? w + "kg → " + suggest + "kg" : w + "kg×" + reps;
                         }
                     }
                 }
@@ -421,31 +462,144 @@ public class StrengthActivity extends AppCompatActivity {
 
     private void showExerciseDetail(String name, String accentColor) {
         ScrollView sv = new ScrollView(this);
-        LinearLayout detail = new LinearLayout(this); detail.setOrientation(LinearLayout.VERTICAL); detail.setPadding(24, 24, 24, 24);
+        LinearLayout detail = new LinearLayout(this); detail.setOrientation(LinearLayout.VERTICAL);
+        detail.setPadding(24, 24, 24, 24);
 
+        // 演示区 (预留 GIF 加载位)
         FrameLayout demo = new FrameLayout(this);
         demo.setLayoutParams(new LinearLayout.LayoutParams(MATCH, dp(200)));
         int ci = Color.parseColor(accentColor);
         GradientDrawable gd = new GradientDrawable(GradientDrawable.Orientation.TL_BR,
                 new int[]{Color.argb(180, Color.red(ci), Color.green(ci), Color.blue(ci)),
                         Color.argb(60, Color.red(ci), Color.green(ci), Color.blue(ci))});
-        gd.setCornerRadius(12); demo.setBackground(gd);
-        TextView dt = new TextView(this); dt.setText(getEmoji(name) + "\n" + name);
-        dt.setTextColor(Color.WHITE); dt.setTextSize(18f); dt.setGravity(Gravity.CENTER);
-        dt.setLayoutParams(new FrameLayout.LayoutParams(MATCH, MATCH)); demo.addView(dt);
+        gd.setCornerRadius(dp(12)); demo.setBackground(gd);
+        LinearLayout demoInner = new LinearLayout(this);
+        demoInner.setOrientation(LinearLayout.VERTICAL); demoInner.setGravity(Gravity.CENTER);
+        demoInner.setLayoutParams(new FrameLayout.LayoutParams(MATCH, MATCH));
+        TextView dt = new TextView(this); dt.setText(getEmoji(name)); dt.setTextSize(36f);
+        dt.setGravity(Gravity.CENTER); demoInner.addView(dt);
+        TextView dtn = new TextView(this); dtn.setText(name); dtn.setTextColor(Color.WHITE);
+        dtn.setTextSize(15f); dtn.setGravity(Gravity.CENTER); dtn.setPadding(0, 8, 0, 0);
+        demoInner.addView(dtn);
+        // GIF 加载位 (assets/exercises/xxx.gif)
+        // Glide.with(this).asGif().load("file:///android_asset/exercises/" + name + ".gif").into(ivGif);
+        demo.addView(demoInner);
         detail.addView(demo);
 
+        // 动作名 + 肌群
         TextView tt = new TextView(this); tt.setText(name); tt.setTextColor(Color.WHITE); tt.setTextSize(22f);
-        tt.setTypeface(null, Typeface.BOLD); tt.setPadding(0, 20, 0, 8); detail.addView(tt);
+        tt.setTypeface(null, Typeface.BOLD); tt.setPadding(0, 20, 0, 4); detail.addView(tt);
 
         String targets = findTargets(name);
-        TextView targ = new TextView(this); targ.setText("目标肌群: " + targets);
-        targ.setTextColor(ColorTokens.TEXT_MUTED); targ.setTextSize(14f); targ.setPadding(0, 0, 0, 16); detail.addView(targ);
+        TextView targ = new TextView(this); targ.setText(targets);
+        targ.setTextColor(Color.parseColor(accentColor)); targ.setTextSize(13f);
+        targ.setPadding(0, 0, 0, 16); detail.addView(targ);
 
+        // ── 重量趋势图 ──
+        LinearLayout chartSection = new LinearLayout(this);
+        chartSection.setOrientation(LinearLayout.VERTICAL);
+        chartSection.setPadding(0, 0, 0, 12);
+        TextView chartTitle = new TextView(this);
+        chartTitle.setText("📊 训练趋势 (近30天)");
+        chartTitle.setTextColor(Color.WHITE); chartTitle.setTextSize(14f);
+        chartTitle.setTypeface(null, Typeface.BOLD);
+        chartTitle.setPadding(0, 0, 0, 8);
+        chartSection.addView(chartTitle);
+
+        com.github.mikephil.charting.charts.LineChart lc = new com.github.mikephil.charting.charts.LineChart(this);
+        lc.setLayoutParams(new LinearLayout.LayoutParams(MATCH, dp(180)));
+        lc.getDescription().setEnabled(false);
+        lc.setTouchEnabled(false);
+        lc.setBackgroundColor(ColorTokens.BG_CARD);
+        lc.getLegend().setTextColor(Color.WHITE);
+        lc.getLegend().setTextSize(10f);
+        lc.getXAxis().setTextColor(ColorTokens.TEXT_SECONDARY);
+        lc.getXAxis().setTextSize(9f);
+        lc.getXAxis().setPosition(com.github.mikephil.charting.components.XAxis.XAxisPosition.BOTTOM);
+        lc.getAxisLeft().setTextColor(ColorTokens.TEXT_SECONDARY);
+        lc.getAxisLeft().setTextSize(9f);
+        lc.getAxisRight().setEnabled(false);
+        chartSection.addView(lc);
+        detail.addView(chartSection);
+
+        // ── 标准描述 ──
         TextView desc = new TextView(this);
-        desc.setText("标准动作执行时，注意核心收紧、动作幅度完整。建议每组 8-12 次，组间休息 60-90 秒。初学者请用轻重量体会发力感，熟悉后再逐渐加重。");
-        desc.setTextColor(ColorTokens.TEXT_PALE); desc.setTextSize(14f); desc.setLineSpacing(4, 1.2f); detail.addView(desc);
+        desc.setText("核心收紧，动作幅度完整。建议每组 8-12 次，组间休息 60-90 秒。初学者用轻重量体会发力感，熟悉后逐渐加重。");
+        desc.setTextColor(ColorTokens.TEXT_PALE); desc.setTextSize(14f);
+        desc.setLineSpacing(4, 1.2f);
+        detail.addView(desc);
+
         sv.addView(detail);
+
+        // ── 异步加载图表数据 ──
+        executor.execute(() -> {
+            List<StrengthRecord> records = AppDatabase.getInstance(this)
+                    .strengthRecordDao().getRecordsForExercise(name);
+            List<com.github.mikephil.charting.data.Entry> weightEntries = new ArrayList<>();
+            List<com.github.mikephil.charting.data.Entry> repsEntries = new ArrayList<>();
+            java.text.SimpleDateFormat sdf = new java.text.SimpleDateFormat("MM/dd", java.util.Locale.getDefault());
+
+            int idx = 0;
+            for (StrengthRecord r : records) {
+                try {
+                    org.json.JSONArray arr = new org.json.JSONArray(r.getExercisesJson());
+                    for (int j = 0; j < arr.length(); j++) {
+                        org.json.JSONObject ex = arr.getJSONObject(j);
+                        if (name.equals(ex.optString("name"))) {
+                            org.json.JSONArray sets = ex.getJSONArray("sets");
+                            double maxW = 0; int maxR = 0;
+                            for (int k = 0; k < sets.length(); k++) {
+                                org.json.JSONObject s = sets.getJSONObject(k);
+                                double w = s.optDouble("weight");
+                                int reps = s.optInt("reps");
+                                if (w > maxW) maxW = w;
+                                if (reps > maxR) maxR = reps;
+                            }
+                            if (maxW > 0) {
+                                weightEntries.add(new com.github.mikephil.charting.data.Entry(idx, (float) maxW));
+                                repsEntries.add(new com.github.mikephil.charting.data.Entry(idx, (float) maxR));
+                                idx++;
+                            }
+                        }
+                    }
+                } catch (Exception ignored) {}
+            }
+
+            runOnUiThread(() -> {
+                if (weightEntries.isEmpty()) {
+                    chartTitle.setText("📊 暂无训练数据");
+                    return;
+                }
+                chartTitle.setText("📊 训练趋势 (" + weightEntries.size() + "次)");
+
+                com.github.mikephil.charting.data.LineDataSet weightSet =
+                        new com.github.mikephil.charting.data.LineDataSet(weightEntries, "最大重量(kg)");
+                weightSet.setColor(Color.parseColor(accentColor));
+                weightSet.setCircleColor(Color.parseColor(accentColor));
+                weightSet.setLineWidth(2.5f);
+                weightSet.setCircleRadius(4f);
+                weightSet.setMode(com.github.mikephil.charting.data.LineDataSet.Mode.CUBIC_BEZIER);
+                weightSet.setValueTextSize(0f);
+
+                com.github.mikephil.charting.data.LineDataSet repsSet =
+                        new com.github.mikephil.charting.data.LineDataSet(repsEntries, "最大次数");
+                repsSet.setColor(Color.parseColor("#94a3b8"));
+                repsSet.setCircleColor(Color.parseColor("#94a3b8"));
+                repsSet.setLineWidth(2f);
+                repsSet.setCircleRadius(3f);
+                repsSet.setMode(com.github.mikephil.charting.data.LineDataSet.Mode.CUBIC_BEZIER);
+                repsSet.setValueTextSize(0f);
+                repsSet.enableDashedLine(8f, 4f, 0f);
+
+                com.github.mikephil.charting.data.LineData lineData =
+                        new com.github.mikephil.charting.data.LineData(weightSet, repsSet);
+                lc.setData(lineData);
+                lc.getXAxis().setAxisMinimum(0f);
+                lc.getXAxis().setAxisMaximum(Math.max(weightEntries.size() - 1, 0) + 1f);
+                lc.animateX(500);
+                lc.invalidate();
+            });
+        });
 
         boolean sel = selectedExercises.containsKey(name);
         new AlertDialog.Builder(this).setView(sv)

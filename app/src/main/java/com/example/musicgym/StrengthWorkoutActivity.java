@@ -312,7 +312,7 @@ public class StrengthWorkoutActivity extends AppCompatActivity {
             lblLp.setMargins(0, UiUtils.dp(this, 14), 0, UiUtils.dp(this, 4));
             labels.setLayoutParams(lblLp);
 
-            for (String h : new String[]{"组", "重量(kg)", "次数", "%1RM", ""}) {
+            for (String h : new String[]{"组", "重量(kg)", "次数", "RPE", ""}) {
                 TextView th = new TextView(this); th.setText(h);
                 th.setTextColor(ColorTokens.TEXT_HINT); th.setTextSize(10f);
                 LinearLayout.LayoutParams hlp;
@@ -335,7 +335,18 @@ public class StrengthWorkoutActivity extends AppCompatActivity {
                 row.setGravity(Gravity.CENTER_VERTICAL);
                 row.setPadding(0, UiUtils.dp(this, 4), 0, UiUtils.dp(this, 4));
 
-                addView(row, String.valueOf(i + 1), Color.WHITE, 13f, UiUtils.dp(this, 26), Gravity.CENTER);
+                // 热身标记 🔥
+                TextView tvWu = new TextView(this);
+                tvWu.setText(se.warmup ? "🔥" : String.valueOf(i + 1));
+                tvWu.setTextColor(se.warmup ? ColorTokens.ACCENT_AMBER : Color.WHITE);
+                tvWu.setTextSize(se.warmup ? 11f : 13f);
+                tvWu.setGravity(Gravity.CENTER);
+                tvWu.setLayoutParams(new LinearLayout.LayoutParams(UiUtils.dp(this, 26), WRAP));
+                tvWu.setOnClickListener(v -> {
+                    sets.get(si).warmup = !sets.get(si).warmup;
+                    buildUI();
+                });
+                row.addView(tvWu);
 
                 EditText etW = buildEdit(row, String.valueOf(se.weight), true);
                 etW.setOnFocusChangeListener((v, f) -> { if (!f) try {
@@ -349,10 +360,14 @@ public class StrengthWorkoutActivity extends AppCompatActivity {
                     updateCardDisplay(exI);
                 } catch (Exception ignored) {} });
 
+                // %1RM + RPE
                 double oneRM = pr != null ? pr[0] : 0;
                 String pct = oneRM > 0 ? String.format(Locale.getDefault(), "%.0f%%", se.weight / oneRM * 100) : "-";
-                addView(row, pct, ColorTokens.TEXT_MUTED, 11f, WRAP);
+                String rpeLabel = se.rpe > 0 ? "R" + se.rpe : "-";
+                addView(row, rpeLabel, se.rpe >= 9 ? ColorTokens.ACCENT_RED :
+                        se.rpe >= 7 ? ColorTokens.ACCENT_AMBER : ColorTokens.TEXT_MUTED, 11f, WRAP);
 
+                // 删除
                 TextView btnDel = addView(row, "−", ColorTokens.ACCENT_RED, 18f, UiUtils.dp(this, 34), Gravity.CENTER);
                 btnDel.setOnClickListener(v -> {
                     if (sets.size() > 1) { sets.remove(si); buildUI(); }
@@ -438,11 +453,13 @@ public class StrengthWorkoutActivity extends AppCompatActivity {
             int rowIdx = 2 + i;
             if (rowIdx >= card.getChildCount()) break;
             View row = card.getChildAt(rowIdx);
-            if (row instanceof LinearLayout && ((LinearLayout) row).getChildCount() >= 4) {
-                TextView tvPct = (TextView) ((LinearLayout) row).getChildAt(3);
+            if (row instanceof LinearLayout && ((LinearLayout) row).getChildCount() >= 5) {
+                TextView tvRpe = (TextView) ((LinearLayout) row).getChildAt(4);
                 SetEntry se = sets.get(i);
-                String pct = oneRM > 0 ? String.format(Locale.getDefault(), "%.0f%%", se.weight / oneRM * 100) : "-";
-                tvPct.setText(pct);
+                String rpeLabel = se.rpe > 0 ? "R" + se.rpe : "-";
+                tvRpe.setText(rpeLabel);
+                tvRpe.setTextColor(se.rpe >= 9 ? ColorTokens.ACCENT_RED :
+                        se.rpe >= 7 ? ColorTokens.ACCENT_AMBER : ColorTokens.TEXT_MUTED);
             }
         }
     }
@@ -516,7 +533,11 @@ public class StrengthWorkoutActivity extends AppCompatActivity {
                 JSONArray sets = new JSONArray();
                 for (SetEntry s : e.getValue()) {
                     JSONObject so = new JSONObject();
-                    so.put("weight", s.weight); so.put("reps", s.reps); sets.put(so);
+                    so.put("weight", s.weight); so.put("reps", s.reps);
+                    if (s.warmup) so.put("warmup", true);
+                    if (!s.note.isEmpty()) so.put("note", s.note);
+                    if (s.rpe > 0) so.put("rpe", s.rpe);
+                    sets.put(so);
                 }
                 ex.put("sets", sets); arr.put(ex);
             }
@@ -535,7 +556,10 @@ public class StrengthWorkoutActivity extends AppCompatActivity {
         }
     }
 
-    static class SetEntry { double weight; int reps; SetEntry(double w, int r) { weight = w; reps = r; } }
+    static class SetEntry { double weight; int reps; boolean warmup; String note; int rpe;
+        SetEntry(double w, int r) { weight = w; reps = r; warmup = false; note = ""; rpe = 0; }
+        SetEntry(double w, int r, boolean wu, String n, int rp) { weight = w; reps = r; warmup = wu; note = n; rpe = rp; }
+    }
 
     @Override protected void onDestroy() {
         super.onDestroy(); timerRunning = false; restRunning = false;
