@@ -415,6 +415,22 @@ public class StrengthWorkoutActivity extends AppCompatActivity {
             btnAdd.setOnClickListener(v -> { sets.add(new SetEntry(0, 10)); buildUI(); });
             actions.addView(btnAdd);
 
+            // 训练笔记
+            TextView btnNote = new TextView(this);
+            btnNote.setText("📝 笔记"); btnNote.setTextColor(ColorTokens.TEXT_MUTED); btnNote.setTextSize(13f);
+            btnNote.setPadding(0, 0, 24, 0);
+            final String exNameN = exName;
+            btnNote.setOnClickListener(v -> {
+                EditText et = new EditText(this);
+                et.setHint("输入训练笔记...");
+                new AlertDialog.Builder(this).setTitle(exNameN + " - 笔记")
+                        .setView(et).setPositiveButton("保存", (d, w) -> {
+                            for (SetEntry se : sets) se.note = et.getText().toString().trim();
+                            Toast.makeText(this, "笔记已保存", Toast.LENGTH_SHORT).show();
+                        }).setNegativeButton("取消", null).show();
+            });
+            actions.addView(btnNote);
+
             TextView btnRest = new TextView(this);
             btnRest.setText("⏱ 组间休息"); btnRest.setTextColor(ColorTokens.ACCENT_AMBER); btnRest.setTextSize(13f);
             btnRest.setOnClickListener(v -> startRestTimer());

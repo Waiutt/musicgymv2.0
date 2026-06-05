@@ -50,6 +50,7 @@
         <activity android:name=".PostDetailActivity" />
         <activity android:name=".SettingsActivity" />
         <activity android:name=".PrivacyPolicyActivity" />
+        <activity android:name=".OnboardingActivity" />
 
         <service
             android:name=".MusicService"

@@ -8,7 +8,12 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.speech.tts.TextToSpeech;
+import android.view.Gravity;
 import android.view.View;
+import android.view.ViewGroup;
+import android.widget.FrameLayout;
+import android.widget.LinearLayout;
+import android.widget.TextView;
 import android.widget.FrameLayout;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -67,6 +72,7 @@ public class WorkoutActivity extends AppCompatActivity implements AMapLocationLi
     private boolean autoPaused;
     private TextToSpeech tts;
     private double lastAnnouncedKm;
+    private View musicControlBar;
     private static final int AUTO_PAUSE_SECONDS = 8;
 
     private Handler timerHandler = new Handler(Looper.getMainLooper());
@@ -87,6 +93,9 @@ public class WorkoutActivity extends AppCompatActivity implements AMapLocationLi
         } catch (Exception e) { e.printStackTrace(); }
 
         setContentView(R.layout.activity_workout);
+
+        // 迷你音乐控制条
+        buildMiniMusicControl();
 
         sportType = getIntent().getStringExtra("sport_type");
         if (sportType == null) sportType = "跑步";
@@ -245,6 +254,7 @@ public class WorkoutActivity extends AppCompatActivity implements AMapLocationLi
 
         pathPoints.clear();
         totalDistanceMeters = 0f;
+        if (musicControlBar != null) musicControlBar.setVisibility(View.VISIBLE);
         totalSeconds = 0;
         lastLatLng = null;
         updateDashboardUI();
@@ -308,6 +318,7 @@ public class WorkoutActivity extends AppCompatActivity implements AMapLocationLi
     private void stopTracking() {
         isTracking = false;
         isPaused = false;
+        if (musicControlBar != null) musicControlBar.setVisibility(View.GONE);
         pauseOverlay.setVisibility(View.GONE);
         btnAction.setBackgroundResource(R.drawable.workout_btn_start);
         btnAction.setText("GO");
@@ -448,6 +459,41 @@ public class WorkoutActivity extends AppCompatActivity implements AMapLocationLi
     @Override public void onInit(int status) {
         if (status == TextToSpeech.SUCCESS && tts != null)
             tts.setLanguage(java.util.Locale.CHINESE);
+    }
+
+    private void buildMiniMusicControl() {
+        ViewGroup root = findViewById(android.R.id.content);
+        musicControlBar = new LinearLayout(this);
+        ((LinearLayout) musicControlBar).setOrientation(LinearLayout.HORIZONTAL);
+        ((LinearLayout) musicControlBar).setGravity(Gravity.CENTER);
+        musicControlBar.setBackgroundColor(Color.argb(180, 15, 23, 42));
+        musicControlBar.setPadding(16, 8, 16, 8);
+        musicControlBar.setVisibility(View.GONE);
+
+        FrameLayout.LayoutParams flp = new FrameLayout.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT, 56);
+        flp.gravity = Gravity.TOP;
+        flp.topMargin = 56; // below top bar
+
+        String[] labels = {"⏮", "▶", "⏭"};
+        for (String label : labels) {
+            TextView btn = new TextView(this);
+            btn.setText(label); btn.setTextColor(Color.WHITE); btn.setTextSize(20f);
+            btn.setGravity(Gravity.CENTER); btn.setPadding(24, 8, 24, 8);
+            btn.setOnClickListener(v -> {
+                if (label.equals("⏮")) sendMusicCommand("PREV");
+                else if (label.equals("▶")) sendMusicCommand("PLAY_PAUSE");
+                else sendMusicCommand("NEXT");
+            });
+            ((LinearLayout) musicControlBar).addView(btn);
+        }
+        root.addView(musicControlBar, flp);
+    }
+
+    private void sendMusicCommand(String action) {
+        Intent intent = new Intent(this, MusicService.class);
+        intent.setAction("com.example.musicgym." + action);
+        startService(intent);
     }
 
     @Override
