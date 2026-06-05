@@ -33,7 +33,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.animation.LinearInterpolator;
 import android.widget.EditText;
-import android.widget.FrameLayout;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -72,7 +71,7 @@ public class MusicFragment extends Fragment {
     private SeekBar seekBar;
     private ImageButton btnPlay, btnPrev, btnNext;
     private LinearLayout playlistContainer;
-    private FrameLayout panel;
+    private ViewGroup panel;
     private View dragHandle;
     private ScrollView playlistScroll;
     private EditText etSearch;
