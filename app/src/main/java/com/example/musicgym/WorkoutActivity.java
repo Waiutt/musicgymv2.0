@@ -7,6 +7,7 @@ import android.graphics.Color;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
+import android.speech.tts.TextToSpeech;
 import android.view.View;
 import android.widget.FrameLayout;
 import android.widget.TextView;
@@ -38,7 +39,7 @@ import java.util.Locale;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-public class WorkoutActivity extends AppCompatActivity implements AMapLocationListener {
+public class WorkoutActivity extends AppCompatActivity implements AMapLocationListener, TextToSpeech.OnInitListener {
 
     private MapView mapView;
     private AMap aMap;
@@ -64,6 +65,8 @@ public class WorkoutActivity extends AppCompatActivity implements AMapLocationLi
     private LatLng lastLatLng;
     private long lastMovementTime;
     private boolean autoPaused;
+    private TextToSpeech tts;
+    private double lastAnnouncedKm;
     private static final int AUTO_PAUSE_SECONDS = 8;
 
     private Handler timerHandler = new Handler(Looper.getMainLooper());
@@ -233,6 +236,8 @@ public class WorkoutActivity extends AppCompatActivity implements AMapLocationLi
         isPaused = false;
         autoPaused = false;
         lastMovementTime = 0;
+        lastAnnouncedKm = 0;
+        if (tts == null) tts = new TextToSpeech(this, this);
         pauseOverlay.setVisibility(View.GONE);
         btnAction.setBackgroundResource(R.drawable.workout_btn_stop);
         btnAction.setText("⏸");
@@ -332,14 +337,28 @@ public class WorkoutActivity extends AppCompatActivity implements AMapLocationLi
                     AppDatabase.getInstance(this).workoutRecordDao().insertRecord(record));
         }
 
-        Intent intent = new Intent(this, WorkoutSummaryActivity.class);
-        intent.putExtra("sport_type", sportType);
-        intent.putExtra("distance_km", distKm);
-        intent.putExtra("duration_sec", totalSeconds);
-        intent.putExtra("calories", cal);
-        intent.putExtra("date", date);
-        startActivity(intent);
-        finish();
+        new android.app.AlertDialog.Builder(this)
+                .setTitle(sportType + " 完成！")
+                .setMessage(String.format(Locale.getDefault(),
+                        "距离: %.2f km\n时长: %d:%02d\n卡路里: %d kcal",
+                        distKm, totalSeconds / 60, totalSeconds % 60, cal))
+                .setPositiveButton("再来一组", (d, w) -> {
+                    totalDistanceMeters = 0; totalSeconds = 0;
+                    pathPoints.clear(); lastLatLng = null;
+                    updateDashboardUI(); checkPermissionAndStart();
+                })
+                .setNegativeButton("查看总结", (d, w) -> {
+                    Intent intent = new Intent(this, WorkoutSummaryActivity.class);
+                    intent.putExtra("sport_type", sportType);
+                    intent.putExtra("distance_km", distKm);
+                    intent.putExtra("duration_sec", totalSeconds);
+                    intent.putExtra("calories", cal);
+                    intent.putExtra("date", date);
+                    startActivity(intent);
+                    finish();
+                })
+                .setCancelable(false)
+                .show();
     }
 
     private String serializePathPoints() {
@@ -389,6 +408,14 @@ public class WorkoutActivity extends AppCompatActivity implements AMapLocationLi
 
         int cal = (int) (km * 70.0 * calorieMultiplier);
         tvCalories.setText(String.valueOf(cal));
+
+        // 每公里语音播报
+        if (tts != null && km >= lastAnnouncedKm + 1.0 && km > 0.1) {
+            lastAnnouncedKm = Math.floor(km);
+            int paceSec = totalSeconds > 0 ? (int) (totalSeconds / km) : 0;
+            String msg = "已跑 " + (int) km + " 公里, 配速 " + (paceSec / 60) + " 分 " + (paceSec % 60) + " 秒";
+            tts.speak(msg, TextToSpeech.QUEUE_FLUSH, null, "workout_announce");
+        }
     }
 
     // ========== 生命周期 ==========
@@ -415,6 +442,12 @@ public class WorkoutActivity extends AppCompatActivity implements AMapLocationLi
         timerHandler.removeCallbacks(timerRunnable);
         if (locationClient != null) locationClient.onDestroy();
         executorService.shutdown();
+        if (tts != null) { tts.stop(); tts.shutdown(); }
+    }
+
+    @Override public void onInit(int status) {
+        if (status == TextToSpeech.SUCCESS && tts != null)
+            tts.setLanguage(java.util.Locale.CHINESE);
     }
 
     @Override

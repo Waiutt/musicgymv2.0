@@ -49,6 +49,9 @@ public class StatsViewModel extends AndroidViewModel {
     // 历史列表
     private final MutableLiveData<Boolean> isStrengthMode = new MutableLiveData<>(false);
 
+    // ── 个人纪录
+    private final MutableLiveData<String> prText = new MutableLiveData<>();
+
     public StatsViewModel(@NonNull Application app) {
         super(app);
         repo = new StatsRepository(app);
@@ -64,6 +67,7 @@ public class StatsViewModel extends AndroidViewModel {
     public LiveData<ChartBundle> getChartBundle() { return chartBundle; }
     public LiveData<StatsRepository.SummaryStats> getSummaryStats() { return summaryStats; }
     public LiveData<Boolean> getIsStrengthMode() { return isStrengthMode; }
+    public LiveData<String> getPrText() { return prText; }
     public LiveData<String> getCurrentFilter() { return currentFilter; }
 
     public String getFilter() { return currentFilter.getValue(); }
@@ -111,6 +115,7 @@ public class StatsViewModel extends AndroidViewModel {
 
         // 模式
         isStrengthMode.postValue("Strength".equals(filter));
+        prText.postValue(calcPRs());
     }
 
     // ── 日历数据 ──
@@ -205,5 +210,53 @@ public class StatsViewModel extends AndroidViewModel {
     protected void onCleared() {
         super.onCleared();
         executor.shutdown();
+    }
+
+
+    private String calcPRs() {
+        StringBuilder sb = new StringBuilder();
+        // 有氧 PRs
+        double maxDist = 0; int maxCal = 0; double bestPace = 999;
+        for (WorkoutRecord r : cardioRecords) {
+            if (r.getDistanceKm() > maxDist) maxDist = r.getDistanceKm();
+            if (r.getCalories() > maxCal) maxCal = r.getCalories();
+            if (r.getDurationSeconds() > 0) {
+                double pace = (double) r.getDurationSeconds() / r.getDistanceKm();
+                if (r.getDistanceKm() > 0.5 && pace < bestPace) bestPace = pace;
+            }
+        }
+        if (maxDist > 0) {
+            int pMin = (int) bestPace / 60, pSec = (int) bestPace % 60;
+            sb.append("🏃 最远: ").append(String.format(Locale.getDefault(), "%.1fkm", maxDist))
+              .append("  |  🔥 最多: ").append(maxCal).append("kcal")
+              .append("  |  ⚡ 最快: ").append(pMin).append("'").append(String.format("%02d", pSec)).append("\"\n");
+        }
+        // 力量 PRs
+        double maxWeight = 0; String maxWtEx = ""; double maxVol = 0; String maxVolEx = "";
+        try {
+            for (StrengthRecord r : strengthRecords) {
+                org.json.JSONArray arr = new org.json.JSONArray(r.getExercisesJson());
+                double totalVol = 0;
+                for (int i = 0; i < arr.length(); i++) {
+                    org.json.JSONObject ex = arr.getJSONObject(i);
+                    org.json.JSONArray sets = ex.getJSONArray("sets");
+                    for (int j = 0; j < sets.length(); j++) {
+                        org.json.JSONObject s = sets.getJSONObject(j);
+                        double w = s.optDouble("weight");
+                        if (w > maxWeight) { maxWeight = w; maxWtEx = ex.optString("name"); }
+                    }
+                    for (int j = 0; j < sets.length(); j++) {
+                        org.json.JSONObject s = sets.getJSONObject(j);
+                        totalVol += s.optDouble("weight") * s.optInt("reps");
+                    }
+                }
+                if (totalVol > maxVol) { maxVol = totalVol; maxVolEx = arr.getJSONObject(0).optString("name"); }
+            }
+        } catch (Exception ignored) {}
+        if (maxWeight > 0) {
+            sb.append("🏋️ 最大重量: ").append(maxWtEx).append(" ").append((int)maxWeight).append("kg")
+              .append("  |  📊 最大容量: ").append(maxVolEx).append(" ").append((int)maxVol).append("kg");
+        }
+        return sb.length() > 0 ? sb.toString() : "暂无纪录，快去运动吧！💪";
     }
 }

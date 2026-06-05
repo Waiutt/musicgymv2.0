@@ -46,7 +46,7 @@ public class StatsFragment extends Fragment {
     private LineChart lineChart;
     private TextView tvCardDistance, tvCardDuration, tvCardWorkouts, tvCardCalories;
     private RecyclerView recyclerView;
-    private LinearLayout calendarContainer;
+    private LinearLayout calendarContainer, prContainer;
 
     private static final int COLOR_LAST_MONTH = ColorTokens.TEXT_SECONDARY;
 
@@ -69,6 +69,7 @@ public class StatsFragment extends Fragment {
         tvCardCalories = view.findViewById(R.id.stats_card_calories);
         recyclerView = view.findViewById(R.id.stats_recycler_view);
         calendarContainer = view.findViewById(R.id.stats_calendar_container);
+        prContainer = view.findViewById(R.id.stats_pr_container);
 
         recyclerView.setLayoutManager(new LinearLayoutManager(requireContext()));
         recyclerView.setAdapter(new WorkoutHistoryAdapter(new ArrayList<>()));
@@ -113,6 +114,16 @@ public class StatsFragment extends Fragment {
         vm.getCurrentFilter().observe(getViewLifecycleOwner(), f -> {
             updateHistoryList();
             updateFilterUI();
+        });
+
+        // 个人纪录
+        vm.getPrText().observe(getViewLifecycleOwner(), t -> {
+            prContainer.removeAllViews();
+            TextView tvPR = new TextView(requireContext());
+            tvPR.setText(t); tvPR.setTextColor(ColorTokens.PR_YELLOW);
+            tvPR.setTextSize(13f); tvPR.setLineSpacing(4, 1.1f);
+            tvPR.setPadding(16, 10, 16, 6);
+            prContainer.addView(tvPR);
         });
     }
 

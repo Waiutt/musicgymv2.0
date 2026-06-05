@@ -1,34 +1,18 @@
 {
   "permissions": {
     "allow": [
-      "Bash(git *)",
-      "Bash(./gradlew *)",
-      "Bash(sed *)",
-      "Bash(grep *)",
-      "Bash(find *)",
-      "Bash(mkdir *)",
-      "Bash(rm *)",
-      "Bash(ls *)",
-      "Bash(cat *)",
-      "Bash(cd *)",
-      "Bash(echo *)",
-      "Bash(wc *)",
-      "Bash(head *)",
-      "Bash(tail *)",
-      "Bash(node *)",
-      "Bash(npm *)",
-      "Bash(cmd *)",
-      "Bash(chmod *)",
-      "Bash(for *)",
-      "Bash(which *)",
-      "WebSearch(*)",
-      "WebFetch(*)",
+      "Bash(*)",
       "Edit(*)",
       "Write(*)",
       "Read(*)",
       "Glob(*)",
       "Grep(*)",
-      "TodoWrite(*)"
+      "WebSearch(*)",
+      "WebFetch(*)",
+      "TodoWrite(*)",
+      "Agent(*)",
+      "Skill(*)",
+      "mcp__ccd_session__mark_chapter(*)"
     ]
   }
 }
