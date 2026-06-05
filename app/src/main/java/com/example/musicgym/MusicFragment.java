@@ -7,6 +7,7 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.graphics.Bitmap;
@@ -67,7 +68,7 @@ public class MusicFragment extends Fragment {
     private MediaPlayer mediaPlayer;
     private ImageView ivAlbum;
     private TextView tvTitle, tvArtist, tvCurrentTime, tvTotalTime, tvTrackCount;
-    private TextView btnShuffle, btnRescan, btnModeLabel;
+    private TextView btnShuffle, btnRescan, btnModeLabel, btnFavorite;
     private SeekBar seekBar;
     private ImageButton btnPlay, btnPrev, btnNext;
     private LinearLayout playlistContainer;
@@ -76,6 +77,14 @@ public class MusicFragment extends Fragment {
     private ScrollView playlistScroll;
     private EditText etSearch;
     private TextView tvEmptyHint;
+    private TextView btnEq;
+
+    // 均衡器
+    private EqualizerManager eqManager;
+
+    // 收藏
+    private SharedPreferences favPrefs;
+    private java.util.Set<String> favSet;
 
     private final List<Track> playlist = new ArrayList<>();
     private int currentTrackIndex = -1;
@@ -141,6 +150,12 @@ public class MusicFragment extends Fragment {
         btnShuffle = view.findViewById(R.id.music_btn_shuffle);
         btnRescan = view.findViewById(R.id.music_btn_rescan);
         btnModeLabel = view.findViewById(R.id.music_mode_label);
+        btnEq = view.findViewById(R.id.music_btn_eq);
+        btnFavorite = view.findViewById(R.id.music_btn_favorite);
+        btnFavorite.setOnClickListener(v -> toggleFavorite());
+
+        favPrefs = requireContext().getSharedPreferences("music_fav", Context.MODE_PRIVATE);
+        favSet = new java.util.LinkedHashSet<>(favPrefs.getStringSet("favs", new java.util.HashSet<>()));
         tvTrackCount = view.findViewById(R.id.music_track_count);
         playlistContainer = view.findViewById(R.id.music_playlist_container);
         panel = view.findViewById(R.id.music_panel);
@@ -230,6 +245,7 @@ public class MusicFragment extends Fragment {
         btnNext.setOnClickListener(v -> playNext());
         btnShuffle.setOnClickListener(v -> cyclePlayMode());
         btnRescan.setOnClickListener(v -> { tvTitle.setText("正在扫描..."); tvArtist.setText("搜索所有音乐"); autoScan(); });
+        btnEq.setOnClickListener(v -> showEqualizerDialog());
         seekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override public void onProgressChanged(SeekBar s, int p, boolean fromUser) {
                 if (fromUser && mediaPlayer != null) mediaPlayer.seekTo(p);
@@ -422,9 +438,11 @@ public class MusicFragment extends Fragment {
             row.setBackgroundColor(isCurrent ? ColorTokens.CURRENT_TRACK_BG : Color.TRANSPARENT);
 
             TextView tvIdx = new TextView(getContext());
-            tvIdx.setText(isCurrent && mediaPlayer != null && mediaPlayer.isPlaying() ? "▶" : String.valueOf(idx + 1));
-            tvIdx.setTextColor(isCurrent ? ColorTokens.BRAND_ORANGE : ColorTokens.TEXT_HINT);
-            tvIdx.setTextSize(11f); tvIdx.setGravity(Gravity.CENTER);
+            tvIdx.setText(isFavorite(t) ? "❤" : (isCurrent && mediaPlayer != null && mediaPlayer.isPlaying() ? "▶" : String.valueOf(idx + 1)));
+            tvIdx.setTextColor(isFavorite(t) ? ColorTokens.ACCENT_RED :
+                    (isCurrent ? ColorTokens.BRAND_ORANGE : ColorTokens.TEXT_HINT));
+            tvIdx.setTextSize(isFavorite(t) ? 9f : 11f);
+            tvIdx.setGravity(Gravity.CENTER);
             tvIdx.setLayoutParams(new LinearLayout.LayoutParams(32, WRAP));
             row.addView(tvIdx);
 
@@ -466,6 +484,83 @@ public class MusicFragment extends Fragment {
         }
     }
 
+    // ═══════════ 均衡器 ═══════════
+
+    private void showEqualizerDialog() {
+        if (eqManager == null || !eqManager.isAvailable()) {
+            Toast.makeText(getContext(), "均衡器不可用（需播放中）", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        String[] presets = {"🏃 跑步", "🏋️ 举铁", "🧘 拉伸", "🎤 人声", "🎛 自定义"};
+        int current = eqManager.getCurrentPreset();
+
+        new android.app.AlertDialog.Builder(requireContext())
+                .setTitle("均衡器")
+                .setSingleChoiceItems(presets, current, (d, which) -> {
+                    eqManager.applyPreset(which);
+                    d.dismiss();
+                    Toast.makeText(getContext(), "已切换: " + presets[which], Toast.LENGTH_SHORT).show();
+
+                    if (which == EqualizerManager.PRESET_CUSTOM) {
+                        showCustomEqDialog();
+                    }
+                })
+                .setPositiveButton("自定义调节", (d, w) -> showCustomEqDialog())
+                .setNegativeButton("关闭均衡器", (d, w) -> {
+                    eqManager.resetBands();
+                    Toast.makeText(getContext(), "均衡器已重置", Toast.LENGTH_SHORT).show();
+                })
+                .show();
+    }
+
+    private void showCustomEqDialog() {
+        if (eqManager == null || !eqManager.isAvailable()) return;
+
+        short bands = eqManager.getNumberOfBands();
+        if (bands == 0) { Toast.makeText(getContext(), "设备不支持均衡器", Toast.LENGTH_SHORT).show(); return; }
+
+        android.widget.LinearLayout container = new android.widget.LinearLayout(requireContext());
+        container.setOrientation(android.widget.LinearLayout.VERTICAL);
+        container.setPadding(40, 20, 40, 10);
+
+        final android.widget.SeekBar[] sliders = new android.widget.SeekBar[bands];
+        int max = eqManager.getBandLevelRange()[1];
+        int min = eqManager.getBandLevelRange()[0];
+
+        for (short i = 0; i < bands; i++) {
+            final short band = i;
+            int freq = eqManager.getCenterFreq(i) / 1000;
+
+            android.widget.TextView label = new android.widget.TextView(requireContext());
+            label.setText((freq < 1 ? freq * 1000 + "Hz" : freq + "kHz") + "  (" + eqManager.getBandLevel(i) + ")");
+            label.setTextColor(android.graphics.Color.WHITE);
+            label.setTextSize(12f);
+            label.setPadding(0, 8, 0, 4);
+            container.addView(label);
+
+            android.widget.SeekBar sb = new android.widget.SeekBar(requireContext());
+            sb.setMax(max - min);
+            sb.setProgress(eqManager.getBandLevel(i) - min);
+            sb.setPadding(0, 0, 0, 8);
+            sb.setOnSeekBarChangeListener(new android.widget.SeekBar.OnSeekBarChangeListener() {
+                @Override public void onProgressChanged(android.widget.SeekBar s, int p, boolean fromUser) {
+                    if (fromUser) eqManager.setBandLevel(band, (short) (p + min));
+                }
+                @Override public void onStartTrackingTouch(android.widget.SeekBar s) {}
+                @Override public void onStopTrackingTouch(android.widget.SeekBar s) {}
+            });
+            sliders[i] = sb;
+            container.addView(sb);
+        }
+
+        new android.app.AlertDialog.Builder(requireContext())
+                .setTitle("自定义均衡器")
+                .setView(container)
+                .setPositiveButton("完成", null)
+                .show();
+    }
+
     // ═══════════ 播放引擎 ═══════════
 
     private void loadTrack(int index, boolean autoPlay) {
@@ -490,6 +585,9 @@ public class MusicFragment extends Fragment {
             mediaPlayer.setDataSource(track.dataPath);
             mediaPlayer.prepare();
             seekBar.setMax(mediaPlayer.getDuration());
+            // 初始化均衡器
+            if (eqManager != null) eqManager.release();
+            eqManager = new EqualizerManager(mediaPlayer.getAudioSessionId());
             tvTotalTime.setText(formatTime(mediaPlayer.getDuration()));
             mediaPlayer.setOnCompletionListener(mp -> {
                 if (playlist.isEmpty()) return;
@@ -500,6 +598,7 @@ public class MusicFragment extends Fragment {
         } catch (Exception e) {
             Toast.makeText(getContext(), "无法播放", Toast.LENGTH_SHORT).show();
         }
+        updateFavoriteIcon();
         buildPlaylistUI();
     }
 
@@ -566,12 +665,39 @@ public class MusicFragment extends Fragment {
     private String formatTime(int ms) { int s = (ms / 1000) % 60, m = (ms / (1000 * 60)) % 60;
         return String.format(Locale.getDefault(), "%02d:%02d", m, s); }
 
+    // ═══════════ 收藏 ═══════════
+
+    private void toggleFavorite() {
+        if (currentTrackIndex < 0 || currentTrackIndex >= playlist.size()) return;
+        Track t = playlist.get(currentTrackIndex);
+        if (favSet.contains(t.dataPath)) {
+            favSet.remove(t.dataPath);
+        } else {
+            favSet.add(t.dataPath);
+        }
+        favPrefs.edit().putStringSet("favs", new java.util.HashSet<>(favSet)).apply();
+        updateFavoriteIcon();
+        buildPlaylistUI();
+    }
+
+    private void updateFavoriteIcon() {
+        if (currentTrackIndex < 0 || currentTrackIndex >= playlist.size()) {
+            btnFavorite.setText("🤍");
+            return;
+        }
+        Track t = playlist.get(currentTrackIndex);
+        btnFavorite.setText(favSet.contains(t.dataPath) ? "❤️" : "🤍");
+    }
+
+    private boolean isFavorite(Track t) { return favSet.contains(t.dataPath); }
+
     private int dp(int d) { return UiUtils.dp(getContext(), d); }
     static final int WRAP = UiUtils.WRAP;
 
     @Override public void onDestroyView() {
         super.onDestroyView();
         if (mediaPlayer != null) { mediaPlayer.release(); mediaPlayer = null; }
+        if (eqManager != null) { eqManager.release(); eqManager = null; }
         abandonAudioFocus();
         handler.removeCallbacksAndMessages(null);
         if (recordAnimator != null) recordAnimator.cancel();
