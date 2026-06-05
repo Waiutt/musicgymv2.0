@@ -247,23 +247,43 @@ public class StrengthActivity extends AppCompatActivity {
     private void buildTabs() {
         for (MuscleGroup g : GROUPS) {
             TextView tab = new TextView(this);
-            tab.setText(g.name); tab.setTextSize(13f); tab.setPadding(28, 10, 28, 10); tab.setGravity(Gravity.CENTER);
-            tab.setLayoutParams(new LinearLayout.LayoutParams(WRAP, MATCH));
+            tab.setText(g.name); tab.setTextSize(13f); tab.setPadding(24, 8, 24, 8); tab.setGravity(Gravity.CENTER);
+            tab.setLayoutParams(new LinearLayout.LayoutParams(WRAP, UiUtils.dp(this, 34)));
+            ((LinearLayout.LayoutParams) tab.getLayoutParams()).setMargins(0, 0, 8, 0);
+
+            // 未选中: 圆角灰底
+            GradientDrawable unselBg = new GradientDrawable();
+            unselBg.setColor(ColorTokens.BG_INPUT);
+            unselBg.setCornerRadius(UiUtils.dp(this, 18));
+            tab.setBackground(unselBg);
+
             final String key = g.key;
             tab.setOnClickListener(v -> {
                 currentGroup = key; etSearch.setText(""); searchQuery = "";
                 for (int i = 0; i < tabContainer.getChildCount(); i++) {
                     TextView t = (TextView) tabContainer.getChildAt(i);
-                    t.setBackgroundColor(Color.TRANSPARENT); t.setTextColor(ColorTokens.TEXT_SECONDARY);
+                    GradientDrawable ubg = new GradientDrawable();
+                    ubg.setColor(ColorTokens.BG_INPUT);
+                    ubg.setCornerRadius(UiUtils.dp(StrengthActivity.this, 18));
+                    t.setBackground(ubg);
+                    t.setTextColor(ColorTokens.TEXT_SECONDARY);
                     t.setTypeface(null, Typeface.NORMAL);
                 }
-                tab.setBackgroundColor(ColorTokens.BRAND_ORANGE); tab.setTextColor(Color.WHITE);
+                GradientDrawable selBg = new GradientDrawable();
+                selBg.setColor(ColorTokens.BRAND_ORANGE);
+                selBg.setCornerRadius(UiUtils.dp(StrengthActivity.this, 18));
+                tab.setBackground(selBg);
+                tab.setTextColor(Color.WHITE);
                 tab.setTypeface(null, Typeface.BOLD); showGroup(key);
             });
             tabContainer.addView(tab);
         }
         TextView first = (TextView) tabContainer.getChildAt(0);
-        first.setBackgroundColor(ColorTokens.BRAND_ORANGE); first.setTextColor(Color.WHITE);
+        GradientDrawable selBg = new GradientDrawable();
+        selBg.setColor(ColorTokens.BRAND_ORANGE);
+        selBg.setCornerRadius(UiUtils.dp(this, 18));
+        first.setBackground(selBg);
+        first.setTextColor(Color.WHITE);
         first.setTypeface(null, Typeface.BOLD);
     }
 
@@ -302,17 +322,30 @@ public class StrengthActivity extends AppCompatActivity {
 
     private View buildExerciseCard(String name, String accentColor, boolean isSelected) {
         FrameLayout card = new FrameLayout(this);
-        LinearLayout.LayoutParams clp = new LinearLayout.LayoutParams(0, dp(150), 1f);
-        clp.setMargins(3, 0, 3, 8); card.setLayoutParams(clp);
+        LinearLayout.LayoutParams clp = new LinearLayout.LayoutParams(0, dp(155), 1f);
+        clp.setMargins(4, 0, 4, 10); card.setLayoutParams(clp);
 
-        // 卡片主体
+        // 卡片主体 — 圆角 + 阴影
+        GradientDrawable cardBg = new GradientDrawable();
+        cardBg.setColor(ColorTokens.BG_CARD);
+        cardBg.setCornerRadius(dp(12));
+        if (isSelected) {
+            cardBg.setStroke(dp(2), ColorTokens.BRAND_ORANGE);
+        }
+
         LinearLayout inner = new LinearLayout(this);
         inner.setOrientation(LinearLayout.VERTICAL);
-        inner.setBackgroundColor(ColorTokens.BG_CARD);
+        inner.setBackground(cardBg);
         inner.setGravity(Gravity.CENTER_HORIZONTAL);
-        inner.setPadding(8, 12, 8, 10);
+        inner.setPadding(6, 0, 6, 8);
         FrameLayout.LayoutParams innerLp = new FrameLayout.LayoutParams(MATCH, MATCH);
         card.addView(inner, innerLp);
+
+        // 肌群色条 (顶部3dp)
+        View strip = new View(this);
+        strip.setBackgroundColor(Color.parseColor(accentColor));
+        strip.setLayoutParams(new LinearLayout.LayoutParams(MATCH, dp(3)));
+        inner.addView(strip);
 
         // Emoji 图标区
         TextView ic = new TextView(this);
@@ -332,30 +365,32 @@ public class StrengthActivity extends AppCompatActivity {
         tv.setPadding(2, 8, 2, 2);
         inner.addView(tv);
 
-        // 上次训练数据
-        String lastInfo = getLastWorkoutInfo(name);
-        if (!lastInfo.isEmpty()) {
+        // 上次训练 / 已选标记
+        if (isSelected) {
             TextView tvLast = new TextView(this);
-            tvLast.setText(lastInfo);
-            tvLast.setTextColor(ColorTokens.TEXT_HINT);
+            tvLast.setText("✓ 已选");
+            tvLast.setTextColor(ColorTokens.ACCENT_GREEN);
             tvLast.setTextSize(10f);
             tvLast.setGravity(Gravity.CENTER);
-            tvLast.setSingleLine(true);
+            tvLast.setPadding(4, 3, 4, 3);
+            tvLast.setBackgroundColor(Color.parseColor("#1a22c55e"));
             inner.addView(tvLast);
+        } else {
+            String lastInfo = getLastWorkoutInfo(name);
+            if (!lastInfo.isEmpty()) {
+                TextView tvLast = new TextView(this);
+                tvLast.setText(lastInfo);
+                tvLast.setTextColor(ColorTokens.TEXT_HINT);
+                tvLast.setTextSize(10f);
+                tvLast.setGravity(Gravity.CENTER);
+                tvLast.setBackgroundColor(Color.parseColor("#1a334155"));
+                tvLast.setPadding(4, 3, 4, 3);
+                tvLast.setSingleLine(true);
+                inner.addView(tvLast);
+            }
         }
 
-        // 选中标记
-        if (isSelected) {
-            TextView chk = new TextView(this);
-            chk.setText("✓"); chk.setTextColor(Color.WHITE); chk.setTextSize(10f);
-            chk.setGravity(Gravity.CENTER);
-            FrameLayout.LayoutParams chklp = new FrameLayout.LayoutParams(UiUtils.dp(this, 22), UiUtils.dp(this, 22));
-            chklp.gravity = Gravity.TOP | Gravity.END;
-            chklp.setMargins(0, 4, 4, 0);
-            GradientDrawable cb = new GradientDrawable(); cb.setShape(GradientDrawable.OVAL);
-            cb.setColor(ColorTokens.BRAND_ORANGE);
-            chk.setBackground(cb); card.addView(chk, chklp);
-        }
+        // 选中角标改为底部条 — 已通过描边+底色表示
 
         card.setOnClickListener(v -> showExerciseDetail(name, accentColor));
         return card;

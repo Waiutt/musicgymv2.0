@@ -5,6 +5,7 @@ import android.app.NotificationManager;
 import android.content.Context;
 import android.graphics.Color;
 import android.graphics.Typeface;
+import android.graphics.drawable.GradientDrawable;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
@@ -246,66 +247,95 @@ public class StrengthWorkoutActivity extends AppCompatActivity {
             List<SetEntry> sets = entry.getValue();
             final int exI = exIdx++;
 
+            // 卡片外层 — 圆角背景
             LinearLayout card = new LinearLayout(this);
             card.setOrientation(LinearLayout.VERTICAL);
-            card.setBackgroundColor(ColorTokens.BG_CARD);
+            GradientDrawable cd = new GradientDrawable();
+            cd.setColor(ColorTokens.BG_CARD);
+            cd.setCornerRadius(UiUtils.dp(this, 14));
+            card.setBackground(cd);
             card.setPadding(16, 14, 16, 14);
-            LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
-            lp.setMargins(0, 0, 0, 12); card.setLayoutParams(lp);
+            LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(
+                    ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+            lp.setMargins(0, 0, 0, 14); card.setLayoutParams(lp);
 
-            // 头部: 序号 + 动作名 + PR + 容量
+            // ── 头部: 序号圆圈 + 动作名 + 标签行 ──
             LinearLayout header = new LinearLayout(this);
             header.setOrientation(LinearLayout.HORIZONTAL);
             header.setGravity(Gravity.CENTER_VERTICAL);
 
+            // 序号圆形
             TextView tvNum = new TextView(this);
-            tvNum.setText(String.valueOf(exI + 1)); tvNum.setTextColor(ColorTokens.BRAND_ORANGE);
-            tvNum.setTextSize(16f); tvNum.setTypeface(null, Typeface.BOLD); tvNum.setPadding(0, 0, 14, 0);
+            tvNum.setText(String.valueOf(exI + 1));
+            tvNum.setTextColor(Color.WHITE);
+            tvNum.setTextSize(13f);
+            tvNum.setTypeface(null, Typeface.BOLD);
+            tvNum.setGravity(Gravity.CENTER);
+            GradientDrawable numBg = new GradientDrawable();
+            numBg.setShape(GradientDrawable.OVAL);
+            numBg.setColor(ColorTokens.BRAND_ORANGE);
+            numBg.setSize(UiUtils.dp(this, 26), UiUtils.dp(this, 26));
+            tvNum.setBackground(numBg);
+            tvNum.setLayoutParams(new LinearLayout.LayoutParams(UiUtils.dp(this, 26), UiUtils.dp(this, 26)));
             header.addView(tvNum);
 
             TextView tvName = new TextView(this);
             tvName.setText(exName); tvName.setTextColor(Color.WHITE); tvName.setTextSize(16f);
             tvName.setTypeface(null, Typeface.BOLD);
-            LinearLayout.LayoutParams nameLp = new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1);
+            tvName.setPadding(UiUtils.dp(this, 10), 0, 0, 0);
+            LinearLayout.LayoutParams nameLp = new LinearLayout.LayoutParams(
+                    0, ViewGroup.LayoutParams.WRAP_CONTENT, 1);
             tvName.setLayoutParams(nameLp);
             header.addView(tvName);
 
-            // PR 显示
+            // PR + 容量标签
             double[] pr = prCache.get(exName);
             if (pr != null) {
                 TextView tvPR = new TextView(this);
                 tvPR.setText(String.format(Locale.getDefault(), "PR %.0fkg", pr[0]));
                 tvPR.setTextColor(ColorTokens.PR_YELLOW); tvPR.setTextSize(11f);
-                tvPR.setPadding(0, 0, 10, 0);
+                tvPR.setPadding(0, 0, 8, 0);
                 header.addView(tvPR);
             }
-
             double vol = 0;
             for (SetEntry se : sets) vol += se.weight * se.reps;
-            TextView tvVol = addView(header, String.format(Locale.getDefault(), "%.0f kg", vol), ColorTokens.ACCENT_AMBER, 13f, WRAP);
+            addView(header, String.format(Locale.getDefault(), "%.0f kg", vol), ColorTokens.ACCENT_AMBER, 12f, WRAP);
             card.addView(header);
 
-            // 表头
+            // ── 表头行 (灰底) ──
             LinearLayout labels = new LinearLayout(this);
-            labels.setOrientation(LinearLayout.HORIZONTAL); labels.setPadding(0, 12, 0, 4);
+            labels.setOrientation(LinearLayout.HORIZONTAL);
+            labels.setPadding(UiUtils.dp(this, 8), UiUtils.dp(this, 6),
+                    UiUtils.dp(this, 4), UiUtils.dp(this, 4));
+            labels.setBackgroundColor(Color.parseColor("#1a334155"));
+            LinearLayout.LayoutParams lblLp = new LinearLayout.LayoutParams(MATCH, WRAP);
+            lblLp.setMargins(0, UiUtils.dp(this, 14), 0, UiUtils.dp(this, 4));
+            labels.setLayoutParams(lblLp);
+
             for (String h : new String[]{"组", "重量(kg)", "次数", "%1RM", ""}) {
-                TextView th = new TextView(this); th.setText(h); th.setTextColor(ColorTokens.TEXT_HINT); th.setTextSize(10f);
+                TextView th = new TextView(this); th.setText(h);
+                th.setTextColor(ColorTokens.TEXT_HINT); th.setTextSize(10f);
                 LinearLayout.LayoutParams hlp;
-                if (h.equals("重量(kg)") || h.equals("次数") || h.equals("%1RM")) hlp = new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1);
-                else if (h.equals("")) hlp = new LinearLayout.LayoutParams(34, ViewGroup.LayoutParams.WRAP_CONTENT);
-                else { hlp = new LinearLayout.LayoutParams(26, ViewGroup.LayoutParams.WRAP_CONTENT); th.setGravity(Gravity.CENTER); }
+                if (h.equals("重量(kg)") || h.equals("次数") || h.equals("%1RM"))
+                    hlp = new LinearLayout.LayoutParams(0, WRAP, 1);
+                else if (h.equals(""))
+                    hlp = new LinearLayout.LayoutParams(UiUtils.dp(this, 34), WRAP);
+                else { hlp = new LinearLayout.LayoutParams(UiUtils.dp(this, 26), WRAP);
+                    th.setGravity(Gravity.CENTER); }
                 th.setLayoutParams(hlp); labels.addView(th);
             }
             card.addView(labels);
 
-            // 组行
+            // ── 组行 ──
             for (int i = 0; i < sets.size(); i++) {
                 SetEntry se = sets.get(i);
                 final int si = i;
                 LinearLayout row = new LinearLayout(this);
-                row.setOrientation(LinearLayout.HORIZONTAL); row.setGravity(Gravity.CENTER_VERTICAL); row.setPadding(0, 5, 0, 5);
+                row.setOrientation(LinearLayout.HORIZONTAL);
+                row.setGravity(Gravity.CENTER_VERTICAL);
+                row.setPadding(0, UiUtils.dp(this, 4), 0, UiUtils.dp(this, 4));
 
-                addView(row, String.valueOf(i + 1), Color.WHITE, 13f, 26, Gravity.CENTER);
+                addView(row, String.valueOf(i + 1), Color.WHITE, 13f, UiUtils.dp(this, 26), Gravity.CENTER);
 
                 EditText etW = buildEdit(row, String.valueOf(se.weight), true);
                 etW.setOnFocusChangeListener((v, f) -> { if (!f) try {
@@ -319,32 +349,36 @@ public class StrengthWorkoutActivity extends AppCompatActivity {
                     updateCardDisplay(exI);
                 } catch (Exception ignored) {} });
 
-                // %1RM 显示
                 double oneRM = pr != null ? pr[0] : 0;
                 String pct = oneRM > 0 ? String.format(Locale.getDefault(), "%.0f%%", se.weight / oneRM * 100) : "-";
                 addView(row, pct, ColorTokens.TEXT_MUTED, 11f, WRAP);
 
-                TextView btnDel = addView(row, "−", ColorTokens.ACCENT_RED, 18f, 34, Gravity.CENTER);
+                TextView btnDel = addView(row, "−", ColorTokens.ACCENT_RED, 18f, UiUtils.dp(this, 34), Gravity.CENTER);
                 btnDel.setOnClickListener(v -> {
                     if (sets.size() > 1) { sets.remove(si); buildUI(); }
                 });
                 card.addView(row);
             }
 
-            // 1RM 百分比快捷填充
+            // ── 1RM 百分比快捷栏 (胶囊风格) ──
             LinearLayout pctRow = new LinearLayout(this);
             pctRow.setOrientation(LinearLayout.HORIZONTAL);
-            pctRow.setPadding(0, 8, 0, 0);
+            pctRow.setPadding(0, UiUtils.dp(this, 10), 0, 0);
             final double[] prRef = prCache.get(exName);
             if (prRef != null) {
                 for (int pctVal : new int[]{50, 65, 75, 85, 95}) {
                     TextView pctBtn = new TextView(this);
                     pctBtn.setText(pctVal + "%");
                     pctBtn.setTextColor(ColorTokens.ACCENT_CYAN); pctBtn.setTextSize(11f);
-                    pctBtn.setBackgroundColor(ColorTokens.BG_INPUT);
-                    pctBtn.setPadding(12, 6, 12, 6);
+                    pctBtn.setGravity(Gravity.CENTER);
+                    pctBtn.setPadding(UiUtils.dp(this, 14), UiUtils.dp(this, 6),
+                            UiUtils.dp(this, 14), UiUtils.dp(this, 6));
+                    GradientDrawable pctBg = new GradientDrawable();
+                    pctBg.setColor(ColorTokens.BG_INPUT);
+                    pctBg.setCornerRadius(UiUtils.dp(this, 14));
+                    pctBtn.setBackground(pctBg);
                     LinearLayout.LayoutParams plp = new LinearLayout.LayoutParams(WRAP, WRAP);
-                    plp.setMargins(0, 0, 6, 0); pctBtn.setLayoutParams(plp);
+                    plp.setMargins(0, 0, UiUtils.dp(this, 8), 0); pctBtn.setLayoutParams(plp);
                     final int fExI = exI;
                     pctBtn.setOnClickListener(vv -> {
                         double w = Math.round(prRef[0] * pctVal / 100.0 / 2.5) * 2.5;
@@ -444,15 +478,24 @@ public class StrengthWorkoutActivity extends AppCompatActivity {
     private EditText buildEdit(LinearLayout parent, String val, boolean decimal) {
         EditText et = new EditText(this);
         et.setText(val); et.setTextColor(Color.WHITE); et.setTextSize(13f);
-        et.setInputType(decimal ? (InputType.TYPE_CLASS_NUMBER | InputType.TYPE_NUMBER_FLAG_DECIMAL) : InputType.TYPE_CLASS_NUMBER);
-        et.setBackgroundColor(ColorTokens.BG_INPUT); et.setPadding(12, 8, 12, 8);
-        LinearLayout.LayoutParams elp = new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1);
-        elp.setMargins(0, 0, 4, 0); et.setLayoutParams(elp);
+        et.setInputType(decimal ? (InputType.TYPE_CLASS_NUMBER | InputType.TYPE_NUMBER_FLAG_DECIMAL)
+                : InputType.TYPE_CLASS_NUMBER);
+        GradientDrawable etBg = new GradientDrawable();
+        etBg.setColor(Color.parseColor("#2a3a4f"));
+        etBg.setCornerRadius(UiUtils.dp(this, 6));
+        etBg.setStroke(UiUtils.dp(this, 1), ColorTokens.BG_INPUT);
+        et.setBackground(etBg);
+        et.setPadding(UiUtils.dp(this, 10), UiUtils.dp(this, 8),
+                UiUtils.dp(this, 10), UiUtils.dp(this, 8));
+        LinearLayout.LayoutParams elp = new LinearLayout.LayoutParams(
+                0, ViewGroup.LayoutParams.WRAP_CONTENT, 1);
+        elp.setMargins(0, 0, UiUtils.dp(this, 6), 0); et.setLayoutParams(elp);
         parent.addView(et);
         return et;
     }
 
     private static final int WRAP = UiUtils.WRAP;
+    private static final int MATCH = UiUtils.MATCH;
     private TextView addView(LinearLayout parent, String text, int color, float size, int width) {
         return addView(parent, text, color, size, width, Gravity.START);
     }
