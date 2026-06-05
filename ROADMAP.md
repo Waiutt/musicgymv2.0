@@ -172,4 +172,19 @@
 
 ---
 
+## ⚠️ 需要用户配合的事项（代码已完成，等待资源/配置）
+
+| # | 事项 | 操作步骤 | 目录/文件 |
+|---|------|---------|----------|
+| 1 | **力量训练 GIF 动图** | 从 [MuscleWiki](https://musclewiki.com) 下载 50+ 个动作 GIF → 放入目录 | `app/src/main/assets/exercises/xxx.gif` |
+| 2 | **AI 训练计划 API Key** | 注册 Claude/OpenAI → 将 Key 写入 `local.properties`: `AI_API_KEY=sk-xxx` | `local.properties` |
+| 3 | **Firebase 项目配置** | 创建 Firebase 项目 → 下载 `google-services.json` → 替换模板 | `app/google-services.json` |
+| 4 | **Spotify Client ID** | 注册 Spotify Developer → 将 Client ID 写入 `local.properties` | `local.properties` |
+| 5 | **Release 签名 Keystore** | 生成 `.jks` 文件 → 配置到 `app/build.gradle` signingConfigs | `app/keystore.jks` |
+| 6 | **训练笔记 UI** | 组行旁加 📝 按钮 → 弹 EditText 输入备注 | `StrengthWorkoutActivity.java` |
+| 7 | **Spotify OAuth 登录闭环** | 用户在浏览器授权后回调 App → 解析 token → 存 SharedPreferences | `SpotifyAuthManager.java`（待建） |
+| 8 | **GIF 压缩** | TinyGIF/WebP 动图压缩 50 个文件 → 控制在 30MB 以内 | `app/src/main/assets/exercises/` |
+
+---
+
 *2026-06-05 | MusicGym 项目路线图*
