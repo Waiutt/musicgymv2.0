@@ -410,7 +410,7 @@ public class StrengthActivity extends AppCompatActivity {
             tvLast.setTextSize(10f);
             tvLast.setGravity(Gravity.CENTER);
             tvLast.setPadding(4, 3, 4, 3);
-            tvLast.setBackgroundColor(Color.parseColor("#1a22c55e"));
+            tvLast.setBackgroundColor(ColorTokens.SELECTED_GREEN_BG);
             inner.addView(tvLast);
         } else {
             String lastInfo = getLastWorkoutInfo(name);
@@ -420,7 +420,7 @@ public class StrengthActivity extends AppCompatActivity {
                 tvLast.setTextColor(ColorTokens.TEXT_HINT);
                 tvLast.setTextSize(10f);
                 tvLast.setGravity(Gravity.CENTER);
-                tvLast.setBackgroundColor(Color.parseColor("#1a334155"));
+                tvLast.setBackgroundColor(ColorTokens.TABLE_HEADER_BG);
                 tvLast.setPadding(4, 3, 4, 3);
                 tvLast.setSingleLine(true);
                 inner.addView(tvLast);
@@ -583,8 +583,8 @@ public class StrengthActivity extends AppCompatActivity {
 
                 com.github.mikephil.charting.data.LineDataSet repsSet =
                         new com.github.mikephil.charting.data.LineDataSet(repsEntries, "最大次数");
-                repsSet.setColor(Color.parseColor("#94a3b8"));
-                repsSet.setCircleColor(Color.parseColor("#94a3b8"));
+                repsSet.setColor(ColorTokens.TEXT_MUTED);
+                repsSet.setCircleColor(ColorTokens.TEXT_MUTED);
                 repsSet.setLineWidth(2f);
                 repsSet.setCircleRadius(3f);
                 repsSet.setMode(com.github.mikephil.charting.data.LineDataSet.Mode.CUBIC_BEZIER);

@@ -36,4 +36,9 @@ public final class ColorTokens {
     public static final int TEXT_HINT            = Color.parseColor("#6b7280");
     public static final int TEXT_MUTED           = Color.parseColor("#94a3b8");
     public static final int TEXT_PALE            = Color.parseColor("#cbd5e1");
+
+    // ── 半透明色 ──
+    public static final int SELECTED_GREEN_BG    = Color.parseColor("#1a22c55e");
+    public static final int TABLE_HEADER_BG      = Color.parseColor("#1a334155");
+    public static final int EDIT_FIELD_BG        = Color.parseColor("#2a3a4f");
 }

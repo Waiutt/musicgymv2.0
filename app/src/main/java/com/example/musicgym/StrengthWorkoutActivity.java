@@ -307,7 +307,7 @@ public class StrengthWorkoutActivity extends AppCompatActivity {
             labels.setOrientation(LinearLayout.HORIZONTAL);
             labels.setPadding(UiUtils.dp(this, 8), UiUtils.dp(this, 6),
                     UiUtils.dp(this, 4), UiUtils.dp(this, 4));
-            labels.setBackgroundColor(Color.parseColor("#1a334155"));
+            labels.setBackgroundColor(ColorTokens.TABLE_HEADER_BG);
             LinearLayout.LayoutParams lblLp = new LinearLayout.LayoutParams(MATCH, WRAP);
             lblLp.setMargins(0, UiUtils.dp(this, 14), 0, UiUtils.dp(this, 4));
             labels.setLayoutParams(lblLp);
@@ -514,7 +514,7 @@ public class StrengthWorkoutActivity extends AppCompatActivity {
         et.setInputType(decimal ? (InputType.TYPE_CLASS_NUMBER | InputType.TYPE_NUMBER_FLAG_DECIMAL)
                 : InputType.TYPE_CLASS_NUMBER);
         GradientDrawable etBg = new GradientDrawable();
-        etBg.setColor(Color.parseColor("#2a3a4f"));
+        etBg.setColor(ColorTokens.EDIT_FIELD_BG);
         etBg.setCornerRadius(UiUtils.dp(this, 6));
         etBg.setStroke(UiUtils.dp(this, 1), ColorTokens.BG_INPUT);
         et.setBackground(etBg);
