@@ -371,7 +371,7 @@ public class StrengthActivity extends AppCompatActivity {
             subTitle.setPadding(8, 12, 8, 8); exerciseContainer.addView(subTitle);
             LinearLayout row = null;
             for (int i = 0; i < customExercises.size(); i++) {
-                if (i % 3 == 0) { row = new LinearLayout(this); row.setOrientation(LinearLayout.HORIZONTAL); row.setPadding(0, 0, 0, 4); exerciseContainer.addView(row); }
+                if (i % 3 == 0) row = newCardRow(exerciseContainer);
                 String n = customExercises.get(i);
                 row.addView(buildExerciseCard(n, "#f59e0b", selectedExercises.containsKey(n)));
             }
@@ -384,7 +384,7 @@ public class StrengthActivity extends AppCompatActivity {
 
             LinearLayout row = null;
             for (int i = 0; i < sub.exercises.size(); i++) {
-                if (i % 3 == 0) { row = new LinearLayout(this); row.setOrientation(LinearLayout.HORIZONTAL); row.setPadding(0, 0, 0, 4); exerciseContainer.addView(row); }
+                if (i % 3 == 0) row = newCardRow(exerciseContainer);
                 String n = sub.exercises.get(i);
                 row.addView(buildExerciseCard(n, group.color, selectedExercises.containsKey(n)));
             }
