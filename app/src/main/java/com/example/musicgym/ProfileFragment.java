@@ -48,11 +48,9 @@ public class ProfileFragment extends Fragment {
     private Button btnEditProfile, btnMeasurements, btnExport, btnReminder;
     private LinearLayout historyContainer, measureContainer;
     private LineChart weightChart;
-    private TextView btnHealth, tvHealthStatus;
     private SharedPreferences prefs;
     private AppDatabase db;
     private ExecutorService executor;
-    private HealthConnectManager hcManager;
 
     @Nullable @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
@@ -101,17 +99,6 @@ public class ProfileFragment extends Fragment {
         btnMeasurements.setOnClickListener(v -> showMeasurementsDialog());
         btnExport.setOnClickListener(v -> exportCSV());
         btnReminder.setOnClickListener(v -> setupReminder());
-
-        // Health Connect 入口（设备安装时显示）
-        TextView btnHealth = view.findViewById(R.id.btn_health);
-        if (HealthConnectManager.isInstalled(requireContext())) {
-            btnHealth.setVisibility(View.VISIBLE);
-            btnHealth.setOnClickListener(v -> HealthConnectManager.open(requireContext()));
-            TextView tvHS = view.findViewById(R.id.tv_health_status);
-            tvHS.setVisibility(View.VISIBLE);
-            tvHS.setText("小米/华为/OPPO/Samsung 手表数据统一查看入口");
-        }
-
         view.findViewById(R.id.btn_settings).setOnClickListener(v ->
                 startActivity(new Intent(requireContext(), SettingsActivity.class)));
 

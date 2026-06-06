@@ -91,25 +91,9 @@
             android:text="训练提醒" />
 
         <Button
-            android:id="@+id/btn_health"
-            style="@style/ProfileButton"
-            android:visibility="gone"
-            android:text="💓 同步健康数据" />
-
-        <TextView
-            android:id="@+id/tv_health_status"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="4dp"
-            android:gravity="center"
-            android:textColor="@color/text_gray"
-            android:textSize="12sp"
-            android:visibility="gone" />
-
-        <Button
             android:id="@+id/btn_settings"
             style="@style/ProfileButton"
-            android:layout_marginTop="8dp"
+            android:layout_marginTop="24dp"
             android:text="⚙ 设置" />
 
         <TextView
