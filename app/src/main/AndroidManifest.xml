@@ -29,7 +29,6 @@
         <activity android:name=".StrengthWorkoutActivity" />
         <activity android:name=".StrengthActivity" />
         <activity android:name=".WorkoutActivity" />
-        <activity android:name=".CreatePostActivity" />
 
         <service android:name="com.amap.api.location.APSService" />
 
@@ -41,7 +40,6 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".PostDetailActivity" />
         <activity android:name=".SettingsActivity" />
         <activity android:name=".PrivacyPolicyActivity" />
         <activity android:name=".OnboardingActivity" />
