@@ -1,7 +1,10 @@
 package com.example.musicgym;
 
+import android.Manifest;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.pm.PackageManager;
+import android.os.Build;
 import android.os.Bundle;
 import android.view.Gravity;
 import android.view.LayoutInflater;
@@ -12,6 +15,8 @@ import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.viewpager2.widget.ViewPager2;
 
@@ -61,10 +66,29 @@ public class OnboardingActivity extends AppCompatActivity {
             if (pager.getCurrentItem() < 2) {
                 pager.setCurrentItem(pager.getCurrentItem() + 1, true);
             } else {
+                // Android 13+ 请求通知权限（前台服务必需）
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                    if (ContextCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS)
+                            != PackageManager.PERMISSION_GRANTED) {
+                        ActivityCompat.requestPermissions(this,
+                                new String[]{Manifest.permission.POST_NOTIFICATIONS}, 1);
+                        return; // 等回调
+                    }
+                }
                 prefs.edit().putBoolean("onboarding_done", true).apply();
                 startMain();
             }
         });
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] perms,
+                                           @NonNull int[] results) {
+        super.onRequestPermissionsResult(requestCode, perms, results);
+        // 不管用户是否授权，都继续进入主页面
+        getSharedPreferences("app_prefs", MODE_PRIVATE).edit()
+                .putBoolean("onboarding_done", true).apply();
+        startMain();
     }
 
     private void updateDots(int current) {

@@ -56,7 +56,8 @@ public class GymFragment extends Fragment {
             List<WorkoutRecord> records = db.workoutRecordDao().getAllRecords();
             List<StrengthRecord> sRecs = db.strengthRecordDao().getAllRecords();
 
-            requireActivity().runOnUiThread(() -> {
+            if (getActivity() == null || !isAdded()) { exec.shutdown(); return; }
+            getActivity().runOnUiThread(() -> {
                 if (records == null || records.isEmpty()) return;
                 setLastWorkout(view, R.id.gym_card_running, records, "Running");
                 setLastWorkout(view, R.id.gym_card_cycling, records, "Cycling");

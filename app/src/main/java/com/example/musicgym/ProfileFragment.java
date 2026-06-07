@@ -127,9 +127,8 @@ public class ProfileFragment extends Fragment {
             AchievementManager am = new AchievementManager(requireContext());
             List<String> newBadges = am.checkAndUnlock(db);
             if (!newBadges.isEmpty()) {
-                requireActivity().runOnUiThread(() ->
-                        Toast.makeText(getContext(), "🏆 解锁成就: " + newBadges.get(0) + "!",
-                                Toast.LENGTH_LONG).show());
+                safePost(() -> Toast.makeText(getContext(), "🏆 解锁成就: " + newBadges.get(0) + "!",
+                        Toast.LENGTH_LONG).show());
             }
         });
 
@@ -200,7 +199,7 @@ public class ProfileFragment extends Fragment {
             }
             java.util.Collections.reverse(wtEntries);
 
-            requireActivity().runOnUiThread(() -> {
+            safePost(() -> {
                 // 连续打卡
                 TextView tvStreak = new TextView(getContext());
                 tvStreak.setText("🔥 连续运动 " + streak + " 天");
@@ -309,11 +308,16 @@ public class ProfileFragment extends Fragment {
 
     private int dp2px(int dp) { return (int) (dp * getResources().getDisplayMetrics().density); }
 
+    /** 安全投递到 UI 线程（Fragment 已 detach 时静默忽略） */
+    private void safePost(Runnable r) {
+        if (isAdded() && getActivity() != null) getActivity().runOnUiThread(r);
+    }
+
     private void loadMeasurementsUI() {
         measureContainer.removeAllViews();
         executor.execute(() -> {
             BodyMeasurement latest = db.bodyMeasurementDao().getLatest();
-            requireActivity().runOnUiThread(() -> {
+            safePost(() -> {
                 if (latest == null) {
                     TextView tv = new TextView(getContext());
                     tv.setText("暂无围度数据"); tv.setTextColor(ColorTokens.TEXT_SECONDARY);
@@ -357,7 +361,7 @@ public class ProfileFragment extends Fragment {
         executor.execute(()->{
             BodyMeasurement last = db.bodyMeasurementDao().getLatest();
             String[] defs = last!=null ? new String[]{String.valueOf(last.getWeightKg()),String.valueOf(last.getChestCm()),String.valueOf(last.getWaistCm()),String.valueOf(last.getHipCm()),String.valueOf(last.getArmCm()),String.valueOf(last.getThighCm())} : new String[]{"70","90","80","95","35","55"};
-            requireActivity().runOnUiThread(()->{
+            safePost(()->{
                 for (int i=0;i<6;i++) { eds[i]=addEdit(layout,hints[i],defs[i]); eds[i].setInputType(InputType.TYPE_CLASS_NUMBER|InputType.TYPE_NUMBER_FLAG_DECIMAL); }
                 new AlertDialog.Builder(getContext()).setTitle("记录围度").setView(new ScrollView(getContext()){{addView(layout);}})
                     .setPositiveButton("保存",(d,w)->{
@@ -383,9 +387,9 @@ public class ProfileFragment extends Fragment {
                 for (StrengthRecord r : db.strengthRecordDao().getAllRecords())
                     fw.write(String.format(Locale.getDefault(),"strength,%s,,,%d,\n",r.getDate(),r.getDurationSeconds()));
                 fw.close();
-                requireActivity().runOnUiThread(()-> Toast.makeText(getContext(), "已导出到 Downloads/\n" + f.getName(), Toast.LENGTH_LONG).show());
+                safePost(()-> Toast.makeText(getContext(), "已导出到 Downloads/\n" + f.getName(), Toast.LENGTH_LONG).show());
             } catch (Exception e) {
-                requireActivity().runOnUiThread(()-> Toast.makeText(getContext(), "导出失败: " + e.getMessage(), Toast.LENGTH_SHORT).show());
+                safePost(()-> Toast.makeText(getContext(), "导出失败: " + e.getMessage(), Toast.LENGTH_SHORT).show());
             }
         });
     }

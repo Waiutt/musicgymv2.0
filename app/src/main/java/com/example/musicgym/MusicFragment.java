@@ -485,6 +485,15 @@ public class MusicFragment extends Fragment {
 
     private void notifyService(boolean playing) {
         if (getContext() == null) return;
+        // Android 13+ 前台服务需要通知权限
+        if (playing && Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            if (ContextCompat.checkSelfPermission(requireContext(),
+                    Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED) {
+                requestPermissions(new String[]{Manifest.permission.POST_NOTIFICATIONS}, 200);
+                // 权限未授予时不启动前台服务，但仍可本地播放
+                return;
+            }
+        }
         Intent intent = new Intent(getContext(), MusicService.class);
         intent.setAction(MusicService.ACTION_UPDATE);
         MusicViewModel.TrackInfo t = vm.getCurrentTrack();
