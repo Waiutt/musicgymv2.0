@@ -49,6 +49,7 @@ android {
     }
 
     buildTypes {
+        debugTest { initWith debug }
         release {
             signingConfig signingConfigs.release
             minifyEnabled true
