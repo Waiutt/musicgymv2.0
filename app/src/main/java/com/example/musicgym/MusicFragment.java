@@ -86,6 +86,12 @@ public class MusicFragment extends Fragment {
     private SharedPreferences favPrefs;
     private java.util.Set<String> favSet;
 
+    // 步频 + BPM 匹配
+    private StepCadenceDetector cadenceDetector;
+    private TextView tvCadence;
+    private SongBpmDatabase bpmDb;
+    private BpmMatchEngine bpmEngine;
+
     private final List<Track> playlist = new ArrayList<>();
     private int currentTrackIndex = -1;
     private int playMode = MODE_SEQUENTIAL;
@@ -154,6 +160,12 @@ public class MusicFragment extends Fragment {
         btnFavorite = view.findViewById(R.id.music_btn_favorite);
         btnFavorite.setOnClickListener(v -> toggleFavorite());
 
+        // 步频 + BPM 匹配
+        cadenceDetector = new StepCadenceDetector(requireContext());
+        bpmDb = new SongBpmDatabase(requireContext());
+        bpmEngine = new BpmMatchEngine(bpmDb, this);
+        cadenceDetector.setListener(bpmEngine);
+
         favPrefs = requireContext().getSharedPreferences("music_fav", Context.MODE_PRIVATE);
         favSet = new java.util.LinkedHashSet<>(favPrefs.getStringSet("favs", new java.util.HashSet<>()));
         tvTrackCount = view.findViewById(R.id.music_track_count);
@@ -178,6 +190,17 @@ public class MusicFragment extends Fragment {
                     .setOnAudioFocusChangeListener(this::handleAudioFocusChange)
                     .build();
         }
+
+        // 步频显示
+        tvCadence = new TextView(requireContext());
+        tvCadence.setTextColor(ColorTokens.TEXT_MUTED);
+        tvCadence.setTextSize(12f);
+        tvCadence.setGravity(Gravity.CENTER);
+        tvCadence.setVisibility(View.GONE);
+        ViewGroup playerArea = (ViewGroup) requireView().findViewById(R.id.music_player_area);
+        View artistRef = requireView().findViewById(R.id.music_tv_artist);
+        int aidx = playerArea.indexOfChild(artistRef);
+        playerArea.addView(tvCadence, aidx + 1);
 
         // ── 绑定 Service ──
         requireContext().bindService(new Intent(requireContext(), MusicService.class),
@@ -609,6 +632,10 @@ public class MusicFragment extends Fragment {
             return;
         }
         mediaPlayer.start();
+        if (cadenceDetector != null && cadenceDetector.isAvailable()) {
+            cadenceDetector.start();
+            if (tvCadence != null) tvCadence.setVisibility(View.VISIBLE);
+        }
         btnPlay.setImageResource(android.R.drawable.ic_media_pause);
         recordAnimator.start();
         updateSeekBar();
@@ -620,11 +647,17 @@ public class MusicFragment extends Fragment {
         if (mediaPlayer.isPlaying()) {
             mediaPlayer.pause(); btnPlay.setImageResource(android.R.drawable.ic_media_play);
             recordAnimator.pause(); notifyService(false);
+            cadenceDetector.stop();
+            if (tvCadence != null) tvCadence.setVisibility(View.GONE);
         } else {
             if (!requestAudioFocus()) return;
             mediaPlayer.start(); btnPlay.setImageResource(android.R.drawable.ic_media_pause);
             if (recordAnimator.isPaused()) recordAnimator.resume(); else recordAnimator.start();
             updateSeekBar(); notifyService(true);
+            if (cadenceDetector != null && cadenceDetector.isAvailable()) {
+                cadenceDetector.start();
+                if (tvCadence != null) tvCadence.setVisibility(View.VISIBLE);
+            }
         }
         buildPlaylistUI();
     }
@@ -659,6 +692,22 @@ public class MusicFragment extends Fragment {
             seekBar.setProgress(mediaPlayer.getCurrentPosition());
             tvCurrentTime.setText(formatTime(mediaPlayer.getCurrentPosition()));
             handler.postDelayed(this::updateSeekBar, 1000);
+        }
+    }
+
+    /** BPM 匹配引擎回调 — 找到匹配歌曲时自动切换 */
+    public void onBpmMatchFound(String trackPath, int cadence) {
+        // 在播放列表中找对应路径的歌曲
+        for (int i = 0; i < playlist.size(); i++) {
+            if (playlist.get(i).dataPath.equals(trackPath) && i != currentTrackIndex) {
+                currentTrackIndex = i;
+                loadTrack(i, true);
+                if (tvCadence != null) {
+                    int bpm = bpmDb.getBpm(trackPath);
+                    tvCadence.setText("🏃 " + cadence + "spm → 🎵" + bpm + "BPM 自动切换");
+                }
+                break;
+            }
         }
     }
 
@@ -698,6 +747,7 @@ public class MusicFragment extends Fragment {
         super.onDestroyView();
         if (mediaPlayer != null) { mediaPlayer.release(); mediaPlayer = null; }
         if (eqManager != null) { eqManager.release(); eqManager = null; }
+        if (cadenceDetector != null) cadenceDetector.stop();
         abandonAudioFocus();
         handler.removeCallbacksAndMessages(null);
         if (recordAnimator != null) recordAnimator.cancel();
