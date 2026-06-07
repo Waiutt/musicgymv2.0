@@ -167,11 +167,11 @@ public class MusicViewModel extends AndroidViewModel {
     // ── 自动播放标志 ──
     public LiveData<Boolean> getAutoPlay() { return autoPlay; }
     public void selectAndPlay(int idx) {
-        autoPlay.setValue(true);
+        autoPlay.postValue(true);
         currentIndex.postValue(idx);
     }
     public void selectNoPlay(int idx) {
-        autoPlay.setValue(false);
+        autoPlay.postValue(false);
         currentIndex.postValue(idx);
     }
     public void clearAutoPlay() { autoPlay.postValue(false); }
