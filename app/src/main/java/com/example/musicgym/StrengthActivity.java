@@ -447,18 +447,17 @@ public class StrengthActivity extends AppCompatActivity {
             tvLast.setBackgroundColor(ColorTokens.SELECTED_GREEN_BG);
             inner.addView(tvLast);
         } else {
-            String lastInfo = getLastWorkoutInfo(name);
-            if (!lastInfo.isEmpty()) {
-                TextView tvLast = new TextView(this);
-                tvLast.setText(lastInfo);
-                tvLast.setTextColor(ColorTokens.TEXT_HINT);
-                tvLast.setTextSize(10f);
-                tvLast.setGravity(Gravity.CENTER);
-                tvLast.setBackgroundColor(ColorTokens.TABLE_HEADER_BG);
-                tvLast.setPadding(4, 3, 4, 3);
-                tvLast.setSingleLine(true);
-                inner.addView(tvLast);
-            }
+            TextView tvLast = new TextView(this);
+            tvLast.setText("...");
+            tvLast.setTextColor(ColorTokens.TEXT_HINT);
+            tvLast.setTextSize(10f);
+            tvLast.setGravity(Gravity.CENTER);
+            tvLast.setBackgroundColor(ColorTokens.TABLE_HEADER_BG);
+            tvLast.setPadding(4, 3, 4, 3);
+            tvLast.setSingleLine(true);
+            tvLast.setVisibility(View.GONE);
+            inner.addView(tvLast);
+            loadLastWorkoutInfo(tvLast, name);
         }
 
         // 选中角标改为底部条 — 已通过描边+底色表示
@@ -467,31 +466,40 @@ public class StrengthActivity extends AppCompatActivity {
         return card;
     }
 
-    /** 查询该动作的上次训练记录摘要 + 渐进超负荷建议 */
-    private String getLastWorkoutInfo(String exerciseName) {
-        try {
-            List<StrengthRecord> all = AppDatabase.getInstance(this).strengthRecordDao().getAllRecords();
-            for (int i = all.size() - 1; i >= 0; i--) {
-                StrengthRecord r = all.get(i);
-                if (r.getExercisesJson() == null) continue;
-                org.json.JSONArray arr = new org.json.JSONArray(r.getExercisesJson());
-                for (int j = 0; j < arr.length(); j++) {
-                    org.json.JSONObject ex = arr.getJSONObject(j);
-                    if (exerciseName.equals(ex.optString("name"))) {
-                        org.json.JSONArray sets = ex.getJSONArray("sets");
-                        if (sets.length() > 0) {
-                            org.json.JSONObject last = sets.getJSONObject(sets.length() - 1);
-                            double w = last.optDouble("weight");
-                            int reps = last.optInt("reps");
-                            // 如果完成了8次以上，建议+2.5kg
-                            double suggest = reps >= 8 ? Math.round((w + 2.5) / 2.5) * 2.5 : w;
-                            return suggest > w ? w + "kg → " + suggest + "kg" : w + "kg×" + reps;
+    /** 查询该动作的上次训练记录摘要 + 渐进超负荷建议（异步加载，避免UI卡顿） */
+    private void loadLastWorkoutInfo(TextView targetView, String exerciseName) {
+        executor.execute(() -> {
+            String info = "";
+            try {
+                List<StrengthRecord> all = AppDatabase.getInstance(this).strengthRecordDao().getAllRecords();
+                outer: for (int i = all.size() - 1; i >= 0; i--) {
+                    StrengthRecord r = all.get(i);
+                    if (r.getExercisesJson() == null) continue;
+                    org.json.JSONArray arr = new org.json.JSONArray(r.getExercisesJson());
+                    for (int j = 0; j < arr.length(); j++) {
+                        org.json.JSONObject ex = arr.getJSONObject(j);
+                        if (exerciseName.equals(ex.optString("name"))) {
+                            org.json.JSONArray sets = ex.getJSONArray("sets");
+                            if (sets.length() > 0) {
+                                org.json.JSONObject last = sets.getJSONObject(sets.length() - 1);
+                                double w = last.optDouble("weight");
+                                int reps = last.optInt("reps");
+                                double suggest = reps >= 8 ? Math.round((w + 2.5) / 2.5) * 2.5 : w;
+                                info = suggest > w ? w + "kg → " + suggest + "kg" : w + "kg×" + reps;
+                            }
+                            break outer;
                         }
                     }
                 }
-            }
-        } catch (Exception ignored) {}
-        return "";
+            } catch (Exception ignored) {}
+            final String finalInfo = info;
+            runOnUiThread(() -> {
+                if (!finalInfo.isEmpty()) {
+                    targetView.setText(finalInfo);
+                    targetView.setVisibility(View.VISIBLE);
+                }
+            });
+        });
     }
 
     private void showExerciseDetail(String name, String accentColor) {

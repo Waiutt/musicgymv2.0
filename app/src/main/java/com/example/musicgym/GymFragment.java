@@ -57,16 +57,17 @@ public class GymFragment extends Fragment {
             List<StrengthRecord> sRecs = db.strengthRecordDao().getAllRecords();
 
             requireActivity().runOnUiThread(() -> {
-                // 跑步: "上次 6月3日 · 5.2km"
+                if (records == null || records.isEmpty()) return;
                 setLastWorkout(view, R.id.gym_card_running, records, "Running");
                 setLastWorkout(view, R.id.gym_card_cycling, records, "Cycling");
                 setLastWorkout(view, R.id.gym_card_walking, records, "Walking");
-                // 力量: "上次 6月2日 · 45min"
-                if (!sRecs.isEmpty()) {
+                if (sRecs != null && !sRecs.isEmpty()) {
                     StrengthRecord r = sRecs.get(0);
-                    String info = "上次 " + (r.getDate() != null ? r.getDate().substring(5) : "") +
-                            " · " + (r.getDurationSeconds() / 60) + "min";
-                    setCardSubtitle(view, R.id.gym_card_strength, info);
+                    if (r.getDate() != null) {
+                        String info = "上次 " + r.getDate().substring(5) +
+                                " · " + (r.getDurationSeconds() / 60) + "min";
+                        setCardSubtitle(view, R.id.gym_card_strength, info);
+                    }
                 }
             });
             exec.shutdown();
