@@ -73,10 +73,10 @@ public class WorkoutActivity extends AppCompatActivity implements AMapLocationLi
     private double lastSegmentDist;
     private List<LatLng> segmentPoints = new ArrayList<>();
     private static final int[] PACE_COLORS = {
-            Color.parseColor("#38bdf8"), // 慢: 蓝
-            Color.parseColor("#22c55e"), // 中: 绿
-            Color.parseColor("#f59e0b"), // 快: 橙
-            Color.parseColor("#ef4444"), // 冲刺: 红
+            ColorTokens.ACCENT_CYAN,       // 慢: 蓝
+            ColorTokens.ACCENT_GREEN,      // 中: 绿
+            ColorTokens.ACCENT_AMBER,      // 快: 橙
+            ColorTokens.ACCENT_RED,        // 冲刺: 红
     };
 
     // 公里标记

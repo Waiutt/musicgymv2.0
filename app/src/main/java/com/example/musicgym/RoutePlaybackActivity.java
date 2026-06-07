@@ -90,7 +90,7 @@ public class RoutePlaybackActivity extends AppCompatActivity {
         // 绘制完整路线
         aMap.addPolyline(new PolylineOptions()
                 .addAll(pathPoints)
-                .width(14f).color(Color.parseColor("#22c55e"))
+                .width(14f).color(ColorTokens.ACCENT_GREEN)
                 .useGradient(true));
 
         // 缩放到包含全路线

@@ -72,6 +72,7 @@ public class MusicFragment extends Fragment {
     private ScrollView playlistScroll;
     private EditText etSearch;
     private TextView tvEmptyHint;
+    private boolean pendingNotifyPermission;
     private TextView btnEq;
 
     private EqualizerManager eqManager;
@@ -110,6 +111,19 @@ public class MusicFragment extends Fragment {
                     vm.setTrack("需要存储权限", "无法访问音频");
                 }
             });
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] perms,
+                                           @NonNull int[] results) {
+        super.onRequestPermissionsResult(requestCode, perms, results);
+        if (requestCode == 200 && results.length > 0
+                && results[0] == PackageManager.PERMISSION_GRANTED
+                && pendingNotifyPermission) {
+            pendingNotifyPermission = false;
+            // 权限已授予，重新启动前台服务
+            notifyService(true);
+        }
+    }
 
     @Nullable @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container,
@@ -491,11 +505,12 @@ public class MusicFragment extends Fragment {
         if (playing && Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
             if (ContextCompat.checkSelfPermission(requireContext(),
                     Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED) {
+                pendingNotifyPermission = true;
                 requestPermissions(new String[]{Manifest.permission.POST_NOTIFICATIONS}, 200);
-                // 权限未授予时不启动前台服务，但仍可本地播放
                 return;
             }
         }
+        pendingNotifyPermission = false;
         Intent intent = new Intent(getContext(), MusicService.class);
         intent.setAction(MusicService.ACTION_UPDATE);
         MusicViewModel.TrackInfo t = vm.getCurrentTrack();

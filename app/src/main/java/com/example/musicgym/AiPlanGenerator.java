@@ -99,13 +99,17 @@ public class AiPlanGenerator {
                             .getString("content");
                     cb.onResult(content, null);
                 } else {
-                    BufferedReader br = new BufferedReader(
-                            new InputStreamReader(conn.getErrorStream()));
-                    StringBuilder sb = new StringBuilder();
-                    String line;
-                    while ((line = br.readLine()) != null) sb.append(line);
-                    br.close();
-                    cb.onResult(null, "API Error " + code + ": " + sb.toString());
+                    String errMsg = "API Error " + code;
+                    if (conn.getErrorStream() != null) {
+                        BufferedReader br = new BufferedReader(
+                                new InputStreamReader(conn.getErrorStream()));
+                        StringBuilder sb = new StringBuilder();
+                        String line;
+                        while ((line = br.readLine()) != null) sb.append(line);
+                        br.close();
+                        errMsg += ": " + sb.toString();
+                    }
+                    cb.onResult(null, errMsg);
                 }
                 conn.disconnect();
             } catch (Exception e) {
