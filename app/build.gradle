@@ -22,8 +22,8 @@ android {
         applicationId "com.example.musicgym"
         minSdk 34
         targetSdk 36
-        versionCode 24
-        versionName "3.7"
+        versionCode 25
+        versionName "3.8"
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
 
@@ -35,8 +35,18 @@ android {
         manifestPlaceholders = [AMAP_API_KEY: localProperties.getProperty('AMAP_API_KEY', '')]
     }
 
+    signingConfigs {
+        release {
+            storeFile file("musicgym.jks")
+            storePassword "musicgym2026"
+            keyAlias "musicgym"
+            keyPassword "musicgym2026"
+        }
+    }
+
     buildTypes {
         release {
+            signingConfig signingConfigs.release
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
