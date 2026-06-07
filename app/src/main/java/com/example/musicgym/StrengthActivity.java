@@ -21,6 +21,7 @@ import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 
 import org.json.JSONArray;
+import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -102,6 +103,17 @@ public class StrengthActivity extends AppCompatActivity {
         btnBack.setOnClickListener(v -> finish());
         btnStart.setOnClickListener(v -> startWorkout());
         btnTemplate.setOnClickListener(v -> showTemplateMenu());
+
+        // AI 按钮 — 动态添加到模板按钮旁边
+        TextView btnAI = new TextView(this);
+        btnAI.setText("🤖"); btnAI.setTextSize(14f);
+        btnAI.setGravity(Gravity.CENTER);
+        btnAI.setBackgroundColor(ColorTokens.BG_INPUT);
+        btnAI.setPadding(UiUtils.dp(this, 8), UiUtils.dp(this, 4),
+                UiUtils.dp(this, 8), UiUtils.dp(this, 4));
+        btnAI.setOnClickListener(v -> showAiPlanDialog());
+        ((ViewGroup) btnTemplate.getParent()).addView(btnAI,
+                ((ViewGroup) btnTemplate.getParent()).indexOfChild(btnTemplate) + 1);
 
         etSearch.addTextChangedListener(new TextWatcher() {
             @Override public void beforeTextChanged(CharSequence s, int st, int c, int a) {}
@@ -660,6 +672,147 @@ public class StrengthActivity extends AppCompatActivity {
         int c = selectedExercises.size();
         tvSelectedCount.setText("已选 " + c + " 项"); tvBottomCount.setText(c + " 个动作已选");
         btnStart.setAlpha(c > 0 ? 1f : 0.4f);
+    }
+
+    private String readApiKey() {
+        try {
+            java.util.Properties p = new java.util.Properties();
+            String path = new java.io.File(getApplicationInfo().sourceDir)
+                    .getParent() + "/../../local.properties";
+            p.load(new java.io.FileInputStream(path));
+            return p.getProperty("DEEPSEEK_API_KEY", "");
+        } catch (Exception e) { return ""; }
+    }
+
+    private void showAiPlanDialog() {
+        // 读取 API Key
+        final String apiKey = readApiKey();
+
+        if (apiKey.isEmpty()) {
+            Toast.makeText(this, "API Key 未配置", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        String[] goals = {"增肌 (肌肉肥大)", "减脂 (保留肌肉)", "力量举 (提升1RM)"};
+        String[] days = {"3", "4", "5", "6"};
+        new AlertDialog.Builder(this)
+                .setTitle("AI 训练计划")
+                .setSingleChoiceItems(goals, 0, null)
+                .setPositiveButton("下一步", (d1, w1) -> {
+                    int goalIdx = ((AlertDialog) d1).getListView()
+                            .getCheckedItemPosition();
+                    new AlertDialog.Builder(this)
+                            .setTitle("每周训练天数")
+                            .setSingleChoiceItems(days, 1, null)
+                            .setPositiveButton("生成", (d2, w2) -> {
+                                int dayIdx = ((AlertDialog) d2).getListView()
+                                        .getCheckedItemPosition();
+                                int dpw = Integer.parseInt(days[Math.max(0, dayIdx)]);
+
+                                // 显示加载
+                                TextView loading = new TextView(this);
+                                loading.setText("🤖 DeepSeek 正在分析你的训练数据...\n可能需要 10-20 秒");
+                                loading.setTextColor(ColorTokens.TEXT_SECONDARY);
+                                loading.setTextSize(14f);
+                                loading.setGravity(Gravity.CENTER);
+                                loading.setPadding(40, 40, 40, 40);
+                                AlertDialog loadDlg = new AlertDialog.Builder(this)
+                                        .setView(loading).setCancelable(false).show();
+
+                                AiPlanGenerator gen = new AiPlanGenerator(apiKey);
+                                gen.generate(this, goals[Math.max(0, goalIdx)], dpw,
+                                        (json, err) -> {
+                                            runOnUiThread(() -> {
+                                                loadDlg.dismiss();
+                                                if (err != null) {
+                                                    new AlertDialog.Builder(this)
+                                                            .setTitle("生成失败")
+                                                            .setMessage(err)
+                                                            .setPositiveButton("确定", null)
+                                                            .show();
+                                                } else {
+                                                    showPlanResult(json);
+                                                }
+                                            });
+                                        });
+                            }).setNegativeButton("取消", null).show();
+                }).setNegativeButton("取消", null).show();
+    }
+
+    private void showPlanResult(String json) {
+        try {
+            // 尝试解析 JSON
+            String text = json;
+            // 提取 JSON 代码块
+            int start = json.indexOf("{");
+            int end = json.lastIndexOf("}");
+            if (start >= 0 && end > start) text = json.substring(start, end + 1);
+
+            JSONObject plan = new JSONObject(text);
+            String rationale = plan.optString("rationale", "");
+            JSONArray weeks = plan.optJSONArray("weeks");
+
+            StringBuilder display = new StringBuilder();
+            if (!rationale.isEmpty())
+                display.append("📋 ").append(rationale).append("\n\n");
+
+            if (weeks != null) {
+                for (int w = 0; w < weeks.length(); w++) {
+                    JSONObject week = weeks.getJSONObject(w);
+                    display.append("━━━ 第").append(week.optInt("week"))
+                            .append("周: ").append(week.optString("focus")).append(" ━━━\n");
+                    JSONArray days = week.optJSONArray("days");
+                    if (days != null) {
+                        for (int d = 0; d < days.length(); d++) {
+                            JSONObject day = days.getJSONObject(d);
+                            display.append("Day ").append(day.optInt("day"))
+                                    .append(" - ").append(day.optString("focus")).append("\n");
+                            JSONArray exs = day.optJSONArray("exercises");
+                            if (exs != null) {
+                                for (int e = 0; e < exs.length(); e++) {
+                                    JSONObject ex = exs.getJSONObject(e);
+                                    display.append("  · ").append(ex.optString("name"))
+                                            .append("  ").append(ex.optInt("sets")).append("组×")
+                                            .append(ex.optString("reps"))
+                                            .append("  RPE").append(ex.optString("rpe"))
+                                            .append("\n");
+                                }
+                            }
+                        }
+                    }
+                    display.append("\n");
+                }
+            }
+
+            // 保存按钮
+            final String finalJson = json;
+            new AlertDialog.Builder(this)
+                    .setTitle("🤖 AI 训练计划")
+                    .setMessage(display.toString())
+                    .setPositiveButton("保存为模板", (d, w) -> {
+                        savePlanAsTemplate(rationale, finalJson);
+                    })
+                    .setNegativeButton("关闭", null)
+                    .show();
+        } catch (Exception e) {
+            // JSON 解析失败 → 显示原始文本
+            new AlertDialog.Builder(this)
+                    .setTitle("🤖 AI 训练计划")
+                    .setMessage(json)
+                    .setPositiveButton("关闭", null)
+                    .show();
+        }
+    }
+
+    private void savePlanAsTemplate(String nameParam, String json) {
+        String name = nameParam;
+        if (name.isEmpty()) name = "AI计划";
+        if (name.length() > 30) name = name.substring(0, 30);
+        final String finalName = name;
+        WorkoutTemplate t = new WorkoutTemplate(finalName, json);
+        executor.execute(() -> AppDatabase.getInstance(this).workoutTemplateDao().insert(t));
+        runOnUiThread(() -> Toast.makeText(this, "已保存为模板: " + finalName,
+                Toast.LENGTH_SHORT).show());
     }
 
     private void startWorkout() {
