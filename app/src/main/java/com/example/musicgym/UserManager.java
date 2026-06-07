@@ -14,7 +14,7 @@ import java.util.Map;
 /** Firebase 用户管理 — 匿名登录 + 昵称/头像。Firebase 不可用时降级为离线模式 */
 public class UserManager {
 
-    private static UserManager instance;
+    private static volatile UserManager instance;
     private FirebaseAuth auth;
     private FirebaseFirestore db;
     private boolean firebaseAvailable;
@@ -42,7 +42,13 @@ public class UserManager {
     }
 
     public static UserManager get(Context ctx) {
-        if (instance == null) instance = new UserManager(ctx.getApplicationContext());
+        if (instance == null) {
+            synchronized (UserManager.class) {
+                if (instance == null) {
+                    instance = new UserManager(ctx.getApplicationContext());
+                }
+            }
+        }
         return instance;
     }
 

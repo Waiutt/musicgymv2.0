@@ -467,6 +467,10 @@ public class MusicFragment extends Fragment {
             if (autoPlay) startPlayback(); else vm.setPlaying(false);
         } catch (Exception e) {
             Toast.makeText(getContext(), "无法播放", Toast.LENGTH_SHORT).show();
+            if (mediaPlayer != null) {
+                try { mediaPlayer.release(); } catch (Exception ignored) {}
+                mediaPlayer = null;
+            }
         }
         buildPlaylistUI();
     }

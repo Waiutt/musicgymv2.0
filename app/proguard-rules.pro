@@ -37,6 +37,11 @@
 # ViewModel
 -keep class * extends androidx.lifecycle.ViewModel { *; }
 
+# 公开内部类（跨文件引用）
+-keep class com.example.musicgym.CommunityRepository$CommunityPost { *; }
+-keep class com.example.musicgym.MusicViewModel$TrackInfo { *; }
+-keep class com.example.musicgym.StrengthWorkoutActivity$SetEntry { *; }
+
 # 保留行号
 -keepattributes SourceFile,LineNumberTable
 -renamesourcefileattribute SourceFile
