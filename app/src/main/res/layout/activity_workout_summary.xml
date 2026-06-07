@@ -141,6 +141,20 @@
             android:layout_marginBottom="20dp"
             android:background="@color/bg_input" />
 
+        <!-- 查看路线 -->
+        <TextView
+            android:id="@+id/summary_btn_route"
+            android:layout_width="match_parent"
+            android:layout_height="48dp"
+            android:layout_marginBottom="12dp"
+            android:background="@color/bg_card"
+            android:gravity="center"
+            android:text="🗺 查看路线回放"
+            android:textColor="@color/cyber_cyan"
+            android:textSize="16sp"
+            android:textStyle="bold"
+            android:visibility="gone" />
+
         <!-- 完成按钮 -->
         <TextView
             android:id="@+id/summary_btn_done"

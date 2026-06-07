@@ -365,6 +365,7 @@ public class WorkoutActivity extends AppCompatActivity implements AMapLocationLi
                     intent.putExtra("duration_sec", totalSeconds);
                     intent.putExtra("calories", cal);
                     intent.putExtra("date", date);
+                    intent.putExtra("path_json", serializePathPoints());
                     startActivity(intent);
                     finish();
                 })

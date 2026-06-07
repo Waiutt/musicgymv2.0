@@ -45,6 +45,7 @@
         <activity android:name=".SettingsActivity" />
         <activity android:name=".PrivacyPolicyActivity" />
         <activity android:name=".OnboardingActivity" />
+        <activity android:name=".RoutePlaybackActivity" />
 
         <service
             android:name=".MusicService"

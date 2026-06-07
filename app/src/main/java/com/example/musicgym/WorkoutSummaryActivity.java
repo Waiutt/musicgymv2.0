@@ -1,6 +1,8 @@
 package com.example.musicgym;
 
+import android.content.Intent;
 import android.os.Bundle;
+import android.view.View;
 import android.widget.TextView;
 
 import androidx.appcompat.app.AppCompatActivity;
@@ -19,6 +21,21 @@ public class WorkoutSummaryActivity extends AppCompatActivity {
         int durSec = getIntent().getIntExtra("duration_sec", 0);
         int cal = getIntent().getIntExtra("calories", 0);
         String date = getIntent().getStringExtra("date");
+        String pathJson = getIntent().getStringExtra("path_json");
+
+        // 添加"查看路线"按钮
+        TextView btnRoute = findViewById(R.id.summary_btn_route);
+        if (pathJson != null && !pathJson.isEmpty() && !pathJson.equals("[]")) {
+            btnRoute.setVisibility(View.VISIBLE);
+            btnRoute.setOnClickListener(v -> {
+                Intent i = new Intent(this, RoutePlaybackActivity.class);
+                i.putExtra("path_json", pathJson);
+                i.putExtra("sport_type", sport);
+                i.putExtra("distance_km", (float) distKm);
+                i.putExtra("duration_sec", durSec);
+                startActivity(i);
+            });
+        }
 
         TextView tvSport = findViewById(R.id.summary_sport);
         tvSport.setText(sport + " 完成 ✓");
