@@ -142,9 +142,7 @@ public class WorkoutActivity extends AppCompatActivity implements AMapLocationLi
         executorService = Executors.newSingleThreadExecutor();
 
         mapView.onCreate(savedInstanceState);
-        if (aMap == null) {
-            aMap = mapView.getMap();
-        }
+        aMap = mapView.getMap();
 
         btnBack.setOnClickListener(v -> {
             if (isTracking && !isPaused) {
@@ -171,6 +169,7 @@ public class WorkoutActivity extends AppCompatActivity implements AMapLocationLi
     }
 
     private void initMapLocationStyle() {
+        if (aMap == null) return;
         try {
             MyLocationStyle style = new MyLocationStyle();
             style.myLocationType(MyLocationStyle.LOCATION_TYPE_LOCATION_ROTATE);

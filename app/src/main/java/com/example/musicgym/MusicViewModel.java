@@ -147,15 +147,23 @@ public class MusicViewModel extends AndroidViewModel {
     public void toggleFavorite() {
         TrackInfo t = getCurrentTrack();
         if (t == null) return;
-        if (favSet.contains(t.path)) favSet.remove(t.path);
-        else favSet.add(t.path);
+        synchronized (favSet) {
+            if (favSet.contains(t.path)) favSet.remove(t.path);
+            else favSet.add(t.path);
+        }
         favPrefs.edit().putStringSet("favs", new LinkedHashSet<>(favSet)).apply();
-        isFavorited.postValue(favSet.contains(t.path));
+        synchronized (favSet) {
+            isFavorited.postValue(favSet.contains(t.path));
+        }
     }
-    public boolean isFavorite(String path) { return favSet.contains(path); }
+    public boolean isFavorite(String path) {
+        synchronized (favSet) { return favSet.contains(path); }
+    }
     private void updateFavorite() {
         TrackInfo t = getCurrentTrack();
-        isFavorited.postValue(t != null && favSet.contains(t.path));
+        synchronized (favSet) {
+            isFavorited.postValue(t != null && favSet.contains(t.path));
+        }
     }
 
     // ── 均衡器 ──

@@ -293,8 +293,8 @@ public class StatsViewModel extends AndroidViewModel {
         }
     }
 
-    public List<WorkoutRecord> getCardioRecords() { return cardioRecords; }
-    public List<StrengthRecord> getStrengthRecords() { return strengthRecords; }
+    public List<WorkoutRecord> getCardioRecords() { return new ArrayList<>(cardioRecords); }
+    public List<StrengthRecord> getStrengthRecords() { return new ArrayList<>(strengthRecords); }
 
     @Override
     protected void onCleared() {
@@ -310,7 +310,7 @@ public class StatsViewModel extends AndroidViewModel {
         for (WorkoutRecord r : cardioRecords) {
             if (r.getDistanceKm() > maxDist) maxDist = r.getDistanceKm();
             if (r.getCalories() > maxCal) maxCal = r.getCalories();
-            if (r.getDurationSeconds() > 0) {
+            if (r.getDurationSeconds() > 0 && r.getDistanceKm() > 0) {
                 double pace = (double) r.getDurationSeconds() / r.getDistanceKm();
                 if (r.getDistanceKm() > 0.5 && pace < bestPace) bestPace = pace;
             }

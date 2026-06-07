@@ -831,6 +831,11 @@ public class StrengthActivity extends AppCompatActivity {
 
     static final int WRAP = UiUtils.WRAP, MATCH = UiUtils.MATCH;
 
+    @Override protected void onDestroy() {
+        super.onDestroy();
+        if (executor != null) executor.shutdown();
+    }
+
     static class MuscleGroup { String name,key,color; List<SubGroup> subGroups;
         MuscleGroup(String n,String k,String c,SubGroup...ss){name=n;key=k;color=c;subGroups=Arrays.asList(ss);} }
     static class SubGroup { String name; List<String> exercises;

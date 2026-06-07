@@ -35,6 +35,7 @@ public class MusicService extends Service {
     private String currentArtist = "";
     private boolean isPlaying = false;
     private MusicCallback callback;
+    private BroadcastReceiver receiver;
 
     public interface MusicCallback {
         void onPlayPause();
@@ -133,7 +134,7 @@ public class MusicService extends Service {
     // ── 接收通知栏按钮点击 ──
 
     private void registerCallbackReceiver() {
-        BroadcastReceiver receiver = new BroadcastReceiver() {
+        receiver = new BroadcastReceiver() {
             @Override
             public void onReceive(Context context, Intent intent) {
                 if (callback == null) return;
@@ -158,5 +159,6 @@ public class MusicService extends Service {
     public void onDestroy() {
         super.onDestroy();
         callback = null;
+        try { unregisterReceiver(receiver); } catch (Exception ignored) {}
     }
 }
