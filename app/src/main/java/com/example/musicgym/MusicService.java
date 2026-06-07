@@ -10,17 +10,12 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.Build;
-import android.os.Bundle;
 import android.os.IBinder;
-import android.support.v4.media.MediaMetadataCompat;
-import android.support.v4.media.session.MediaSessionCompat;
-import android.support.v4.media.session.PlaybackStateCompat;
 
 import androidx.annotation.Nullable;
 import androidx.core.app.NotificationCompat;
-import androidx.media.session.MediaButtonReceiver;
 
-/** 音乐后台播放 Foreground Service + 通知栏播放控制 + MediaSession（蓝牙/线控） */
+/** 音乐后台播放 Foreground Service + 通知栏播放控制 */
 public class MusicService extends Service {
 
     private static final String CHANNEL_ID = "music_playback";
@@ -35,16 +30,11 @@ public class MusicService extends Service {
     public static final String EXTRA_TITLE = "title";
     public static final String EXTRA_ARTIST = "artist";
     public static final String EXTRA_IS_PLAYING = "is_playing";
-    public static final String EXTRA_DURATION = "duration";
 
     private String currentTitle = "";
     private String currentArtist = "";
-    private long currentDuration = 0;
     private boolean isPlaying = false;
     private MusicCallback callback;
-
-    private MediaSessionCompat mediaSession;
-    private PlaybackStateCompat.Builder stateBuilder;
 
     public interface MusicCallback {
         void onPlayPause();
@@ -56,72 +46,19 @@ public class MusicService extends Service {
     public void onCreate() {
         super.onCreate();
         createNotificationChannel();
-        setupMediaSession();
         registerCallbackReceiver();
     }
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
-        if (intent != null) {
-            // 处理蓝牙/线控的媒体按钮
-            MediaButtonReceiver.handleIntent(mediaSession, intent);
-
-            if (ACTION_UPDATE.equals(intent.getAction())) {
-                currentTitle = intent.getStringExtra(EXTRA_TITLE);
-                currentArtist = intent.getStringExtra(EXTRA_ARTIST);
-                isPlaying = intent.getBooleanExtra(EXTRA_IS_PLAYING, false);
-                currentDuration = intent.getLongExtra(EXTRA_DURATION, 0);
-                updateNotification();
-            }
+        if (intent != null && ACTION_UPDATE.equals(intent.getAction())) {
+            currentTitle = intent.getStringExtra(EXTRA_TITLE);
+            currentArtist = intent.getStringExtra(EXTRA_ARTIST);
+            isPlaying = intent.getBooleanExtra(EXTRA_IS_PLAYING, false);
+            updateNotification();
         }
         return START_STICKY;
     }
-
-    // ── MediaSession ──
-
-    private void setupMediaSession() {
-        mediaSession = new MediaSessionCompat(this, "MusicGym");
-
-        // 播放状态构建器
-        stateBuilder = new PlaybackStateCompat.Builder()
-                .setActions(
-                        PlaybackStateCompat.ACTION_PLAY
-                                | PlaybackStateCompat.ACTION_PAUSE
-                                | PlaybackStateCompat.ACTION_PLAY_PAUSE
-                                | PlaybackStateCompat.ACTION_SKIP_TO_NEXT
-                                | PlaybackStateCompat.ACTION_SKIP_TO_PREVIOUS
-                                | PlaybackStateCompat.ACTION_STOP);
-
-        mediaSession.setPlaybackState(stateBuilder.build());
-        mediaSession.setActive(true);
-
-        // 回调：蓝牙耳机/线控按键 → 通知栏同款动作
-        mediaSession.setCallback(new MediaSessionCompat.Callback() {
-            @Override
-            public void onPlay() {
-                if (callback != null) callback.onPlayPause();
-            }
-
-            @Override
-            public void onPause() {
-                if (callback != null) callback.onPlayPause();
-            }
-
-            @Override
-            public void onSkipToNext() {
-                if (callback != null) callback.onNext();
-            }
-
-            @Override
-            public void onSkipToPrevious() {
-                if (callback != null) callback.onPrev();
-            }
-        });
-    }
-
-    // ── 公开方法（Fragment 调用） ──
-
-    public void setCallback(MusicCallback cb) { this.callback = cb; }
 
     public class LocalBinder extends android.os.Binder {
         public MusicService getService() { return MusicService.this; }
@@ -144,12 +81,9 @@ public class MusicService extends Service {
         }
     }
 
-    // ── 通知栏构建（含播放控制按钮 + MediaSession 令牌） ──
+    // ── 通知栏构建（含播放控制按钮） ──
 
     private void updateNotification() {
-        // 更新 MediaSession 状态
-        updateMediaSessionState();
-
         // 点击通知 → 回 App
         Intent openIntent = new Intent(this, MainActivity.class);
         openIntent.setFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
@@ -172,8 +106,8 @@ public class MusicService extends Service {
                 PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
 
         NotificationCompat.Builder builder = new NotificationCompat.Builder(this, CHANNEL_ID)
-                .setContentTitle(currentTitle.isEmpty() ? "MusicGym" : currentTitle)
-                .setContentText(currentArtist.isEmpty() ? "未在播放" : currentArtist)
+                .setContentTitle(currentTitle)
+                .setContentText(currentArtist)
                 .setSmallIcon(isPlaying ? android.R.drawable.ic_media_play : android.R.drawable.ic_media_pause)
                 .setContentIntent(contentPI)
                 .setOngoing(true)
@@ -184,7 +118,6 @@ public class MusicService extends Service {
                         "播放/暂停", playPausePI)
                 .addAction(android.R.drawable.ic_media_next, "下一首", nextPI)
                 .setStyle(new androidx.media.app.NotificationCompat.MediaStyle()
-                        .setMediaSession(mediaSession.getSessionToken())
                         .setShowActionsInCompactView(0, 1, 2));
 
         Notification notification = builder.build();
@@ -195,27 +128,6 @@ public class MusicService extends Service {
         } else {
             startForeground(NOTIFICATION_ID, notification);
         }
-    }
-
-    // ── 更新 MediaSession 播放状态 ──
-
-    private void updateMediaSessionState() {
-        int state = isPlaying
-                ? PlaybackStateCompat.STATE_PLAYING
-                : PlaybackStateCompat.STATE_PAUSED;
-        stateBuilder.setState(state, PlaybackStateCompat.PLAYBACK_POSITION_UNKNOWN, 1.0f);
-        mediaSession.setPlaybackState(stateBuilder.build());
-
-        // 更新元数据（锁屏/蓝牙设备显示歌名）
-        MediaMetadataCompat.Builder meta = new MediaMetadataCompat.Builder()
-                .putString(MediaMetadataCompat.METADATA_KEY_TITLE,
-                        currentTitle.isEmpty() ? "MusicGym" : currentTitle)
-                .putString(MediaMetadataCompat.METADATA_KEY_ARTIST,
-                        currentArtist.isEmpty() ? "未知艺术家" : currentArtist);
-        if (currentDuration > 0) {
-            meta.putLong(MediaMetadataCompat.METADATA_KEY_DURATION, currentDuration);
-        }
-        mediaSession.setMetadata(meta.build());
     }
 
     // ── 接收通知栏按钮点击 ──
@@ -239,13 +151,12 @@ public class MusicService extends Service {
         registerReceiver(receiver, filter, Context.RECEIVER_NOT_EXPORTED);
     }
 
+    /** Fragment 设置回调，用于接收通知栏按钮事件 */
+    public void setCallback(MusicCallback cb) { this.callback = cb; }
+
     @Override
     public void onDestroy() {
         super.onDestroy();
         callback = null;
-        if (mediaSession != null) {
-            mediaSession.setActive(false);
-            mediaSession.release();
-        }
     }
 }
