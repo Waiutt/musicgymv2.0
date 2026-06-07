@@ -6,9 +6,13 @@ import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.Color;
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
+import android.provider.MediaStore;
 import android.text.InputType;
 import android.view.Gravity;
 import android.view.LayoutInflater;
@@ -16,14 +20,20 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ScrollView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
+
+import java.io.File;
+import java.io.FileOutputStream;
 
 import com.github.mikephil.charting.charts.LineChart;
 import com.github.mikephil.charting.data.Entry;
@@ -51,6 +61,32 @@ public class ProfileFragment extends Fragment {
     private SharedPreferences prefs;
     private AppDatabase db;
     private ExecutorService executor;
+    private ImageView ivAvatar;
+    private Uri avatarUri;
+
+    private final ActivityResultLauncher<Intent> cameraLauncher =
+            registerForActivityResult(new ActivityResultContracts.StartActivityForResult(), result -> {
+                if (result.getResultCode() == android.app.Activity.RESULT_OK && result.getData() != null) {
+                    Bundle extras = result.getData().getExtras();
+                    Bitmap bmp = (Bitmap) extras.get("data");
+                    if (bmp != null) {
+                        ivAvatar.setImageBitmap(bmp);
+                        saveAvatarToCache(bmp);
+                    }
+                }
+            });
+
+    private final ActivityResultLauncher<String> galleryLauncher =
+            registerForActivityResult(new ActivityResultContracts.GetContent(), uri -> {
+                if (uri != null) {
+                    try {
+                        Bitmap bmp = MediaStore.Images.Media.getBitmap(
+                                requireActivity().getContentResolver(), uri);
+                        ivAvatar.setImageBitmap(bmp);
+                        saveAvatarToCache(bmp);
+                    } catch (Exception ignored) {}
+                }
+            });
 
     @Nullable @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
@@ -71,6 +107,20 @@ public class ProfileFragment extends Fragment {
 
         executor.execute(this::migrateWeightHistoryIfNeeded);
         loadUserData();
+
+        // 头像点击
+        ivAvatar = view.findViewById(R.id.iv_avatar);
+        ivAvatar.setOnClickListener(v -> {
+            new AlertDialog.Builder(requireContext())
+                    .setTitle("设置头像")
+                    .setItems(new String[]{"📷 拍照", "🖼 从相册选择"}, (d, which) -> {
+                        if (which == 0) cameraLauncher.launch(
+                                new Intent(MediaStore.ACTION_IMAGE_CAPTURE));
+                        else galleryLauncher.launch("image/*");
+                    }).show();
+        });
+        // 加载已缓存的头像
+        loadCachedAvatar();
 
         // 体重趋势图 — 动态插入到按钮上方
         ViewGroup rootLayout = (ViewGroup) view.findViewById(R.id.profile_root);
@@ -223,6 +273,27 @@ public class ProfileFragment extends Fragment {
             }
             return streak;
         } catch (Exception e) { return 0; }
+    }
+
+    private void saveAvatarToCache(Bitmap bmp) {
+        try {
+            File dir = new File(requireContext().getCacheDir(), "avatars");
+            dir.mkdirs();
+            File f = new File(dir, "avatar.png");
+            FileOutputStream os = new FileOutputStream(f);
+            bmp.compress(Bitmap.CompressFormat.PNG, 90, os);
+            os.close();
+            prefs.edit().putString("avatar_path", f.getAbsolutePath()).apply();
+        } catch (Exception ignored) {}
+    }
+
+    private void loadCachedAvatar() {
+        String path = prefs.getString("avatar_path", "");
+        if (!path.isEmpty()) {
+            try {
+                ivAvatar.setImageBitmap(BitmapFactory.decodeFile(path));
+            } catch (Exception ignored) {}
+        }
     }
 
     private int dp2px(int dp) { return (int) (dp * getResources().getDisplayMetrics().density); }

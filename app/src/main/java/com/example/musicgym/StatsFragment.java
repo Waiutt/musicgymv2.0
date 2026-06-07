@@ -92,12 +92,17 @@ public class StatsFragment extends Fragment {
         // 折线图
         vm.getChartBundle().observe(getViewLifecycleOwner(), this::renderChart);
 
-        // 摘要卡片
+        // 摘要卡片（含趋势）
         vm.getSummaryStats().observe(getViewLifecycleOwner(), s -> {
             tvCardDistance.setText(s.distance);
             tvCardDuration.setText(s.duration);
             tvCardWorkouts.setText(s.workouts);
             tvCardCalories.setText(s.calories);
+            // 趋势指示
+            String trend = s.trend;
+            if (trend != null && !trend.isEmpty()) {
+                ((TextView)((ViewGroup)tvCardDistance.getParent()).getChildAt(1)).setText(trend);
+            }
         });
 
         // 模式切换 → 更新单位标签和过滤 UI

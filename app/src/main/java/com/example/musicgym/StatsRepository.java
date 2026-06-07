@@ -156,11 +156,35 @@ public class StatsRepository {
             cnt++;
         }
         int h = (int) dur / 3600, m = ((int) dur % 3600) / 60;
-        return new SummaryStats(
+        SummaryStats ss = new SummaryStats(
                 String.format(Locale.getDefault(), "%.1f", dist),
                 String.format(Locale.getDefault(), "%dh %dm", h, m),
                 String.valueOf(cnt),
                 String.valueOf((int) cal));
+
+        // 趋势: 对比上月
+        java.util.Calendar cal2 = java.util.Calendar.getInstance();
+        cal2.set(year, month, 1);
+        cal2.add(java.util.Calendar.MONTH, -1);
+        int lastY = cal2.get(java.util.Calendar.YEAR);
+        int lastM = cal2.get(java.util.Calendar.MONTH);
+        String lastP = String.format(Locale.getDefault(), "%04d-%02d", lastY, lastM + 1);
+        float lastDist = 0; int lastCnt = 0;
+        for (WorkoutRecord r : records) {
+            if (r.getDate() != null && r.getDate().startsWith(lastP)) {
+                if ("All".equals(filter) || filter.equals(r.getSportType())) {
+                    lastDist += r.getDistanceKm(); lastCnt++;
+                }
+            }
+        }
+        if (lastDist > 0) {
+            double change = (dist - lastDist) / lastDist * 100;
+            ss.trend = String.format(Locale.getDefault(), "%s %.0f%%",
+                    change >= 0 ? "↑" : "↓", Math.abs(change));
+        } else if (dist > 0) {
+            ss.trend = "new";
+        }
+        return ss;
     }
 
     // ── Mock 数据 ──
@@ -213,6 +237,7 @@ public class StatsRepository {
 
     public static class SummaryStats {
         public final String distance, duration, workouts, calories;
+        public String trend;
         SummaryStats(String d, String dur, String w, String cal) {
             distance = d; duration = dur; workouts = w; calories = cal;
         }
