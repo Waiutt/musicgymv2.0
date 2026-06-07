@@ -282,6 +282,7 @@ public class StrengthWorkoutActivity extends AppCompatActivity {
             TextView tvName = new TextView(this);
             tvName.setText(exName); tvName.setTextColor(Color.WHITE); tvName.setTextSize(16f);
             tvName.setTypeface(null, Typeface.BOLD);
+            tvName.setSingleLine(true); tvName.setEllipsize(android.text.TextUtils.TruncateAt.END);
             tvName.setPadding(UiUtils.dp(this, 10), 0, 0, 0);
             LinearLayout.LayoutParams nameLp = new LinearLayout.LayoutParams(
                     0, ViewGroup.LayoutParams.WRAP_CONTENT, 1);

@@ -52,7 +52,9 @@
                     android:layout_weight="1"
                     android:text="User"
                     android:textColor="@color/text_gray"
-                    android:textSize="11sp" />
+                    android:textSize="11sp"
+                    android:maxLines="1"
+                    android:ellipsize="end" />
 
                 <TextView
                     android:id="@+id/tv_post_date"

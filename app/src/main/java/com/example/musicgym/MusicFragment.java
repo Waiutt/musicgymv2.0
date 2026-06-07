@@ -385,10 +385,12 @@ public class MusicFragment extends Fragment {
             info.setOrientation(LinearLayout.VERTICAL);
             info.setLayoutParams(new LinearLayout.LayoutParams(0, WRAP, 1));
             TextView tvT = new TextView(getContext());
-            tvT.setText(t.title); tvT.setTextColor(Color.WHITE); tvT.setTextSize(14f); tvT.setSingleLine(true);
+            tvT.setText(t.title); tvT.setTextColor(Color.WHITE); tvT.setTextSize(14f);
+            tvT.setSingleLine(true); tvT.setEllipsize(android.text.TextUtils.TruncateAt.END);
             info.addView(tvT);
             TextView tvA = new TextView(getContext());
-            tvA.setText(t.artist); tvA.setTextColor(ColorTokens.TEXT_SECONDARY); tvA.setTextSize(11f); tvA.setSingleLine(true);
+            tvA.setText(t.artist); tvA.setTextColor(ColorTokens.TEXT_SECONDARY); tvA.setTextSize(11f);
+            tvA.setSingleLine(true); tvA.setEllipsize(android.text.TextUtils.TruncateAt.END);
             info.addView(tvA); row.addView(info);
 
             TextView btnDel = new TextView(getContext());

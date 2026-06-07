@@ -58,8 +58,11 @@
         android:textColor="@color/white"
         android:textColorHint="@color/text_gray_mid"
         android:textSize="15sp"
+        android:maxLines="1"
+        android:maxLength="100"
         android:paddingStart="12dp"
-        android:paddingEnd="12dp" />
+        android:paddingEnd="12dp"
+        android:inputType="text" />
 
     <EditText
         android:id="@+id/create_et_content"
@@ -72,7 +75,9 @@
         android:textColor="@color/white"
         android:textColorHint="@color/text_gray_mid"
         android:textSize="14sp"
-        android:padding="12dp" />
+        android:maxLength="500"
+        android:padding="12dp"
+        android:inputType="textMultiLine" />
 
     <Button
         android:id="@+id/create_btn_publish"

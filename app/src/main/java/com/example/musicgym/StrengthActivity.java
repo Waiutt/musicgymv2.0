@@ -440,11 +440,12 @@ public class StrengthActivity extends AppCompatActivity {
 
         // 动作名称
         TextView tv = new TextView(this);
-        tv.setText(name.length() > 5 ? name.substring(0, 4) + ".." : name);
+        tv.setText(name);
         tv.setTextColor(isSelected ? ColorTokens.BRAND_ORANGE : Color.WHITE);
         tv.setTextSize(12f);
         tv.setTypeface(null, android.graphics.Typeface.BOLD);
         tv.setGravity(Gravity.CENTER);
+        tv.setMaxLines(2); tv.setEllipsize(android.text.TextUtils.TruncateAt.END);
         tv.setPadding(2, 8, 2, 2);
         inner.addView(tv);
 

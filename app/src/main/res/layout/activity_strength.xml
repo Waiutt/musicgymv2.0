@@ -63,7 +63,9 @@
             android:paddingStart="12dp"
             android:paddingEnd="12dp"
             android:textColor="@color/white"
-            android:textSize="13sp" />
+            android:textSize="13sp"
+            android:maxLines="1"
+            android:inputType="text" />
 
         <TextView
             android:id="@+id/strength_btn_template"

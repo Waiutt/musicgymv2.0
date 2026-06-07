@@ -24,10 +24,13 @@
                 android:id="@+id/tv_workout_sport"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:maxWidth="100dp"
                 android:text="跑步"
                 android:textColor="@color/accent_green"
                 android:textSize="16sp"
-                android:textStyle="bold" />
+                android:textStyle="bold"
+                android:maxLines="1"
+                android:ellipsize="end" />
 
             <TextView
                 android:id="@+id/tv_workout_date"
