@@ -24,6 +24,16 @@
             style="@style/CloseButton" />
 
         <TextView
+            android:id="@+id/route_btn_satellite"
+            android:layout_width="36dp"
+            android:layout_height="36dp"
+            android:layout_marginEnd="8dp"
+            android:background="@drawable/stats_filter_unselected"
+            android:gravity="center"
+            android:text="🛰"
+            android:textSize="14sp" />
+
+        <TextView
             android:id="@+id/route_tv_title"
             style="@style/ToolbarTitle"
             android:text="路线回放" />

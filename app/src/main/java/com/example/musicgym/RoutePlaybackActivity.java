@@ -32,7 +32,7 @@ public class RoutePlaybackActivity extends AppCompatActivity {
     private List<LatLng> pathPoints = new ArrayList<>();
     private Marker playMarker;
     private final Handler handler = new Handler(Looper.getMainLooper());
-    private boolean playing;
+    private boolean playing, isSatellite;
     private int playIndex;
 
     @Override
@@ -47,6 +47,10 @@ public class RoutePlaybackActivity extends AppCompatActivity {
         tvInfo = findViewById(R.id.route_info_text);
 
         findViewById(R.id.route_btn_back).setOnClickListener(v -> finish());
+        findViewById(R.id.route_btn_satellite).setOnClickListener(v -> {
+            isSatellite = !isSatellite;
+            aMap.setMapType(isSatellite ? AMap.MAP_TYPE_SATELLITE : AMap.MAP_TYPE_NIGHT);
+        });
         btnPlay.setOnClickListener(v -> togglePlayback());
 
         aMap = mapView.getMap();
@@ -54,6 +58,11 @@ public class RoutePlaybackActivity extends AppCompatActivity {
     }
 
     private void loadAndDrawRoute() {
+        // 暗色地图 + 交通
+        aMap.setMapType(AMap.MAP_TYPE_NIGHT);
+        aMap.setTrafficEnabled(true);
+        aMap.getUiSettings().setZoomControlsEnabled(false);
+
         String json = getIntent().getStringExtra("path_json");
         String sport = getIntent().getStringExtra("sport_type");
         float dist = getIntent().getFloatExtra("distance_km", 0);

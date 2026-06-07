@@ -159,7 +159,12 @@ public class WorkoutActivity extends AppCompatActivity implements AMapLocationLi
             style.radiusFillColor(Color.argb(30, 56, 189, 248));
             aMap.setMyLocationStyle(style);
             aMap.setMyLocationEnabled(true);
+            // 地图样式: 暗色模式(匹配App主题) + 交通路况
+            aMap.setMapType(AMap.MAP_TYPE_NIGHT);
+            aMap.setTrafficEnabled(true);
             aMap.getUiSettings().setMyLocationButtonEnabled(false);
+            aMap.getUiSettings().setZoomControlsEnabled(false);
+            aMap.getUiSettings().setCompassEnabled(true);
         } catch (Exception e) { e.printStackTrace(); }
     }
 
