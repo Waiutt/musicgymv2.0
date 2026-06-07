@@ -66,12 +66,18 @@ public class ShareFragment extends Fragment {
     private void loadPosts() {
         if (tvStatus != null) tvStatus.setText("加载中...");
         repo.loadPosts(result -> {
+            if (tvStatus == null) return;
+            if (result == null) {
+                // Firebase 不可用（离线或未配置）
+                tvStatus.setText("社区不可用，请检查网络连接");
+                posts.clear();
+                adapter.notifyDataSetChanged();
+                return;
+            }
             posts.clear();
             posts.addAll(result);
             adapter.notifyDataSetChanged();
-            if (tvStatus != null) {
-                tvStatus.setText(result.isEmpty() ? "暂无帖子，点击 + 发布第一条" : "");
-            }
+            tvStatus.setText(result.isEmpty() ? "暂无帖子，点击 + 发布第一条" : "");
         });
     }
 

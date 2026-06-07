@@ -37,44 +37,50 @@
     </LinearLayout>
 
     <!-- Sport Type Filter Chips -->
-    <LinearLayout
-        android:id="@+id/stats_filter_container"
+    <HorizontalScrollView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:paddingStart="16dp"
+        android:scrollbars="none"
         android:paddingTop="6dp"
-        android:paddingEnd="16dp"
         android:paddingBottom="10dp">
 
-        <TextView
-            android:id="@+id/stats_filter_all"
-            style="@style/FilterChip"
-            android:background="@drawable/stats_filter_selected"
-            android:text="All"
-            android:textColor="@color/white"
-            android:textStyle="bold" />
+        <LinearLayout
+            android:id="@+id/stats_filter_container"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:paddingStart="16dp"
+            android:paddingEnd="16dp">
 
-        <TextView
-            android:id="@+id/stats_filter_running"
-            style="@style/FilterChip"
-            android:text="Run" />
+            <TextView
+                android:id="@+id/stats_filter_all"
+                style="@style/FilterChip"
+                android:background="@drawable/stats_filter_selected"
+                android:text="All"
+                android:textColor="@color/white"
+                android:textStyle="bold" />
 
-        <TextView
-            android:id="@+id/stats_filter_cycling"
-            style="@style/FilterChip"
-            android:text="Ride" />
+            <TextView
+                android:id="@+id/stats_filter_running"
+                style="@style/FilterChip"
+                android:text="Run" />
 
-        <TextView
-            android:id="@+id/stats_filter_walking"
-            style="@style/FilterChip"
-            android:text="Walk" />
+            <TextView
+                android:id="@+id/stats_filter_cycling"
+                style="@style/FilterChip"
+                android:text="Ride" />
 
-        <TextView
-            android:id="@+id/stats_filter_strength"
-            style="@style/FilterChip"
-            android:text="Strength" />
-    </LinearLayout>
+            <TextView
+                android:id="@+id/stats_filter_walking"
+                style="@style/FilterChip"
+                android:text="Walk" />
+
+            <TextView
+                android:id="@+id/stats_filter_strength"
+                style="@style/FilterChip"
+                android:text="Strength" />
+        </LinearLayout>
+    </HorizontalScrollView>
 
     <!-- 日历热力图 -->
     <androidx.cardview.widget.CardView

@@ -48,7 +48,7 @@ public class CommunityRepository {
     }
 
     public void loadPosts(OnPostsLoadedListener listener) {
-        if (!available) { if (listener != null) listener.onLoaded(new ArrayList<>()); return; }
+        if (!available) { if (listener != null) listener.onLoaded(null); return; }
         try {
             db.collection("posts").orderBy("timestamp", Query.Direction.DESCENDING).limit(50).get()
                     .addOnCompleteListener(task -> {
@@ -56,9 +56,12 @@ public class CommunityRepository {
                         if (task.isSuccessful() && task.getResult() != null) {
                             for (DocumentSnapshot doc : task.getResult()) result.add(docToPost(doc));
                         }
-                        if (listener != null) listener.onLoaded(result);
+                        if (listener != null) {
+                            if (!task.isSuccessful()) listener.onLoaded(null); // network error
+                            else listener.onLoaded(result);
+                        }
                     });
-        } catch (Exception e) { if (listener != null) listener.onLoaded(new ArrayList<>()); }
+        } catch (Exception e) { if (listener != null) listener.onLoaded(null); }
     }
 
     public void loadPost(String postId, OnPostLoadedListener listener) {

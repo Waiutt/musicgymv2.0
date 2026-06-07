@@ -107,50 +107,54 @@
 
                 <TextView
                     android:id="@+id/rest_dur_60"
-                    android:layout_width="42dp"
-                    android:layout_height="32dp"
+                    android:layout_width="48dp"
+                    android:layout_height="36dp"
                     android:layout_marginEnd="8dp"
                     android:background="@color/bg_input"
                     android:gravity="center"
                     android:text="60s"
                     android:textColor="@color/text_gray_light"
-                    android:textSize="11sp"
-                    android:clickable="true" />
+                    android:textSize="12sp"
+                    android:clickable="true"
+                    android:focusable="true" />
 
                 <TextView
                     android:id="@+id/rest_dur_90"
-                    android:layout_width="42dp"
-                    android:layout_height="32dp"
+                    android:layout_width="48dp"
+                    android:layout_height="36dp"
                     android:layout_marginEnd="8dp"
                     android:background="@color/brand_orange"
                     android:gravity="center"
                     android:text="90s"
                     android:textColor="@color/white"
-                    android:textSize="11sp"
-                    android:clickable="true" />
+                    android:textSize="12sp"
+                    android:clickable="true"
+                    android:focusable="true" />
 
                 <TextView
                     android:id="@+id/rest_dur_120"
-                    android:layout_width="42dp"
-                    android:layout_height="32dp"
+                    android:layout_width="48dp"
+                    android:layout_height="36dp"
                     android:layout_marginEnd="8dp"
                     android:background="@color/bg_input"
                     android:gravity="center"
                     android:text="120s"
                     android:textColor="@color/text_gray_light"
-                    android:textSize="11sp"
-                    android:clickable="true" />
+                    android:textSize="12sp"
+                    android:clickable="true"
+                    android:focusable="true" />
 
                 <TextView
                     android:id="@+id/rest_dur_180"
-                    android:layout_width="42dp"
-                    android:layout_height="32dp"
+                    android:layout_width="48dp"
+                    android:layout_height="36dp"
                     android:background="@color/bg_input"
                     android:gravity="center"
                     android:text="180s"
                     android:textColor="@color/text_gray_light"
-                    android:textSize="11sp"
-                    android:clickable="true" />
+                    android:textSize="12sp"
+                    android:clickable="true"
+                    android:focusable="true" />
             </LinearLayout>
         </LinearLayout>
     </FrameLayout>

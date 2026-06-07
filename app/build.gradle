@@ -22,8 +22,8 @@ android {
         applicationId "com.example.musicgym"
         minSdk 34
         targetSdk 36
-        versionCode 36
-        versionName "5.1"
+        versionCode 37
+        versionName "5.2"
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
 
@@ -41,10 +41,10 @@ android {
 
     signingConfigs {
         release {
-            storeFile file("musicgym.jks")
-            storePassword "musicgym2026"
-            keyAlias "musicgym"
-            keyPassword "musicgym2026"
+            storeFile file(localProperties.getProperty('KEYSTORE_PATH', 'musicgym.jks'))
+            storePassword localProperties.getProperty('KEYSTORE_PASSWORD', '')
+            keyAlias localProperties.getProperty('KEY_ALIAS', '')
+            keyPassword localProperties.getProperty('KEY_PASSWORD', '')
         }
     }
 
