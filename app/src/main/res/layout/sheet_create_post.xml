@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="@color/bg_card"
+    android:orientation="vertical"
+    android:padding="20dp">
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="发布动态"
+        android:textColor="@color/white"
+        android:textSize="18sp"
+        android:textStyle="bold"
+        android:layout_marginBottom="16dp" />
+
+    <ImageView
+        android:id="@+id/create_iv_preview"
+        android:layout_width="match_parent"
+        android:layout_height="150dp"
+        android:background="@color/bg_input"
+        android:scaleType="centerCrop" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:orientation="horizontal">
+
+        <Button
+            android:id="@+id/create_btn_camera"
+            android:layout_width="0dp"
+            android:layout_height="40dp"
+            android:layout_weight="1"
+            android:layout_marginEnd="8dp"
+            android:backgroundTint="@color/cyber_rose"
+            android:text="📷 拍照"
+            android:textColor="@color/white" />
+
+        <Button
+            android:id="@+id/create_btn_gallery"
+            android:layout_width="0dp"
+            android:layout_height="40dp"
+            android:layout_weight="1"
+            android:backgroundTint="@color/accent_purple"
+            android:text="🖼 相册"
+            android:textColor="@color/white" />
+    </LinearLayout>
+
+    <EditText
+        android:id="@+id/create_et_title"
+        android:layout_width="match_parent"
+        android:layout_height="48dp"
+        android:layout_marginTop="12dp"
+        android:background="@color/bg_input"
+        android:hint="标题"
+        android:textColor="@color/white"
+        android:textColorHint="@color/text_gray_mid"
+        android:textSize="15sp"
+        android:paddingStart="12dp"
+        android:paddingEnd="12dp" />
+
+    <EditText
+        android:id="@+id/create_et_content"
+        android:layout_width="match_parent"
+        android:layout_height="100dp"
+        android:layout_marginTop="8dp"
+        android:background="@color/bg_input"
+        android:gravity="top"
+        android:hint="分享你的运动心得..."
+        android:textColor="@color/white"
+        android:textColorHint="@color/text_gray_mid"
+        android:textSize="14sp"
+        android:padding="12dp" />
+
+    <Button
+        android:id="@+id/create_btn_publish"
+        android:layout_width="match_parent"
+        android:layout_height="48dp"
+        android:layout_marginTop="16dp"
+        android:backgroundTint="@color/accent_emerald"
+        android:text="发布"
+        android:textColor="@color/white"
+        android:textSize="16sp"
+        android:textStyle="bold" />
+</LinearLayout>

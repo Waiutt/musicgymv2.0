@@ -48,13 +48,8 @@ public class ShareFragment extends Fragment {
         userManager = UserManager.get(requireContext());
 
         FloatingActionButton fab = view.findViewById(R.id.fab_add_post);
-        fab.setOnClickListener(v -> {
-            if (userManager.getUserId() == null) {
-                Toast.makeText(getContext(), "正在连接社区...", Toast.LENGTH_SHORT).show();
-                return;
-            }
-            startActivity(new Intent(requireContext(), CreatePostActivity.class));
-        });
+        fab.setOnClickListener(v -> new CreatePostSheet()
+                .show(getParentFragmentManager(), "create_post"));
 
         // 登录后加载数据
         userManager.signIn((userId, nickname) -> loadPosts());
@@ -81,15 +76,17 @@ public class ShareFragment extends Fragment {
     }
 
     private void openPostDetail(CommunityRepository.CommunityPost post) {
-        Intent intent = new Intent(requireContext(), PostDetailActivity.class);
-        intent.putExtra("POST_ID", post.id);
-        intent.putExtra("POST_TITLE", post.title);
-        intent.putExtra("POST_AUTHOR", post.nickname);
-        intent.putExtra("POST_DATE", String.valueOf(post.timestamp));
-        intent.putExtra("POST_CONTENT", post.content);
-        intent.putExtra("POST_IMAGE_URI", post.imageUri);
-        intent.putExtra("POST_LIKES", post.likeCount);
-        intent.putExtra("POST_COMMENTS", post.commentCount);
-        startActivity(intent);
+        Bundle args = new Bundle();
+        args.putString("post_id", post.id);
+        args.putString("title", post.title);
+        args.putString("author", post.nickname);
+        args.putLong("timestamp", post.timestamp);
+        args.putString("content", post.content);
+        args.putString("image_uri", post.imageUri);
+        args.putInt("likes", post.likeCount);
+        args.putInt("comments", post.commentCount);
+        PostDetailSheet sheet = new PostDetailSheet();
+        sheet.setArguments(args);
+        sheet.show(getParentFragmentManager(), "post_detail");
     }
 }
