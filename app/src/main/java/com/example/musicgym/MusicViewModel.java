@@ -39,6 +39,7 @@ public class MusicViewModel extends AndroidViewModel {
     private final MutableLiveData<Integer> eqPreset = new MutableLiveData<>(0); // 0=跑步
     private final MutableLiveData<Integer> cadence = new MutableLiveData<>(0);
     private final MutableLiveData<String> scanStatus = new MutableLiveData<>("扫描歌曲中...");
+    private final MutableLiveData<Boolean> autoPlay = new MutableLiveData<>(false);
 
     public MusicViewModel(@NonNull Application app) {
         super(app);
@@ -136,7 +137,7 @@ public class MusicViewModel extends AndroidViewModel {
             setTracks(found);
             if (!found.isEmpty() && (currentIndex.getValue() == null
                     || currentIndex.getValue() < 0)) {
-                currentIndex.postValue(0);
+                selectNoPlay(0);
             }
             scanStatus.postValue(found.isEmpty() ? "0 首" : "");
         });
@@ -162,6 +163,18 @@ public class MusicViewModel extends AndroidViewModel {
 
     // ── 步频 ──
     public void setCadence(int spm) { cadence.postValue(spm); }
+
+    // ── 自动播放标志 ──
+    public LiveData<Boolean> getAutoPlay() { return autoPlay; }
+    public void selectAndPlay(int idx) {
+        autoPlay.setValue(true);
+        currentIndex.postValue(idx);
+    }
+    public void selectNoPlay(int idx) {
+        autoPlay.setValue(false);
+        currentIndex.postValue(idx);
+    }
+    public void clearAutoPlay() { autoPlay.postValue(false); }
 
     // ── 数据类 ──
     public static class TrackInfo {

@@ -265,7 +265,11 @@ public class MusicFragment extends Fragment {
             buildPlaylistUI(etSearch != null ? etSearch.getText().toString().trim().toLowerCase() : "");
         });
         vm.getCurrentIndex().observe(getViewLifecycleOwner(), idx -> {
-            if (idx != null && idx >= 0) loadTrack(idx, false);
+            if (idx != null && idx >= 0) {
+                boolean auto = Boolean.TRUE.equals(vm.getAutoPlay().getValue());
+                loadTrack(idx, auto);
+                vm.clearAutoPlay();
+            }
         });
     }
 
@@ -407,7 +411,7 @@ public class MusicFragment extends Fragment {
                 buildPlaylistUI();
             });
             row.addView(btnDel);
-            row.setOnClickListener(v -> { vm.setCurrentIndex(idx); });
+            row.setOnClickListener(v -> { vm.selectAndPlay(idx); });
             playlistContainer.addView(row);
         }
     }
@@ -440,7 +444,7 @@ public class MusicFragment extends Fragment {
             tvTotalTime.setText(formatTime(mediaPlayer.getDuration()));
             mediaPlayer.setOnCompletionListener(mp -> {
                 int next = vm.getNextIndex();
-                if (next >= 0) { vm.setCurrentIndex(next); }
+                if (next >= 0) vm.selectAndPlay(next);
             });
             if (eqManager != null) eqManager.release();
             eqManager = new EqualizerManager(mediaPlayer.getAudioSessionId());
@@ -493,12 +497,12 @@ public class MusicFragment extends Fragment {
 
     private void playNext() {
         int next = vm.getNextIndex();
-        if (next >= 0) vm.setCurrentIndex(next);
+        if (next >= 0) vm.selectAndPlay(next);
     }
 
     private void playPrevious() {
         int prev = vm.getPrevIndex();
-        if (prev >= 0) vm.setCurrentIndex(prev);
+        if (prev >= 0) vm.selectAndPlay(prev);
     }
 
     private void updateSeekBar() {
@@ -565,7 +569,7 @@ public class MusicFragment extends Fragment {
         Integer curIdx = vm.getCurrentIndex().getValue();
         for (int i = 0; i < tracks.size(); i++) {
             if (tracks.get(i).path.equals(trackPath) && (curIdx == null || i != curIdx)) {
-                vm.setCurrentIndex(i);
+                vm.selectAndPlay(i);
                 if (tvCadence != null) {
                     int bpm = bpmDb.getBpm(trackPath);
                     tvCadence.setText("🏃 " + cadence + "spm → 🎵" + bpm + "BPM");
