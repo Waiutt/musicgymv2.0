@@ -73,22 +73,25 @@
         <Button
             android:id="@+id/btn_edit_profile"
             style="@style/ProfileButton"
-            android:layout_marginTop="30dp"
+            android:layout_marginTop="24dp"
             android:text="编辑资料" />
 
         <Button
             android:id="@+id/btn_measurements"
             style="@style/ProfileButton"
+            android:layout_marginTop="12dp"
             android:text="身体围度" />
 
         <Button
             android:id="@+id/btn_export"
             style="@style/ProfileButton"
+            android:layout_marginTop="12dp"
             android:text="导出数据 CSV" />
 
         <Button
             android:id="@+id/btn_reminder"
             style="@style/ProfileButton"
+            android:layout_marginTop="12dp"
             android:text="训练提醒" />
 
         <Button
@@ -117,7 +120,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="24dp"
-            android:layout_marginBottom="10dp"
+            android:layout_marginBottom="8dp"
             android:text="体重记录"
             android:textColor="@color/white"
             android:textSize="16sp"
