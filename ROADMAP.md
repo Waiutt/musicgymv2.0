@@ -187,4 +187,46 @@
 
 ---
 
-*2026-06-05 | MusicGym 项目路线图*
+## 🤖 AI 能力规划
+
+### 文本 AI：DeepSeek（当前实施中）
+
+```
+用途: 基于用户历史数据生成4周周期化训练计划
+模型: DeepSeek V3 (deepseek.com)
+成本: ~¥0.01/次生成 | 免费额度: 500万token
+```
+
+### 视觉 AI：ML Kit Pose Detection（未来）
+
+```
+用途: 实时动作姿势检测+语音纠错
+技术: Google ML Kit Pose Detection (完全免费,设备端运行)
+
+架构:
+  手机摄像头 → 实时视频流 (30fps)
+      │
+      ▼ 每帧 ~100ms
+  ML Kit Pose Detection → 33个身体关键点
+      │
+      ▼ 角度计算
+  膝关节: 85° (目标90°) → "再蹲深2cm"
+  背脊角: 70° (目标80°) → "挺胸"
+      │
+      ▼ TTS语音播报
+  实时纠错反馈 → "深度不足,再来一次"
+      │
+      ▼ 组后总结
+  "本组10次, 3次深度不足, 建议减重"
+
+关键文件(待创建):
+  - PoseCoach.java: ML Kit初始化+关键点检测
+  - JointAnalyzer.java: 角度计算+纠错逻辑
+  - CoachOverlay.java: 摄像头预览+骨骼线绘制
+
+工作量: 8h | 风险: 低(ML Kit成熟稳定)
+```
+
+---
+
+*2026-06-07 | MusicGym v4.7*
