@@ -3,7 +3,10 @@ package com.example.musicgym;
 import android.Manifest;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.graphics.Bitmap;
+import android.graphics.Canvas;
 import android.graphics.Color;
+import android.graphics.Paint;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
@@ -31,7 +34,9 @@ import com.amap.api.maps.AMapUtils;
 import com.amap.api.maps.CameraUpdateFactory;
 import com.amap.api.maps.MapView;
 import com.amap.api.maps.MapsInitializer;
+import com.amap.api.maps.model.BitmapDescriptorFactory;
 import com.amap.api.maps.model.LatLng;
+import com.amap.api.maps.model.MarkerOptions;
 import com.amap.api.maps.model.MyLocationStyle;
 import com.amap.api.maps.model.Polyline;
 import com.amap.api.maps.model.PolylineOptions;
@@ -60,9 +65,23 @@ public class WorkoutActivity extends AppCompatActivity implements AMapLocationLi
     private String sportTypeEn;
 
     private List<LatLng> pathPoints = new ArrayList<>();
-    private Polyline trajectoryLine;
+    private List<Polyline> trajectoryLines = new ArrayList<>();
     private boolean isTracking;
     private boolean isPaused;
+
+    // 配速着色
+    private double lastSegmentDist;
+    private List<LatLng> segmentPoints = new ArrayList<>();
+    private static final int[] PACE_COLORS = {
+            Color.parseColor("#38bdf8"), // 慢: 蓝
+            Color.parseColor("#22c55e"), // 中: 绿
+            Color.parseColor("#f59e0b"), // 快: 橙
+            Color.parseColor("#ef4444"), // 冲刺: 红
+    };
+
+    // 公里标记
+    private int nextKmMark = 1;
+    private int kmStartSeconds;
 
     private float totalDistanceMeters;
     private int totalSeconds;
@@ -220,11 +239,25 @@ public class WorkoutActivity extends AppCompatActivity implements AMapLocationLi
                 }
                 lastLatLng = latLng;
                 pathPoints.add(latLng);
+                segmentPoints.add(latLng);
 
-                if (pathPoints.size() >= 2) {
-                    if (trajectoryLine != null) trajectoryLine.remove();
-                    trajectoryLine = aMap.addPolyline(new PolylineOptions()
-                            .addAll(pathPoints).width(18f).color(ColorTokens.ACCENT_GREEN).setUseTexture(false));
+                // 配速着色: 每100米画一段
+                float segDist = AMapUtils.calculateLineDistance(
+                        segmentPoints.get(0), latLng);
+                if (segDist > 100 || pathPoints.size() < 2) {
+                    drawPaceSegment();
+                }
+
+                // 公里标记
+                if (totalDistanceMeters >= nextKmMark * 1000) {
+                    int kmTime = totalSeconds - kmStartSeconds;
+                    aMap.addMarker(new MarkerOptions()
+                            .position(latLng)
+                            .icon(BitmapDescriptorFactory.fromBitmap(
+                                    createKmBitmap(nextKmMark, kmTime)))
+                            .anchor(0.5f, 0.5f));
+                    kmStartSeconds = totalSeconds;
+                    nextKmMark++;
                 }
 
                 float speedMs = loc.getSpeed();
@@ -259,6 +292,11 @@ public class WorkoutActivity extends AppCompatActivity implements AMapLocationLi
 
         pathPoints.clear();
         totalDistanceMeters = 0f;
+        segmentPoints.clear();
+        for (Polyline pl : trajectoryLines) pl.remove();
+        trajectoryLines.clear();
+        nextKmMark = 1;
+        kmStartSeconds = 0;
         if (musicControlBar != null) musicControlBar.setVisibility(View.VISIBLE);
         totalSeconds = 0;
         lastLatLng = null;
@@ -376,6 +414,42 @@ public class WorkoutActivity extends AppCompatActivity implements AMapLocationLi
                 })
                 .setCancelable(false)
                 .show();
+    }
+
+    private void drawPaceSegment() {
+        if (segmentPoints.size() < 2) return;
+
+        // 根据速度选择合适的颜色
+        float paceSec = totalSeconds > 0 ? totalSeconds / (totalDistanceMeters / 1000f) : 300;
+        int colorIdx = paceSec < 270 ? 3 : paceSec < 330 ? 2 : paceSec < 390 ? 1 : 0;
+
+        Polyline line = aMap.addPolyline(new PolylineOptions()
+                .addAll(new ArrayList<>(segmentPoints))
+                .width(16f).color(PACE_COLORS[colorIdx])
+                .setUseTexture(false));
+        trajectoryLines.add(line);
+        segmentPoints.clear();
+        // 保留最后一个点作为下段起点
+        segmentPoints.add(pathPoints.get(pathPoints.size() - 1));
+    }
+
+    private android.graphics.Bitmap createKmBitmap(int km, int seconds) {
+        int m = seconds / 60, s = seconds % 60;
+        String text = km + "km " + m + ":" + String.format("%02d", s);
+        android.graphics.Paint paint = new android.graphics.Paint();
+        paint.setTextSize(28f); paint.setColor(Color.WHITE);
+        paint.setAntiAlias(true); paint.setFakeBoldText(true);
+        paint.setShadowLayer(3, 1, 1, Color.BLACK);
+
+        float w = paint.measureText(text) + 16;
+        android.graphics.Bitmap bmp = android.graphics.Bitmap.createBitmap(
+                (int) w, 40, android.graphics.Bitmap.Config.ARGB_8888);
+        android.graphics.Canvas canvas = new android.graphics.Canvas(bmp);
+        paint.setColor(Color.argb(160, 15, 23, 42));
+        canvas.drawRoundRect(0, 0, w, 40, 8, 8, paint);
+        paint.setColor(Color.WHITE);
+        canvas.drawText(text, 8, 28, paint);
+        return bmp;
     }
 
     private String serializePathPoints() {
