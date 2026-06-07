@@ -1,13 +1,13 @@
 {
   "project_info": {
-    "project_number": "000000000000",
-    "project_id": "musicgym-community",
-    "storage_bucket": "musicgym-community.appspot.com"
+    "project_number": "277315606117",
+    "project_id": "musicgym-d07a2",
+    "storage_bucket": "musicgym-d07a2.firebasestorage.app"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:000000000000:android:xxxxxxxxxxxxxxxx",
+        "mobilesdk_app_id": "1:277315606117:android:ca64c40fbc05ad4858588c",
         "android_client_info": {
           "package_name": "com.example.musicgym"
         }
@@ -15,7 +15,7 @@
       "oauth_client": [],
       "api_key": [
         {
-          "current_key": "PLACEHOLDER_API_KEY"
+          "current_key": "AIzaSyBfBemJ_uYcDd3kfesS-Y4X1jtS6AMXGjk"
         }
       ],
       "services": {

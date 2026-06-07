@@ -22,8 +22,8 @@ android {
         applicationId "com.example.musicgym"
         minSdk 34
         targetSdk 36
-        versionCode 23
-        versionName "3.6"
+        versionCode 24
+        versionName "3.7"
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
 
