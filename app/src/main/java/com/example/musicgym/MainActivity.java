@@ -12,6 +12,7 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        ThemeManager.apply(this); // 必须在 setContentView 之前
 
         // 首次启动 → 引导页
         SharedPreferences prefs = getSharedPreferences("app_prefs", MODE_PRIVATE);

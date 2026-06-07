@@ -145,6 +145,36 @@
                         android:background="@color/bg_input" />
 
                     <TextView
+                        android:id="@+id/settings_btn_theme"
+                        android:layout_width="match_parent"
+                        android:layout_height="56dp"
+                        android:gravity="center_vertical"
+                        android:paddingStart="20dp"
+                        android:paddingEnd="20dp"
+                        android:text="主题切换"
+                        android:textColor="@color/white"
+                        android:textSize="15sp"
+                        android:background="?attr/selectableItemBackground"
+                        android:clickable="true"
+                        android:focusable="true" />
+
+                    <TextView
+                        android:id="@+id/settings_theme_label"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="20dp"
+                        android:layout_marginBottom="4dp"
+                        android:text="深色模式"
+                        android:textColor="@color/text_gray"
+                        android:textSize="12sp" />
+
+                    <View
+                        android:layout_width="match_parent"
+                        android:layout_height="1dp"
+                        android:layout_marginStart="20dp"
+                        android:background="@color/bg_input" />
+
+                    <TextView
                         android:id="@+id/settings_btn_privacy"
                         android:layout_width="match_parent"
                         android:layout_height="56dp"

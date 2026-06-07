@@ -2,12 +2,14 @@ package com.example.musicgym;
 
 import android.app.AlertDialog;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.Bundle;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.app.AppCompatDelegate;
 
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -62,11 +64,25 @@ public class SettingsActivity extends AppCompatActivity {
         findViewById(R.id.settings_btn_privacy).setOnClickListener(v ->
                 startActivity(new Intent(this, PrivacyPolicyActivity.class)));
 
+        // 主题切换
+        findViewById(R.id.settings_btn_theme).setOnClickListener(v -> {
+            int current = ThemeManager.getMode(this);
+            new AlertDialog.Builder(this)
+                    .setTitle("主题切换")
+                    .setSingleChoiceItems(new String[]{"跟随系统", "深色模式", "浅色模式"}, current, (d, w) -> {
+                        ThemeManager.setMode(this, w);
+                        d.dismiss();
+                        recreate(); // 立即生效
+                    }).show();
+        });
+        ((TextView) findViewById(R.id.settings_theme_label))
+                .setText(new String[]{"跟随系统", "深色模式", "浅色模式"}[ThemeManager.getMode(this)]);
+
         // 关于
         findViewById(R.id.settings_btn_about).setOnClickListener(v ->
                 new AlertDialog.Builder(this)
                         .setTitle("关于 MusicGym")
-                        .setMessage("MusicGym v2.0\n\n一站式健身记录助手\n运动追踪 · 力量训练 · 音乐播放\n\n独立开发者作品 © 2026")
+                        .setMessage("MusicGym v4.3\n\n一站式健身记录助手\n运动追踪 · 力量训练 · 音乐播放\n\n独立开发者作品 © 2026")
                         .setPositiveButton("确定", null)
                         .show());
     }

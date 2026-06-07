@@ -122,6 +122,17 @@ public class ProfileFragment extends Fragment {
         // 加载已缓存的头像
         loadCachedAvatar();
 
+        // 成就检查
+        executor.execute(() -> {
+            AchievementManager am = new AchievementManager(requireContext());
+            List<String> newBadges = am.checkAndUnlock(db);
+            if (!newBadges.isEmpty()) {
+                requireActivity().runOnUiThread(() ->
+                        Toast.makeText(getContext(), "🏆 解锁成就: " + newBadges.get(0) + "!",
+                                Toast.LENGTH_LONG).show());
+            }
+        });
+
         // 体重趋势图 — 动态插入到按钮上方
         ViewGroup rootLayout = (ViewGroup) view.findViewById(R.id.profile_root);
         View btnFirst = view.findViewById(R.id.btn_edit_profile);
