@@ -26,17 +26,30 @@ public class AiPlanGenerator {
         void onResult(String planJson, String error);
     }
 
+    private static long lastCallTime;
+    private static final long MIN_INTERVAL = 30000; // 30秒冷却(避免误触重复烧钱)
+
     public AiPlanGenerator(String apiKey) {
         this.apiKey = apiKey;
+    }
+
+    /** 检查是否允许调用（防止重复烧钱） */
+    public static boolean canCall() {
+        return System.currentTimeMillis() - lastCallTime > MIN_INTERVAL;
     }
 
     /** 生成 4 周训练计划 */
     public void generate(Context ctx, String goal, int daysPerWeek, PlanCallback cb) {
         executor.execute(() -> {
             if (apiKey.isEmpty()) {
-                cb.onResult(null, "API Key 未配置，请检查 local.properties");
+                cb.onResult(null, "API Key 未配置");
                 return;
             }
+            if (!canCall()) {
+                cb.onResult(null, "请等待30秒后再试(防止重复调用消耗额度)");
+                return;
+            }
+            lastCallTime = System.currentTimeMillis();
 
             String prompt = buildPrompt(ctx, goal, daysPerWeek);
             try {

@@ -22,8 +22,8 @@ android {
         applicationId "com.example.musicgym"
         minSdk 34
         targetSdk 36
-        versionCode 35
-        versionName "5.0"
+        versionCode 36
+        versionName "5.1"
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
 
@@ -33,6 +33,10 @@ android {
 
         // 高德地图 API Key（从 local.properties 注入，不暴露在代码中）
         manifestPlaceholders = [AMAP_API_KEY: localProperties.getProperty('AMAP_API_KEY', '')]
+
+        // DeepSeek AI API Key（编译时注入到 BuildConfig，APK 内可用）
+        buildConfigField "String", "DEEPSEEK_API_KEY",
+                "\"${localProperties.getProperty('DEEPSEEK_API_KEY', '')}\""
     }
 
     signingConfigs {
@@ -51,6 +55,9 @@ android {
             shrinkResources true
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
+    }
+    buildFeatures {
+        buildConfig = true
     }
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_11

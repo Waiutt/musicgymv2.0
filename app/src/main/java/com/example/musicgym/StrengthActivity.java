@@ -675,13 +675,7 @@ public class StrengthActivity extends AppCompatActivity {
     }
 
     private String readApiKey() {
-        try {
-            java.util.Properties p = new java.util.Properties();
-            String path = new java.io.File(getApplicationInfo().sourceDir)
-                    .getParent() + "/../../local.properties";
-            p.load(new java.io.FileInputStream(path));
-            return p.getProperty("DEEPSEEK_API_KEY", "");
-        } catch (Exception e) { return ""; }
+        return BuildConfig.DEEPSEEK_API_KEY;
     }
 
     private void showAiPlanDialog() {
