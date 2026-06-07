@@ -47,6 +47,7 @@ public class StatsFragment extends Fragment {
     private TextView tvCardDistance, tvCardDuration, tvCardWorkouts, tvCardCalories;
     private RecyclerView recyclerView;
     private LinearLayout calendarContainer, prContainer;
+    private TextView tvViewToggle, tvGoalBar;
 
     private static final int COLOR_LAST_MONTH = ColorTokens.TEXT_SECONDARY;
 
@@ -75,6 +76,25 @@ public class StatsFragment extends Fragment {
         recyclerView.setAdapter(new WorkoutHistoryAdapter(new ArrayList<>()));
 
         vm = new ViewModelProvider(this).get(StatsViewModel.class);
+
+        // 周/月切换按钮
+        tvViewToggle = new TextView(requireContext());
+        tvViewToggle.setText("📅 周视图");
+        tvViewToggle.setTextColor(ColorTokens.ACCENT_CYAN);
+        tvViewToggle.setTextSize(13f);
+        tvViewToggle.setPadding(16, 8, 16, 8);
+        tvViewToggle.setOnClickListener(v -> vm.toggleViewMode());
+        ((ViewGroup) view.findViewById(R.id.stats_filter_container))
+                .addView(tvViewToggle);
+
+        // 目标进度条
+        tvGoalBar = new TextView(requireContext());
+        tvGoalBar.setTextColor(ColorTokens.ACCENT_CYAN);
+        tvGoalBar.setTextSize(12f);
+        tvGoalBar.setPadding(16, 2, 16, 8);
+        tvGoalBar.setVisibility(View.GONE);
+        ((ViewGroup) view.findViewById(R.id.stats_filter_container))
+                .addView(tvGoalBar);
 
         initChart();
         initFilters();
@@ -130,6 +150,18 @@ public class StatsFragment extends Fragment {
             tvPR.setPadding(16, 10, 16, 6);
             prContainer.addView(tvPR);
         });
+
+        // 周/月切换
+        vm.getViewMode().observe(getViewLifecycleOwner(), mode -> {
+            tvViewToggle.setText(mode == StatsViewModel.VIEW_WEEK ? "📅 月视图" : "📅 周视图");
+        });
+
+        // 目标进度
+        vm.getGoalProgress().observe(getViewLifecycleOwner(), t -> {
+            if (t == null || t.isEmpty()) { tvGoalBar.setVisibility(View.GONE); return; }
+            tvGoalBar.setText("🎯 " + t);
+            tvGoalBar.setVisibility(View.VISIBLE);
+        });
     }
 
     // ═══════════ 折线图 ═══════════
@@ -184,8 +216,14 @@ public class StatsFragment extends Fragment {
         lineChart.clear(); lineChart.setData(new LineData(sets));
 
         int maxDays = Math.max(vm.getCurDays(), vm.getLastDays());
-        lineChart.getXAxis().setAxisMinimum(1f);
-        lineChart.getXAxis().setAxisMaximum(maxDays);
+        boolean isWeek = bundle.curEntries.size() == 7; // 7 entries = week view
+        lineChart.getXAxis().setAxisMinimum(isWeek ? 0f : 1f);
+        lineChart.getXAxis().setAxisMaximum(isWeek ? 6f : maxDays);
+        if (isWeek) {
+            // 修复图表: 设置为空列表表示上周无数据(周视图已自带数据)
+            lineChart.getXAxis().setValueFormatter(new com.github.mikephil.charting.formatter.IndexAxisValueFormatter(
+                    new String[]{"一","二","三","四","五","六","日"}));
+        }
         lineChart.getAxisLeft().setAxisMaximum(bundle.maxValue * 1.2f + 1f);
         lineChart.getAxisLeft().setAxisMinimum(0f);
         lineChart.animateX(600); lineChart.invalidate();
