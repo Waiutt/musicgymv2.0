@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/bg_dark"
+    android:orientation="vertical">
+
+    <!-- 顶部栏 -->
+    <LinearLayout style="@style/TopBar">
+
+        <TextView
+            android:id="@+id/up_back"
+            style="@style/CloseButton"
+            android:text="←" />
+
+        <TextView
+            android:id="@+id/up_name"
+            style="@style/ToolbarTitle"
+            android:text="用户" />
+    </LinearLayout>
+
+    <!-- 统计区 -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@color/bg_card"
+        android:gravity="center"
+        android:orientation="vertical"
+        android:padding="20dp">
+
+        <TextView
+            android:id="@+id/up_stats"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="加载中..."
+            android:textColor="@color/cyber_cyan"
+            android:textSize="14sp" />
+    </LinearLayout>
+
+    <!-- 帖子列表 -->
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/up_posts"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:clipToPadding="false"
+        android:paddingHorizontal="16dp"
+        android:paddingTop="8dp"
+        android:paddingBottom="16dp" />
+
+</LinearLayout>

@@ -561,10 +561,19 @@ public class StrengthWorkoutActivity extends AppCompatActivity {
             String json = arr.toString();
             String date = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(new Date());
             StrengthRecord record = new StrengthRecord(date, totalSeconds, json);
+            final int secs = totalSeconds;
+            final String names = String.join(", ", workoutData.keySet());
             executor.execute(() -> {
                 AppDatabase.getInstance(this).strengthRecordDao().insertRecord(record);
                 runOnUiThread(() -> {
                     Toast.makeText(this, "训练已保存 ✓", Toast.LENGTH_SHORT).show();
+                    // 自动发布社区动态
+                    UserManager.get(this).signIn((userId, nickname) -> {
+                        String title = "完成了力量训练 💪";
+                        String content = String.format(Locale.getDefault(),
+                                "%d 分钟 · %d 个动作: %s", secs / 60, workoutData.size(), names);
+                        new CommunityRepository().publishPost(userId, nickname, title, content, null, null);
+                    });
                     finish();
                 });
             });

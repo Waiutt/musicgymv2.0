@@ -13,6 +13,7 @@ import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.recyclerview.widget.StaggeredGridLayoutManager;
+import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
@@ -28,6 +29,7 @@ public class ShareFragment extends Fragment {
     private CommunityRepository repo;
     private UserManager userManager;
     private TextView tvStatus;
+    private SwipeRefreshLayout swipe;
 
     @Nullable
     @Override
@@ -37,6 +39,8 @@ public class ShareFragment extends Fragment {
 
         tvStatus = view.findViewById(R.id.share_status);
         recyclerView = view.findViewById(R.id.rv_blog_posts);
+        swipe = view.findViewById(R.id.share_swipe);
+
         StaggeredGridLayoutManager lm = new StaggeredGridLayoutManager(2, StaggeredGridLayoutManager.VERTICAL);
         lm.setGapStrategy(StaggeredGridLayoutManager.GAP_HANDLING_NONE);
         recyclerView.setLayoutManager(lm);
@@ -50,6 +54,12 @@ public class ShareFragment extends Fragment {
         FloatingActionButton fab = view.findViewById(R.id.fab_add_post);
         fab.setOnClickListener(v -> new CreatePostSheet()
                 .show(getParentFragmentManager(), "create_post"));
+
+        // 下拉刷新
+        swipe.setOnRefreshListener(this::loadPosts);
+        swipe.setColorSchemeResources(android.R.color.holo_blue_bright,
+                android.R.color.holo_green_light,
+                android.R.color.holo_orange_light);
 
         // 登录后加载数据
         userManager.signIn((userId, nickname) -> loadPosts());
@@ -66,9 +76,9 @@ public class ShareFragment extends Fragment {
     private void loadPosts() {
         if (tvStatus != null) tvStatus.setText("加载中...");
         repo.loadPosts(result -> {
+            if (swipe != null) swipe.setRefreshing(false);
             if (tvStatus == null) return;
             if (result == null) {
-                // Firebase 不可用（离线或未配置）
                 tvStatus.setText("社区不可用，请检查网络连接");
                 posts.clear();
                 adapter.notifyDataSetChanged();

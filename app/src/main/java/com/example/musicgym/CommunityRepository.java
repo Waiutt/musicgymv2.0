@@ -108,6 +108,38 @@ public class CommunityRepository {
         } catch (Exception ignored) {}
     }
 
+    // ═══════════ 用户帖子 ═══════════
+
+    public void loadUserPosts(String userId, OnPostsLoadedListener listener) {
+        if (!available) { if (listener != null) listener.onLoaded(null); return; }
+        try {
+            db.collection("posts").whereEqualTo("userId", userId)
+                    .orderBy("timestamp", Query.Direction.DESCENDING).limit(30).get()
+                    .addOnCompleteListener(task -> {
+                        List<CommunityPost> result = new ArrayList<>();
+                        if (task.isSuccessful() && task.getResult() != null) {
+                            for (DocumentSnapshot doc : task.getResult()) result.add(docToPost(doc));
+                        }
+                        if (listener != null) {
+                            if (!task.isSuccessful()) listener.onLoaded(null);
+                            else listener.onLoaded(result);
+                        }
+                    });
+        } catch (Exception e) { if (listener != null) listener.onLoaded(null); }
+    }
+
+    // ═══════════ 举报 ═══════════
+
+    public void reportPost(String postId, String userId, String reason) {
+        if (!available) return;
+        try {
+            Map<String, Object> report = new HashMap<>();
+            report.put("postId", postId); report.put("reporterId", userId);
+            report.put("reason", reason); report.put("timestamp", System.currentTimeMillis());
+            db.collection("reports").add(report);
+        } catch (Exception ignored) {}
+    }
+
     // ═══════════ 工具 ═══════════
 
     private CommunityPost docToPost(DocumentSnapshot doc) {

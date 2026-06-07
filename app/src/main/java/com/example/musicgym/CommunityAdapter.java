@@ -1,12 +1,15 @@
 package com.example.musicgym;
 
+import android.content.Intent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
+import androidx.appcompat.app.AlertDialog;
 import androidx.recyclerview.widget.RecyclerView;
 
 import java.text.SimpleDateFormat;
@@ -63,8 +66,32 @@ public class CommunityAdapter extends RecyclerView.Adapter<CommunityAdapter.View
 
         holder.tvStats.setText("❤ " + post.likeCount + "  💬 " + post.commentCount);
 
+        // 点击帖子 → 详情
         holder.itemView.setOnClickListener(v -> {
             if (listener != null) listener.onClick(post);
+        });
+
+        // 点击作者 → 用户主页
+        holder.tvAuthor.setOnClickListener(v -> {
+            Intent i = new Intent(v.getContext(), UserProfileActivity.class);
+            i.putExtra("user_id", post.userId);
+            i.putExtra("nickname", post.nickname);
+            v.getContext().startActivity(i);
+        });
+
+        // 长按 → 举报
+        holder.itemView.setOnLongClickListener(v -> {
+            new AlertDialog.Builder(v.getContext())
+                    .setTitle("举报帖子")
+                    .setMessage("确定举报该帖子？")
+                    .setPositiveButton("举报", (d, w) -> {
+                        UserManager.get(v.getContext()).signIn((uid, nn) ->
+                                new CommunityRepository().reportPost(post.id, uid, "用户举报"));
+                        Toast.makeText(v.getContext(), "已提交举报", Toast.LENGTH_SHORT).show();
+                    })
+                    .setNegativeButton("取消", null)
+                    .show();
+            return true;
         });
     }
 

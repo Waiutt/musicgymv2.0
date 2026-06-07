@@ -390,6 +390,9 @@ public class WorkoutActivity extends AppCompatActivity implements AMapLocationLi
                     AppDatabase.getInstance(this).workoutRecordDao().insertRecord(record));
         }
 
+        // 自动发布社区动态
+        autoPostWorkout(sportType, distKm, totalSeconds, cal);
+
         new android.app.AlertDialog.Builder(this)
                 .setTitle(sportType + " 完成！")
                 .setMessage(String.format(Locale.getDefault(),
@@ -579,5 +582,16 @@ public class WorkoutActivity extends AppCompatActivity implements AMapLocationLi
     protected void onSaveInstanceState(@NonNull Bundle outState) {
         super.onSaveInstanceState(outState);
         mapView.onSaveInstanceState(outState);
+    }
+
+    private void autoPostWorkout(String sport, double distKm, int sec, int cal) {
+        if (distKm < 0.1) return; // 太短不发
+        String title = String.format(Locale.getDefault(),
+                "完成了 %.1f km %s", distKm, sport);
+        String content = String.format(Locale.getDefault(),
+                "距离: %.2f km | 时长: %d:%02d | 🔥 %d kcal",
+                distKm, sec / 60, sec % 60, cal);
+        UserManager.get(this).signIn((userId, nickname) ->
+                new CommunityRepository().publishPost(userId, nickname, title, content, null, null));
     }
 }
