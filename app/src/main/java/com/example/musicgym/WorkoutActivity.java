@@ -587,19 +587,40 @@ public class WorkoutActivity extends AppCompatActivity implements AMapLocationLi
 
     private void autoPostWorkout(String sport, double distKm, int sec, int cal) {
         if (distKm < 0.1) return;
-        String emoji = sport.contains("跑") ? "🏃" : sport.contains("骑") ? "🚴" : "🚶";
-        String title = emoji + " 完成了 " + String.format(Locale.getDefault(),
-                "%.1f km %s", distKm, sport);
-        String content = String.format(Locale.getDefault(),
-                "距离: %.2f km\n时长: %d:%02d\n🔥 %d kcal\n平均配速: %.1f min/km",
-                distKm, sec / 60, sec % 60, cal,
-                (sec / 60.0) / (distKm > 0 ? distKm : 1));
-        UserManager.get(this).signIn((userId, nickname) ->
-                new CommunityRepository().publishActivity(
-                        userId, nickname, title, content, "workout"));
+        String sportTypeEnCopy = sportTypeEn;
+        double pace = (sec / 60.0) / (distKm > 0 ? distKm : 1);
+        executorService.execute(() -> {
+            // 检测 PR
+            StringBuilder prs = new StringBuilder();
+            List<WorkoutRecord> all = AppDatabase.getInstance(this)
+                    .workoutRecordDao().getAllRecords();
+            double bestDist = 0; int bestCal = 0; double bestPace = 999;
+            for (WorkoutRecord r : all) {
+                if (!sportTypeEnCopy.equals(r.getSportType())) continue;
+                if (r.getDistanceKm() > bestDist) bestDist = r.getDistanceKm();
+                if (r.getCalories() > bestCal) bestCal = r.getCalories();
+                if (r.getDistanceKm() > 0.5 && r.getDurationSeconds() > 0) {
+                    double p = (double) r.getDurationSeconds() / r.getDistanceKm();
+                    if (p < bestPace) bestPace = p;
+                }
+            }
+            if (distKm > bestDist) prs.append("🏆 最远距离新纪录！");
+            if (cal > bestCal) prs.append("🔥 最高热量新纪录！");
+            if (pace < bestPace && distKm > 0.5) prs.append("⚡ 最快配速新纪录！");
 
-        // 同步更新挑战进度
-        updateChallengeProgress("跑步 km", distKm);
+            String emoji = sport.contains("跑") ? "🏃" : sport.contains("骑") ? "🚴" : "🚶";
+            String title = prs.length() > 0 ? prs.toString().trim()
+                    : emoji + " 完成了 " + String.format(Locale.getDefault(),
+                    "%.1f km %s", distKm, sport);
+            String content = String.format(Locale.getDefault(),
+                    "距离: %.2f km\n时长: %d:%02d\n🔥 %d kcal\n配速: %.1f min/km",
+                    distKm, sec / 60, sec % 60, cal, pace);
+            UserManager.get(this).signIn((userId, nickname) ->
+                    new CommunityRepository().publishActivity(
+                            userId, nickname, title, content, "workout"));
+            updateChallengeProgress(sportTypeEnCopy.equals("Running") ? "跑步 km"
+                    : sportTypeEnCopy.equals("Cycling") ? "骑行 km" : "跑步 km", distKm);
+        });
     }
 
     private void updateChallengeProgress(String goalType, double progress) {
