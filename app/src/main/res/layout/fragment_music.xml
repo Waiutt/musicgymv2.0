@@ -31,7 +31,8 @@
             android:background="@drawable/stats_filter_unselected"
             android:gravity="center"
             android:text="🔀"
-            android:textSize="14sp" />
+            android:textSize="14sp"
+            android:contentDescription="切换播放模式" />
 
         <TextView
             android:id="@+id/music_mode_label"
@@ -51,7 +52,8 @@
             android:background="@drawable/stats_filter_unselected"
             android:gravity="center"
             android:text="🎚"
-            android:textSize="14sp" />
+            android:textSize="14sp"
+            android:contentDescription="均衡器" />
 
         <TextView
             android:id="@+id/music_btn_rescan"

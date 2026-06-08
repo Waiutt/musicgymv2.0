@@ -79,6 +79,7 @@
         android:layout_alignParentBottom="true"
         android:layout_alignParentEnd="true"
         android:layout_margin="24dp"
+        android:contentDescription="发布动态"
         android:backgroundTint="@color/cyber_rose"
         android:src="@android:drawable/ic_input_add"
         app:tint="@color/white"
