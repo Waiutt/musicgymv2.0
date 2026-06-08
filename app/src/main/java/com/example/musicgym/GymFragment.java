@@ -6,18 +6,16 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
+import androidx.lifecycle.ViewModelProvider;
 
-import java.util.List;
-import java.util.Locale;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-
+/** GYM Tab — 运动类型选择（MVVM 架构） */
 public class GymFragment extends Fragment {
+
+    private GymViewModel vm;
 
     @Nullable
     @Override
@@ -25,20 +23,29 @@ public class GymFragment extends Fragment {
                              @Nullable Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_gym, container, false);
 
+        vm = new ViewModelProvider(this).get(GymViewModel.class);
+
+        // 导航（保持不变 — View 层职责）
         view.findViewById(R.id.gym_card_running).setOnClickListener(v ->
                 startWorkout("跑步"));
-
         view.findViewById(R.id.gym_card_cycling).setOnClickListener(v ->
                 startWorkout("骑行"));
-
         view.findViewById(R.id.gym_card_walking).setOnClickListener(v ->
                 startWorkout("步行"));
-
         view.findViewById(R.id.gym_card_strength).setOnClickListener(v ->
                 startActivity(new Intent(requireContext(), StrengthActivity.class)));
 
-        // 动态卡片内容
-        loadCardSubtitles(view);
+        // 观察上次训练信息
+        vm.getRunInfo().observe(getViewLifecycleOwner(),
+                t -> setCardSubtitle(view, R.id.gym_card_running, t));
+        vm.getCycleInfo().observe(getViewLifecycleOwner(),
+                t -> setCardSubtitle(view, R.id.gym_card_cycling, t));
+        vm.getWalkInfo().observe(getViewLifecycleOwner(),
+                t -> setCardSubtitle(view, R.id.gym_card_walking, t));
+        vm.getStrengthInfo().observe(getViewLifecycleOwner(),
+                t -> setCardSubtitle(view, R.id.gym_card_strength, t));
+
+        vm.loadLastWorkouts();
 
         return view;
     }
@@ -49,51 +56,14 @@ public class GymFragment extends Fragment {
         startActivity(intent);
     }
 
-    private void loadCardSubtitles(View view) {
-        ExecutorService exec = Executors.newSingleThreadExecutor();
-        exec.execute(() -> {
-            AppDatabase db = AppDatabase.getInstance(requireContext());
-            List<WorkoutRecord> records = db.workoutRecordDao().getAllRecords();
-            List<StrengthRecord> sRecs = db.strengthRecordDao().getAllRecords();
-
-            if (getActivity() == null || !isAdded()) { exec.shutdown(); return; }
-            getActivity().runOnUiThread(() -> {
-                if (records == null || records.isEmpty()) return;
-                setLastWorkout(view, R.id.gym_card_running, records, "Running");
-                setLastWorkout(view, R.id.gym_card_cycling, records, "Cycling");
-                setLastWorkout(view, R.id.gym_card_walking, records, "Walking");
-                if (sRecs != null && !sRecs.isEmpty()) {
-                    StrengthRecord r = sRecs.get(0);
-                    if (r.getDate() != null) {
-                        String info = "上次 " + r.getDate().substring(5) +
-                                " · " + (r.getDurationSeconds() / 60) + "min";
-                        setCardSubtitle(view, R.id.gym_card_strength, info);
-                    }
-                }
-            });
-            exec.shutdown();
-        });
-    }
-
-    private void setLastWorkout(View root, int cardId, List<WorkoutRecord> records, String sportType) {
-        for (WorkoutRecord r : records) {
-            if (sportType.equals(r.getSportType())) {
-                String info = "上次 " + (r.getDate() != null ? r.getDate().substring(5) : "") +
-                        " · " + String.format(Locale.getDefault(), "%.1fkm", r.getDistanceKm());
-                setCardSubtitle(root, cardId, info);
-                return;
-            }
-        }
-    }
-
+    /** 设置卡片副标题（View 层逻辑，保留在 Fragment） */
     private void setCardSubtitle(View root, int cardId, String text) {
+        if (text == null || text.isEmpty()) return;
         View card = root.findViewById(cardId);
         if (card instanceof ViewGroup) {
             ViewGroup vg = (ViewGroup) card;
-            // 卡片内的LinearLayout → 第二个子View是内容区(第一个是图标,第二个是信息)
             if (vg.getChildCount() > 0 && vg.getChildAt(0) instanceof ViewGroup) {
                 ViewGroup inner = (ViewGroup) vg.getChildAt(0);
-                // 查找副标题: 信息区内的第二个TextView
                 for (int i = 0; i < inner.getChildCount(); i++) {
                     View child = inner.getChildAt(i);
                     if (child instanceof ViewGroup) {
