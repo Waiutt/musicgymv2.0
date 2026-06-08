@@ -246,10 +246,13 @@ public class ProfileFragment extends Fragment {
     }
 
     private void loadHistoryUI() {
-        historyContainer.removeAllViews();
+        final LinearLayout container = historyContainer;
+        if (container == null) return;
+        container.removeAllViews();
+        final AppDatabase database = db;
         executor.execute(() -> {
-            List<WeightRecord> records = db.weightRecordDao().getAllRecords();
-            // 计算连续打卡天数
+            if (database == null) return;
+            List<WeightRecord> records = database.weightRecordDao().getAllRecords();
             int streak = calcStreak();
             List<Entry> wtEntries = new ArrayList<>();
             for (int i = 0; i < Math.min(records.size(), 60); i++) {
@@ -265,7 +268,7 @@ public class ProfileFragment extends Fragment {
                 tvStreak.setTextColor(streak >= 7 ? ColorTokens.BRAND_ORANGE : ColorTokens.TEXT_SECONDARY);
                 tvStreak.setTextSize(15f);
                 tvStreak.setPadding(0, 0, 0, dp2px(8));
-                historyContainer.addView(tvStreak);
+                container.addView(tvStreak);
 
                 // 体重折线图
                 if (wtEntries.size() >= 2) {
@@ -306,14 +309,14 @@ public class ProfileFragment extends Fragment {
                             diff > 0 ? ColorTokens.ACCENT_AMBER : ColorTokens.TEXT_SECONDARY);
                     tvTrend.setTextSize(14f);
                     tvTrend.setPadding(0, dp2px(4), 0, 0);
-                    historyContainer.addView(tvTrend);
+                    container.addView(tvTrend);
                 } else if (!records.isEmpty()) {
                     TextView tv = new TextView(getContext());
                     tv.setText("最新: " + records.get(0).getWeightKg() + " kg (至少需2条记录才能显示趋势)");
                     tv.setTextColor(ColorTokens.TEXT_SECONDARY);
                     tv.setTextSize(13f);
                     tv.setPadding(0, dp2px(4), 0, 0);
-                    historyContainer.addView(tv);
+                    container.addView(tv);
                 }
             });
         });
@@ -373,14 +376,18 @@ public class ProfileFragment extends Fragment {
     }
 
     private void loadMeasurementsUI() {
-        measureContainer.removeAllViews();
+        final LinearLayout container = measureContainer;
+        if (container == null) return;
+        container.removeAllViews();
+        final AppDatabase database = db;
         executor.execute(() -> {
-            BodyMeasurement latest = db.bodyMeasurementDao().getLatest();
+            if (database == null) return;
+            BodyMeasurement latest = database.bodyMeasurementDao().getLatest();
             safePost(() -> {
                 if (latest == null) {
                     TextView tv = new TextView(getContext());
                     tv.setText("暂无围度数据"); tv.setTextColor(ColorTokens.TEXT_SECONDARY);
-                    measureContainer.addView(tv); return;
+                    container.addView(tv); return;
                 }
                 String[] labels = {"胸围","腰围","臀围","臂围","腿围"};
                 double[] vals = {latest.getChestCm(),latest.getWaistCm(),latest.getHipCm(),latest.getArmCm(),latest.getThighCm()};
@@ -388,7 +395,7 @@ public class ProfileFragment extends Fragment {
                     TextView tv = new TextView(getContext());
                     tv.setText(labels[i] + ": " + vals[i] + " cm");
                     tv.setTextColor(ColorTokens.ACCENT_CYAN); tv.setTextSize(13);
-                    tv.setPadding(0,6,0,6); measureContainer.addView(tv);
+                    tv.setPadding(0,6,0,6); container.addView(tv);
                 }
             });
         });
