@@ -124,11 +124,16 @@ public class ProfileFragment extends Fragment {
 
         // 成就检查
         executor.execute(() -> {
-            AchievementManager am = new AchievementManager(requireContext());
-            List<String> newBadges = am.checkAndUnlock(db);
-            if (!newBadges.isEmpty()) {
-                safePost(() -> Toast.makeText(getContext(), "🏆 解锁成就: " + newBadges.get(0) + "!",
-                        Toast.LENGTH_LONG).show());
+            try {
+                AchievementManager am = new AchievementManager(getContext());
+                if (am == null || db == null) return;
+                List<String> newBadges = am.checkAndUnlock(db);
+                if (newBadges != null && !newBadges.isEmpty()) {
+                    safePost(() -> Toast.makeText(getContext(), "🏆 解锁成就: " + newBadges.get(0) + "!",
+                            Toast.LENGTH_LONG).show());
+                }
+            } catch (Exception e) {
+                android.util.Log.e("MusicGym", "Achievement check failed", e);
             }
         });
 
@@ -155,56 +160,53 @@ public class ProfileFragment extends Fragment {
         weightChart.getAxisRight().setEnabled(false);
         rootLayout.addView(weightChart, btnIdx);
 
-        // 累计统计卡片（动态插入到体重身高行和按钮之间）
-        LinearLayout statsRow = new LinearLayout(requireContext());
-        statsRow.setOrientation(LinearLayout.HORIZONTAL);
-        statsRow.setPadding(0, dp2px(16), 0, 0);
-        for (int i = 0; i < 3; i++) {
-            TextView tv = new TextView(requireContext());
-            tv.setLayoutParams(new LinearLayout.LayoutParams(0,
-                    ViewGroup.LayoutParams.WRAP_CONTENT, 1));
-            tv.setGravity(Gravity.CENTER);
-            tv.setTextColor(ColorTokens.ACCENT_CYAN);
-            tv.setTextSize(13f);
-            tv.setTag("loading");
-            statsRow.addView(tv);
-        }
-        int btnIdx2 = rootLayout.indexOfChild(btnEditProfile);
-        rootLayout.addView(statsRow, btnIdx2);
+        // 累计统计卡片（安全创建，异常时静默跳过）
+        try {
+            LinearLayout statsRow = new LinearLayout(requireContext());
+            statsRow.setOrientation(LinearLayout.HORIZONTAL);
+            statsRow.setPadding(0, dp2px(16), 0, 0);
+            for (int i = 0; i < 3; i++) {
+                TextView tv = new TextView(requireContext());
+                tv.setLayoutParams(new LinearLayout.LayoutParams(0,
+                        ViewGroup.LayoutParams.WRAP_CONTENT, 1));
+                tv.setGravity(Gravity.CENTER);
+                tv.setTextColor(ColorTokens.ACCENT_CYAN);
+                tv.setTextSize(13f);
+                statsRow.addView(tv);
+            }
+            int btnIdx2 = rootLayout.indexOfChild(btnEditProfile);
+            rootLayout.addView(statsRow, btnIdx2);
 
-        executor.execute(() -> {
-            try {
-                List<WorkoutRecord> wRecs = db.workoutRecordDao().getAllRecords();
-                int totalWorkouts = wRecs.size();
-                double totalDist = 0; int totalSec = 0;
-                java.util.HashSet<String> activeDays = new java.util.HashSet<>();
-                for (WorkoutRecord r : wRecs) {
-                    totalDist += r.getDistanceKm();
-                    totalSec += r.getDurationSeconds();
-                    if (r.getDate() != null) activeDays.add(r.getDate());
-                }
-                List<StrengthRecord> sRecs = db.strengthRecordDao().getAllRecords();
-                totalWorkouts += sRecs.size();
-                for (StrengthRecord r : sRecs) {
-                    totalSec += r.getDurationSeconds();
-                    if (r.getDate() != null) activeDays.add(r.getDate());
-                }
-                final int fHours = totalSec / 3600;
-                final int fDays = activeDays.size();
-                final double fDist = totalDist;
-                safePost(() -> {
-                    String[] labels = {
-                            fDays + " 天",
-                            String.format(Locale.getDefault(), "%.0f km", fDist),
-                            fHours + " 小时"
-                    };
-                    for (int i = 0; i < 3 && i < statsRow.getChildCount(); i++) {
-                        TextView tv = (TextView) statsRow.getChildAt(i);
-                        tv.setText(labels[i]);
+            executor.execute(() -> {
+                try {
+                    List<WorkoutRecord> wRecs = db.workoutRecordDao().getAllRecords();
+                    double totalDist = 0; int totalSec = 0;
+                    java.util.HashSet<String> activeDays = new java.util.HashSet<>();
+                    for (WorkoutRecord r : wRecs) {
+                        totalDist += r.getDistanceKm();
+                        totalSec += r.getDurationSeconds();
+                        if (r.getDate() != null) activeDays.add(r.getDate());
                     }
-                });
-            } catch (Exception ignored) {}
-        });
+                    List<StrengthRecord> sRecs = db.strengthRecordDao().getAllRecords();
+                    for (StrengthRecord r : sRecs) {
+                        totalSec += r.getDurationSeconds();
+                        if (r.getDate() != null) activeDays.add(r.getDate());
+                    }
+                    final int fHours = totalSec / 3600;
+                    final int fDays = activeDays.size();
+                    final double fDist = totalDist;
+                    safePost(() -> {
+                        String[] labels = {fDays + " 天",
+                                String.format(Locale.getDefault(), "%.0f km", fDist),
+                                fHours + " 小时"};
+                        for (int i = 0; i < 3 && i < statsRow.getChildCount(); i++)
+                            ((TextView) statsRow.getChildAt(i)).setText(labels[i]);
+                    });
+                } catch (Exception ignored) {}
+            });
+        } catch (Exception e) {
+            android.util.Log.e("MusicGym", "Stats row failed", e);
+        }
 
         btnEditProfile.setOnClickListener(v -> showEditDialog());
         btnMeasurements.setOnClickListener(v -> showMeasurementsDialog());
