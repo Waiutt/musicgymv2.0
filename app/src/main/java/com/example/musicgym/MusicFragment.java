@@ -75,6 +75,9 @@ public class MusicFragment extends Fragment {
     private TextView tvEmptyHint;
     private boolean pendingNotifyPermission;
     private TextView btnEq;
+    private View miniBar, playerArea;
+    private TextView miniTitle, miniArtist;
+    private ImageButton miniPlay;
 
     private EqualizerManager eqManager;
     private ObjectAnimator recordAnimator;
@@ -87,10 +90,7 @@ public class MusicFragment extends Fragment {
     private SongBpmDatabase bpmDb;
     private BpmMatchEngine bpmEngine;
 
-    private int panelExpandedHeight, panelCollapsedHeight;
     private boolean panelExpanded;
-    private float dragStartY, panelStartHeight;
-    private static final int COLLAPSED_DP = 48;
 
     // ── 后台 Service ──
     private MusicService musicService;
@@ -154,6 +154,13 @@ public class MusicFragment extends Fragment {
         playlistScroll = view.findViewById(R.id.music_playlist_scroll);
         etSearch = view.findViewById(R.id.music_search);
         tvEmptyHint = view.findViewById(R.id.music_empty_hint);
+        miniBar = view.findViewById(R.id.music_mini_bar);
+        playerArea = view.findViewById(R.id.music_player_area);
+        miniTitle = view.findViewById(R.id.music_mini_title);
+        miniArtist = view.findViewById(R.id.music_mini_artist);
+        miniPlay = view.findViewById(R.id.music_mini_play);
+        miniPlay.setOnClickListener(v -> togglePlayPause());
+        miniBar.setOnClickListener(v -> setPanelExpanded(false));
         setupPlaylistUI(view);
 
         audioManager = (AudioManager) requireContext().getSystemService(Context.AUDIO_SERVICE);
@@ -173,50 +180,30 @@ public class MusicFragment extends Fragment {
         tvCadence.setTextColor(ColorTokens.TEXT_MUTED);
         tvCadence.setTextSize(12f); tvCadence.setGravity(Gravity.CENTER);
         tvCadence.setVisibility(View.GONE);
-        ViewGroup playerArea = (ViewGroup) view.findViewById(R.id.music_player_area);
+        playerArea = view.findViewById(R.id.music_player_area);
         View artistRef = view.findViewById(R.id.music_tv_artist);
-        playerArea.addView(tvCadence, playerArea.indexOfChild(artistRef) + 1);
+        ((ViewGroup) playerArea).addView(tvCadence,
+                ((ViewGroup) playerArea).indexOfChild(artistRef) + 1);
 
         cadenceDetector = new StepCadenceDetector(requireContext());
         bpmDb = new SongBpmDatabase(requireContext());
         bpmEngine = new BpmMatchEngine(bpmDb, this);
         cadenceDetector.setListener(bpmEngine);
 
-        // ── 提拉面板 ──
-        panelCollapsedHeight = dp(COLLAPSED_DP);
-        panel.post(() -> {
-            panelExpandedHeight = (int) (view.getHeight() * 0.55);
-            ViewGroup.LayoutParams lp = panel.getLayoutParams();
-            lp.height = panelCollapsedHeight; panel.setLayoutParams(lp);
-            panelExpanded = false;
-        });
+        // ── 歌列表面板拖动（简化为点击展开/折叠） ──
+        initPanel(view);
         dragHandle.setOnTouchListener(new View.OnTouchListener() {
-            private float downX, downY; private boolean isDragging;
+            private float downY; private boolean dragged;
             @Override public boolean onTouch(View v, MotionEvent event) {
                 switch (event.getAction()) {
                     case MotionEvent.ACTION_DOWN:
-                        downX = event.getX(); downY = event.getY();
-                        dragStartY = event.getRawY(); panelStartHeight = panel.getHeight();
-                        isDragging = false; dragHandle.setAlpha(0.7f); return true;
+                        downY = event.getY(); dragged = false; return true;
                     case MotionEvent.ACTION_MOVE:
-                        float dx = Math.abs(event.getX() - downX);
-                        float dy = Math.abs(event.getY() - downY);
-                        if (!isDragging && (dx > 10 || dy > 5)) isDragging = true;
-                        if (isDragging) {
-                            float moveDy = dragStartY - event.getRawY();
-                            int newH = (int) (panelStartHeight + moveDy);
-                            newH = Math.max(panelCollapsedHeight, Math.min(newH, panelExpandedHeight));
-                            setPanelHeight(newH);
-                        }
+                        if (Math.abs(event.getY() - downY) > 20) dragged = true;
                         return true;
-                    case MotionEvent.ACTION_UP: case MotionEvent.ACTION_CANCEL:
-                        dragHandle.setAlpha(1f);
-                        if (isDragging) {
-                            int curH = panel.getHeight();
-                            int mid = (panelCollapsedHeight + panelExpandedHeight) / 2;
-                            animatePanel(curH > mid ? panelExpandedHeight : panelCollapsedHeight);
-                        } else animatePanel(panelExpanded ? panelCollapsedHeight : panelExpandedHeight);
-                        isDragging = false; return true;
+                    case MotionEvent.ACTION_UP:
+                        if (!dragged) setPanelExpanded(!panelExpanded);
+                        return true;
                 }
                 return false;
             }
@@ -341,18 +328,25 @@ public class MusicFragment extends Fragment {
 
     // ═══════════ 提拉面板 ═══════════
 
-    private void setPanelHeight(int h) {
-        ViewGroup.LayoutParams lp = panel.getLayoutParams();
-        lp.height = h; panel.setLayoutParams(lp);
+    // ═══════════ 面板展开/折叠 ═══════════
+    private void setPanelExpanded(boolean expanded) {
+        playerArea.setVisibility(expanded ? View.GONE : View.VISIBLE);
+        miniBar.setVisibility(expanded ? View.VISIBLE : View.GONE);
+        panelExpanded = expanded;
+        if (expanded) updateMiniBar();
     }
-
-    private void animatePanel(int targetH) {
-        ValueAnimator va = ValueAnimator.ofInt(panel.getHeight(), targetH);
-        va.setDuration(300);
-        va.setInterpolator(new android.view.animation.DecelerateInterpolator(2.5f));
-        va.addUpdateListener(a -> setPanelHeight((int) a.getAnimatedValue()));
-        va.start();
-        panelExpanded = targetH == panelExpandedHeight;
+    private void updateMiniBar() {
+        MusicViewModel.TrackInfo t = vm.getCurrentTrack();
+        miniTitle.setText(t != null ? t.title : "未在播放");
+        miniArtist.setText(t != null ? t.artist : "");
+        Boolean p = vm.getIsPlaying().getValue();
+        miniPlay.setImageResource(p != null && p
+                ? android.R.drawable.ic_media_pause : android.R.drawable.ic_media_play);
+    }
+    private void initPanel(View view) {
+        panelExpanded = false;
+        playerArea.setVisibility(View.VISIBLE);
+        miniBar.setVisibility(View.GONE);
     }
 
     // ═══════════ 扫描 ═══════════

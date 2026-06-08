@@ -144,6 +144,11 @@ public class WorkoutActivity extends AppCompatActivity implements AMapLocationLi
 
         mapView.onCreate(savedInstanceState);
         aMap = mapView.getMap();
+        if (aMap != null) {
+            // 设置初始相机位置到成都（避免显示世界地图）
+            aMap.moveCamera(CameraUpdateFactory.newLatLngZoom(
+                    new LatLng(30.5728, 104.0668), 15f));
+        }
 
         btnBack.setOnClickListener(v -> {
             if (isTracking && !isPaused) {

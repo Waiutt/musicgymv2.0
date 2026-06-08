@@ -34,6 +34,7 @@ public class CreatePostSheet extends BottomSheetDialogFragment {
 
     private final ActivityResultLauncher<Intent> cameraLauncher =
             registerForActivityResult(new ActivityResultContracts.StartActivityForResult(), result -> {
+                if (getActivity() == null) return;
                 if (result.getResultCode() == getActivity().RESULT_OK && result.getData() != null) {
                     Bitmap bmp = (Bitmap) result.getData().getExtras().get("data");
                     if (bmp != null) {
@@ -70,7 +71,6 @@ public class CreatePostSheet extends BottomSheetDialogFragment {
 
         repo = new CommunityRepository();
         userManager = UserManager.get(requireContext());
-        userManager.signIn((uid, nick) -> {});
 
         btnCamera.setOnClickListener(v2 -> cameraLauncher.launch(
                 new Intent(android.provider.MediaStore.ACTION_IMAGE_CAPTURE)));
@@ -79,17 +79,26 @@ public class CreatePostSheet extends BottomSheetDialogFragment {
         btnPublish.setOnClickListener(v2 -> {
             String title = etTitle.getText().toString().trim();
             String content = etContent.getText().toString().trim();
-            if (title.isEmpty() || content.isEmpty()) {
-                Toast.makeText(getContext(), "请填写标题和内容", Toast.LENGTH_SHORT).show();
+            if (title.isEmpty()) {
+                Toast.makeText(getContext(), "请填写标题", Toast.LENGTH_SHORT).show();
                 return;
             }
-            repo.publishPost(userManager.getUserId(), userManager.getNickname(),
-                    title, content, currentImageUri, postId -> {
-                        if (postId != null) {
-                            Toast.makeText(getContext(), "发布成功！", Toast.LENGTH_SHORT).show();
-                            dismiss();
-                        }
-                    });
+            // 确保登录完成后再发布
+            userManager.signIn((userId, nickname) -> {
+                if (userId == null) {
+                    Toast.makeText(getContext(), "社区不可用，请检查网络", Toast.LENGTH_SHORT).show();
+                    return;
+                }
+                repo.publishPost(userId, nickname, title,
+                        content, currentImageUri, postId -> {
+                            if (postId != null) {
+                                Toast.makeText(getContext(), "发布成功！", Toast.LENGTH_SHORT).show();
+                                dismiss();
+                            } else {
+                                Toast.makeText(getContext(), "发布失败", Toast.LENGTH_SHORT).show();
+                            }
+                        });
+            });
         });
 
         return v;

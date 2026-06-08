@@ -6,7 +6,7 @@
     android:orientation="vertical"
     android:background="@color/bg_dark">
 
-    <!-- 顶部工具栏 -->
+    <!-- ═══ 顶部工具栏 ═══ -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="56dp"
@@ -19,7 +19,7 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:text="Music Player"
+            android:text="@string/music_title"
             android:textColor="@color/white"
             android:textSize="17sp"
             android:textStyle="bold" />
@@ -32,14 +32,14 @@
             android:gravity="center"
             android:text="🔀"
             android:textSize="14sp"
-            android:contentDescription="切换播放模式" />
+            android:contentDescription="@string/music_mode_shuffle" />
 
         <TextView
             android:id="@+id/music_mode_label"
             android:layout_width="wrap_content"
             android:layout_height="36dp"
             android:gravity="center_vertical"
-            android:text="顺序"
+            android:text="@string/music_mode_sequential"
             android:textColor="@color/text_gray"
             android:textSize="11sp"
             android:paddingStart="4dp"
@@ -62,10 +62,11 @@
             android:background="@drawable/stats_filter_unselected"
             android:gravity="center"
             android:text="🔄"
-            android:textSize="14sp" />
+            android:textSize="14sp"
+            android:contentDescription="重新扫描" />
     </LinearLayout>
 
-    <!-- 播放器区域 (固定) -->
+    <!-- ═══ 播放器区域 ═══ -->
     <LinearLayout
         android:id="@+id/music_player_area"
         android:layout_width="match_parent"
@@ -76,7 +77,6 @@
         android:paddingStart="20dp"
         android:paddingEnd="20dp">
 
-        <!-- 专辑封面 -->
         <androidx.cardview.widget.CardView
             android:layout_width="180dp"
             android:layout_height="180dp"
@@ -107,7 +107,7 @@
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:text="未在播放"
+                android:text="@string/music_not_playing"
                 android:textColor="@color/white"
                 android:textSize="20sp"
                 android:textStyle="bold"
@@ -123,27 +123,29 @@
                 android:text="🤍"
                 android:textSize="16sp"
                 android:clickable="true"
-                android:focusable="true" />
+                android:focusable="true"
+                android:contentDescription="收藏歌曲" />
         </LinearLayout>
 
         <TextView
             android:id="@+id/music_tv_artist"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="扫描歌曲中..."
+            android:text="@string/music_scanning"
             android:textColor="@color/text_gray"
             android:textSize="13sp"
             android:maxLines="1"
             android:ellipsize="end"
             android:layout_marginTop="4dp"
-            android:layout_marginBottom="20dp" />
+            android:gravity="center" />
 
         <!-- 进度条 -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:gravity="center_vertical"
-            android:orientation="horizontal">
+            android:orientation="horizontal"
+            android:layout_marginTop="16dp">
 
             <TextView
                 android:id="@+id/music_tv_current_time"
@@ -187,8 +189,6 @@
                 android:background="?attr/selectableItemBackgroundBorderless"
                 android:src="@android:drawable/ic_media_previous"
                 android:contentDescription="上一首"
-                android:scaleX="1.0"
-                android:scaleY="1.0"
                 app:tint="@color/white" />
 
             <ImageButton
@@ -199,9 +199,9 @@
                 android:layout_marginEnd="20dp"
                 android:background="?attr/selectableItemBackgroundBorderless"
                 android:src="@android:drawable/ic_media_play"
-                android:contentDescription="播放/暂停"
                 android:scaleX="1.6"
                 android:scaleY="1.6"
+                android:contentDescription="播放/暂停"
                 app:tint="@color/accent_emerald" />
 
             <ImageButton
@@ -211,21 +211,77 @@
                 android:background="?attr/selectableItemBackgroundBorderless"
                 android:src="@android:drawable/ic_media_next"
                 android:contentDescription="下一首"
-                android:scaleX="1.0"
-                android:scaleY="1.0"
                 app:tint="@color/white" />
         </LinearLayout>
     </LinearLayout>
 
-    <!-- 提拉式播放列表面板 -->
+    <!-- ═══ 底部固定迷你播放条 ═══ -->
+    <FrameLayout
+        android:id="@+id/music_mini_bar"
+        android:layout_width="match_parent"
+        android:layout_height="56dp"
+        android:background="@color/bg_panel"
+        android:visibility="gone">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:gravity="center_vertical"
+            android:orientation="horizontal"
+            android:paddingStart="16dp"
+            android:paddingEnd="8dp">
+
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:orientation="vertical"
+                android:layout_marginEnd="12dp">
+
+                <TextView
+                    android:id="@+id/music_mini_title"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="未在播放"
+                    android:textColor="@color/white"
+                    android:textSize="14sp"
+                    android:maxLines="1"
+                    android:ellipsize="end" />
+
+                <TextView
+                    android:id="@+id/music_mini_artist"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text=""
+                    android:textColor="@color/text_gray"
+                    android:textSize="11sp"
+                    android:maxLines="1"
+                    android:ellipsize="end" />
+            </LinearLayout>
+
+            <ImageButton
+                android:id="@+id/music_mini_play"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:src="@android:drawable/ic_media_play"
+                android:scaleX="1.2"
+                android:scaleY="1.2"
+                app:tint="@color/accent_emerald"
+                android:contentDescription="播放/暂停" />
+        </LinearLayout>
+    </FrameLayout>
+
+    <!-- ═══ 歌列表面板 ═══ -->
     <LinearLayout
         android:id="@+id/music_panel"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="0dp"
+        android:layout_weight="1"
         android:orientation="vertical"
         android:background="@color/bg_panel">
 
-        <!-- 拖动把手 (圆润设计) -->
+        <!-- 拖动把手 -->
         <LinearLayout
             android:id="@+id/music_drag_handle"
             android:layout_width="match_parent"
@@ -234,7 +290,8 @@
             android:orientation="vertical"
             android:clickable="true"
             android:focusable="true"
-            android:background="#00000000">
+            android:background="#00000000"
+            android:contentDescription="拖动调整歌单">
 
             <View
                 android:layout_width="36dp"
@@ -251,7 +308,7 @@
             android:layout_marginStart="16dp"
             android:layout_marginEnd="16dp"
             android:background="@color/bg_input"
-            android:hint="🔍 搜索歌曲或歌手..."
+            android:hint="@string/music_search_hint"
             android:textColor="@color/white"
             android:textColorHint="@color/text_gray_dark"
             android:textSize="13sp"
@@ -276,7 +333,7 @@
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:text="播放列表"
+                android:text="@string/music_playlist_title"
                 android:textColor="@color/white"
                 android:textSize="14sp"
                 android:textStyle="bold" />
@@ -303,7 +360,7 @@
                 android:textSize="11sp" />
         </LinearLayout>
 
-        <!-- 歌曲列表 (可滚动) -->
+        <!-- 歌曲列表 -->
         <ScrollView
             android:id="@+id/music_playlist_scroll"
             android:layout_width="match_parent"
