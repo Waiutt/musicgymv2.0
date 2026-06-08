@@ -78,9 +78,10 @@ public abstract class AppDatabase extends RoomDatabase {
                                 }
                             })
                             .build();
-                    // 已有数据库但未种子化（升级场景）
-                    new Thread(() -> SeedDataManager.seedIfNeeded(
-                            context.getApplicationContext())).start();
+                    // 已有数据库但未种子化（升级场景，延迟避免阻塞启动）
+                    new android.os.Handler(android.os.Looper.getMainLooper())
+                            .postDelayed(() -> new Thread(() -> SeedDataManager.seedIfNeeded(
+                                    context.getApplicationContext())).start(), 1000);
                 }
             }
         }

@@ -59,6 +59,7 @@ public class CommunityAdapter extends RecyclerView.Adapter<CommunityAdapter.View
             com.bumptech.glide.Glide.with(holder.itemView.getContext())
                     .load(post.imageUri)
                     .placeholder(R.drawable.pic1)
+                    .diskCacheStrategy(com.bumptech.glide.load.engine.DiskCacheStrategy.ALL)
                     .into(holder.ivImage);
         } else {
             holder.ivImage.setVisibility(View.GONE);

@@ -208,6 +208,7 @@
                 android:layout_height="52dp"
                 android:background="?attr/selectableItemBackgroundBorderless"
                 android:src="@android:drawable/ic_media_next"
+                android:contentDescription="下一首"
                 android:scaleX="1.0"
                 android:scaleY="1.0"
                 app:tint="@color/white" />
