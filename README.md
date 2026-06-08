@@ -21,7 +21,6 @@
   <img src="screenshots/05_stats.jpg" width="200" alt="数据统计"/>
   <img src="screenshots/06_community.jpg" width="200" alt="社区"/>
   <img src="screenshots/07_profile.jpg" width="200" alt="个人中心"/>
-  <img src="screenshots/08_settings.jpg" width="200" alt="设置"/>
 </div>
 
 ---
