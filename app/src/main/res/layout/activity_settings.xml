@@ -86,6 +86,26 @@
                         android:background="?attr/selectableItemBackground"
                         android:clickable="true"
                         android:focusable="true" />
+
+                    <View
+                        android:layout_width="match_parent"
+                        android:layout_height="1dp"
+                        android:layout_marginStart="20dp"
+                        android:background="@color/bg_input" />
+
+                    <TextView
+                        android:id="@+id/settings_btn_cache"
+                        android:layout_width="match_parent"
+                        android:layout_height="56dp"
+                        android:gravity="center_vertical"
+                        android:paddingStart="20dp"
+                        android:paddingEnd="20dp"
+                        android:text="清除缓存"
+                        android:textColor="@color/white"
+                        android:textSize="15sp"
+                        android:background="?attr/selectableItemBackground"
+                        android:clickable="true"
+                        android:focusable="true" />
                 </LinearLayout>
             </androidx.cardview.widget.CardView>
 
@@ -216,7 +236,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="16dp"
                 android:gravity="center"
-                android:text="MusicGym v2.0 — Made with ❤️"
+                android:text="MusicGym — Made with ❤️"
                 android:textColor="@color/text_gray_dark"
                 android:textSize="12sp" />
 

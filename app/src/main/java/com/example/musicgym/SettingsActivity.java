@@ -53,12 +53,28 @@ public class SettingsActivity extends AppCompatActivity {
                         .setPositiveButton("确认清除", (d, w) -> {
                             executor.execute(() -> {
                                 AppDatabase.getInstance(this).clearAllTables();
+                                getSharedPreferences("app_prefs", MODE_PRIVATE).edit().clear().apply();
+                                getSharedPreferences("music_fav", MODE_PRIVATE).edit().clear().apply();
                                 runOnUiThread(() -> Toast.makeText(this,
                                         "数据已清除", Toast.LENGTH_SHORT).show());
                             });
                         })
                         .setNegativeButton("取消", null)
                         .show());
+
+        // 清除缓存
+        findViewById(R.id.settings_btn_cache).setOnClickListener(v -> {
+            executor.execute(() -> {
+                try {
+                    java.io.File cache = getCacheDir();
+                    deleteDir(cache);
+                    java.io.File extCache = getExternalCacheDir();
+                    if (extCache != null) deleteDir(extCache);
+                } catch (Exception ignored) {}
+                runOnUiThread(() -> Toast.makeText(this,
+                        "缓存已清除", Toast.LENGTH_SHORT).show());
+            });
+        });
 
         // 隐私政策
         findViewById(R.id.settings_btn_privacy).setOnClickListener(v ->
@@ -82,9 +98,19 @@ public class SettingsActivity extends AppCompatActivity {
         findViewById(R.id.settings_btn_about).setOnClickListener(v ->
                 new AlertDialog.Builder(this)
                         .setTitle("关于 MusicGym")
-                        .setMessage("MusicGym v4.3\n\n一站式健身记录助手\n运动追踪 · 力量训练 · 音乐播放\n\n独立开发者作品 © 2026")
+                        .setMessage("MusicGym " + tvVersion.getText() + "\n\n一站式健身记录助手\n运动追踪 · 力量训练 · 音乐播放\n社区社交 · AI 训练计划\n\n© 2026 MusicGym Team")
                         .setPositiveButton("确定", null)
                         .show());
+    }
+
+    private void deleteDir(java.io.File dir) {
+        if (dir == null || !dir.exists()) return;
+        java.io.File[] files = dir.listFiles();
+        if (files != null) for (java.io.File f : files) {
+            if (f.isDirectory()) deleteDir(f);
+            else f.delete();
+        }
+        dir.delete();
     }
 
     @Override
