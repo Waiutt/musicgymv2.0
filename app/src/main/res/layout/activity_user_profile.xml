@@ -35,6 +35,19 @@
             android:text="加载中..."
             android:textColor="@color/cyber_cyan"
             android:textSize="14sp" />
+
+        <TextView
+            android:id="@+id/up_follow"
+            android:layout_width="wrap_content"
+            android:layout_height="36dp"
+            android:layout_marginTop="10dp"
+            android:gravity="center"
+            android:paddingStart="24dp"
+            android:paddingEnd="24dp"
+            android:text="+ 关注"
+            android:textColor="@color/white"
+            android:textSize="14sp"
+            android:background="@color/brand_orange" />
     </LinearLayout>
 
     <!-- 帖子列表 -->

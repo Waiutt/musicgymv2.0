@@ -46,6 +46,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -585,13 +586,36 @@ public class WorkoutActivity extends AppCompatActivity implements AMapLocationLi
     }
 
     private void autoPostWorkout(String sport, double distKm, int sec, int cal) {
-        if (distKm < 0.1) return; // 太短不发
-        String title = String.format(Locale.getDefault(),
-                "完成了 %.1f km %s", distKm, sport);
+        if (distKm < 0.1) return;
+        String emoji = sport.contains("跑") ? "🏃" : sport.contains("骑") ? "🚴" : "🚶";
+        String title = emoji + " 完成了 " + String.format(Locale.getDefault(),
+                "%.1f km %s", distKm, sport);
         String content = String.format(Locale.getDefault(),
-                "距离: %.2f km | 时长: %d:%02d | 🔥 %d kcal",
-                distKm, sec / 60, sec % 60, cal);
+                "距离: %.2f km\n时长: %d:%02d\n🔥 %d kcal\n平均配速: %.1f min/km",
+                distKm, sec / 60, sec % 60, cal,
+                (sec / 60.0) / (distKm > 0 ? distKm : 1));
         UserManager.get(this).signIn((userId, nickname) ->
-                new CommunityRepository().publishPost(userId, nickname, title, content, null, null));
+                new CommunityRepository().publishActivity(
+                        userId, nickname, title, content, "workout"));
+
+        // 同步更新挑战进度
+        updateChallengeProgress("跑步 km", distKm);
+    }
+
+    private void updateChallengeProgress(String goalType, double progress) {
+        CommunityRepository cr = new CommunityRepository();
+        UserManager.get(this).signIn((uid, nn) ->
+                cr.loadChallenges(challenges -> {
+                    for (CommunityRepository.Challenge c : challenges) {
+                        if (c.participants == null) continue;
+                        for (Map<String, Object> p : c.participants) {
+                            if (uid.equals(p.get("userId"))) {
+                                double cur = p.get("progress") instanceof Number
+                                        ? ((Number) p.get("progress")).doubleValue() : 0;
+                                cr.updateChallengeProgress(c.id, uid, cur + progress);
+                            }
+                        }
+                    }
+                }));
     }
 }

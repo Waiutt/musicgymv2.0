@@ -569,10 +569,26 @@ public class StrengthWorkoutActivity extends AppCompatActivity {
                     Toast.makeText(this, "训练已保存 ✓", Toast.LENGTH_SHORT).show();
                     // 自动发布社区动态
                     UserManager.get(this).signIn((userId, nickname) -> {
-                        String title = "完成了力量训练 💪";
+                        String title = "💪 完成了力量训练";
                         String content = String.format(Locale.getDefault(),
                                 "%d 分钟 · %d 个动作: %s", secs / 60, workoutData.size(), names);
-                        new CommunityRepository().publishPost(userId, nickname, title, content, null, null);
+                        new CommunityRepository().publishActivity(
+                                userId, nickname, title, content, "strength");
+                        // 更新挑战进度
+                        new CommunityRepository().loadChallenges(challenges -> {
+                            for (CommunityRepository.Challenge c : challenges) {
+                                if (c.participants == null) continue;
+                                for (java.util.Map<String, Object> p : c.participants) {
+                                    if (userId.equals(p.get("userId"))
+                                            && "🏋️ 训练次数".equals(c.goalType)) {
+                                        double cur = p.get("progress") instanceof Number
+                                                ? ((Number) p.get("progress")).doubleValue() : 0;
+                                        new CommunityRepository().updateChallengeProgress(
+                                                c.id, userId, cur + 1);
+                                    }
+                                }
+                            }
+                        });
                     });
                     finish();
                 });
