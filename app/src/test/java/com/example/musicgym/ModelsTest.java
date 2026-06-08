@@ -82,4 +82,78 @@ public class ModelsTest {
         t.setExercisesJson("[]");
         assertEquals("拉日", t.getName());
     }
+
+    // ── 歌单 ──
+
+    @Test
+    public void playlist_constructor() {
+        Playlist p = new Playlist("我的歌单");
+        assertEquals("我的歌单", p.name);
+        assertTrue(p.createdAt > 0);
+        assertEquals(0, p.id);
+    }
+
+    @Test
+    public void playlistSong_constructor() {
+        PlaylistSong s = new PlaylistSong(1, "/sdcard/test.mp3", "Test", "Artist", 5);
+        assertEquals(1, s.playlistId);
+        assertEquals("/sdcard/test.mp3", s.trackPath);
+        assertEquals(5, s.position);
+    }
+
+    // ── 围度 ──
+
+    @Test
+    public void bodyMeasurement_getters() {
+        BodyMeasurement m = new BodyMeasurement("2026-06-01", 75.0, 100, 85, 95, 38, 58);
+        assertEquals(100.0, m.getChestCm(), 0.01);
+        assertEquals(85.0, m.getWaistCm(), 0.01);
+        assertEquals(75.0, m.getWeightKg(), 0.01);
+    }
+
+    // ── TrackInfo ──
+
+    @Test
+    public void trackInfo_constructor() {
+        MusicViewModel.TrackInfo t = new MusicViewModel.TrackInfo("标题", "歌手", "/path");
+        assertEquals("标题", t.title);
+        assertEquals("歌手", t.artist);
+        assertEquals("/path", t.path);
+    }
+
+    // ── 边界条件 ──
+
+    @Test
+    public void workoutRecord_zeroValues() {
+        WorkoutRecord r = new WorkoutRecord("2026-01-01", "Running", 0, 0, 0, "[]");
+        assertEquals(0, r.getDistanceKm(), 0.001);
+        assertEquals(0, r.getDurationSeconds());
+    }
+
+    @Test
+    public void formatTime_largeValues() {
+        assertEquals("166:40", fmt(10000));
+        assertEquals("00:01", fmt(1));
+    }
+
+    // ── SetEntry ──
+
+    @Test
+    public void setEntry_fields() {
+        StrengthWorkoutActivity.SetEntry s = new StrengthWorkoutActivity.SetEntry(80, 8);
+        assertEquals(80.0, s.weight, 0.001);
+        assertEquals(8, s.reps);
+        assertFalse(s.warmup);
+        assertEquals("", s.note);
+        assertEquals(0, s.rpe);
+    }
+
+    @Test
+    public void setEntry_fullConstructor() {
+        StrengthWorkoutActivity.SetEntry s =
+                new StrengthWorkoutActivity.SetEntry(100, 5, true, "状态好", 8);
+        assertTrue(s.warmup);
+        assertEquals("状态好", s.note);
+        assertEquals(8, s.rpe);
+    }
 }

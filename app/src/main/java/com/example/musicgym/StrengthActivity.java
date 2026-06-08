@@ -207,7 +207,7 @@ public class StrengthActivity extends AppCompatActivity {
                         WorkoutTemplate t = new WorkoutTemplate(name, arr.toString());
                         executor.execute(() -> AppDatabase.getInstance(this).workoutTemplateDao().insert(t));
                         Toast.makeText(this, "模板已保存", Toast.LENGTH_SHORT).show();
-                    } catch (Exception e) { e.printStackTrace(); }
+                    } catch (Exception e) { android.util.Log.e("MusicGym", "Strength error", e); }
                 }).setNegativeButton("取消", null).show();
     }
 
@@ -269,7 +269,7 @@ public class StrengthActivity extends AppCompatActivity {
                                     }
                                     updateSelectionUI(); showGroup(currentGroup);
                                     Toast.makeText(this, "模板已加载", Toast.LENGTH_SHORT).show();
-                                } catch (Exception e) { e.printStackTrace(); }
+                                } catch (Exception e) { android.util.Log.e("MusicGym", "Strength error", e); }
                             }
                         }).show();
             });

@@ -184,6 +184,7 @@
                 android:layout_height="52dp"
                 android:background="?attr/selectableItemBackgroundBorderless"
                 android:src="@android:drawable/ic_media_previous"
+                android:contentDescription="上一首"
                 android:scaleX="1.0"
                 android:scaleY="1.0"
                 app:tint="@color/white" />
@@ -196,6 +197,7 @@
                 android:layout_marginEnd="20dp"
                 android:background="?attr/selectableItemBackgroundBorderless"
                 android:src="@android:drawable/ic_media_play"
+                android:contentDescription="播放/暂停"
                 android:scaleX="1.6"
                 android:scaleY="1.6"
                 app:tint="@color/accent_emerald" />

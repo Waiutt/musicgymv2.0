@@ -110,7 +110,7 @@ public class WorkoutActivity extends AppCompatActivity implements AMapLocationLi
         try {
             AMapLocationClient.updatePrivacyShow(this, true, true);
             AMapLocationClient.updatePrivacyAgree(this, true);
-        } catch (Exception e) { e.printStackTrace(); }
+        } catch (Exception e) { android.util.Log.e("MusicGym", "Workout error", e); }
 
         setContentView(R.layout.activity_workout);
 
@@ -184,7 +184,7 @@ public class WorkoutActivity extends AppCompatActivity implements AMapLocationLi
             aMap.getUiSettings().setMyLocationButtonEnabled(false);
             aMap.getUiSettings().setZoomControlsEnabled(false);
             aMap.getUiSettings().setCompassEnabled(true);
-        } catch (Exception e) { e.printStackTrace(); }
+        } catch (Exception e) { android.util.Log.e("MusicGym", "Workout error", e); }
     }
 
     private void requestLocationAndStart() {
@@ -206,7 +206,7 @@ public class WorkoutActivity extends AppCompatActivity implements AMapLocationLi
             locationClient.setLocationOption(option);
             locationClient.setLocationListener(this);
             locationClient.startLocation();
-        } catch (Exception e) { e.printStackTrace(); }
+        } catch (Exception e) { android.util.Log.e("MusicGym", "Workout error", e); }
     }
 
     @Override
@@ -316,7 +316,7 @@ public class WorkoutActivity extends AppCompatActivity implements AMapLocationLi
             locationClient.setLocationOption(option);
             locationClient.setLocationListener(this);
             locationClient.startLocation();
-        } catch (Exception e) { e.printStackTrace(); }
+        } catch (Exception e) { android.util.Log.e("MusicGym", "Workout error", e); }
     }
 
     private void pauseTracking() {
@@ -355,7 +355,7 @@ public class WorkoutActivity extends AppCompatActivity implements AMapLocationLi
             locationClient.setLocationOption(option);
             locationClient.setLocationListener(this);
             locationClient.startLocation();
-        } catch (Exception e) { e.printStackTrace(); }
+        } catch (Exception e) { android.util.Log.e("MusicGym", "Workout error", e); }
     }
 
     private void stopTracking() {

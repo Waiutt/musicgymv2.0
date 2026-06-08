@@ -53,7 +53,7 @@ public class DataExporter {
             fw.close();
             return true;
         } catch (Exception e) {
-            e.printStackTrace();
+            android.util.Log.e("MusicGym", "Export failed", e);
             return false;
         }
     }
