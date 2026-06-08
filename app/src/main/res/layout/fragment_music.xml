@@ -277,9 +277,22 @@
                 android:textStyle="bold" />
 
             <TextView
+                android:id="@+id/music_playlist_selector"
+                android:layout_width="wrap_content"
+                android:layout_height="32dp"
+                android:background="@color/bg_input"
+                android:gravity="center"
+                android:paddingStart="10dp"
+                android:paddingEnd="10dp"
+                android:text="📂 全部歌曲"
+                android:textColor="@color/cyber_cyan"
+                android:textSize="12sp" />
+
+            <TextView
                 android:id="@+id/music_track_count"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:layout_marginStart="8dp"
                 android:text="0 首"
                 android:textColor="@color/text_gray_dark"
                 android:textSize="11sp" />

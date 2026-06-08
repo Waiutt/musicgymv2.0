@@ -7,6 +7,8 @@
 -keep class com.example.musicgym.BodyMeasurement { *; }
 -keep class com.example.musicgym.WorkoutTemplate { *; }
 -keep class com.example.musicgym.BlogPost { *; }
+-keep class com.example.musicgym.Playlist { *; }
+-keep class com.example.musicgym.PlaylistSong { *; }
 
 # Room DAO
 -keep interface com.example.musicgym.*Dao { *; }

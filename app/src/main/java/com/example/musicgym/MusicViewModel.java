@@ -184,6 +184,31 @@ public class MusicViewModel extends AndroidViewModel {
     }
     public void clearAutoPlay() { autoPlay.postValue(false); }
 
+    // ── 歌单管理 ──
+    public void loadPlaylists(Context ctx, java.util.function.Consumer<List<Playlist>> cb) {
+        executor.execute(() -> {
+            List<Playlist> list = AppDatabase.getInstance(ctx).playlistDao().getAllPlaylists();
+            cb.accept(list);
+        });
+    }
+    public void loadPlaylistSongs(Context ctx, long playlistId,
+                                   java.util.function.Consumer<List<TrackInfo>> cb) {
+        executor.execute(() -> {
+            List<PlaylistSong> songs = AppDatabase.getInstance(ctx).playlistDao().getSongs(playlistId);
+            List<TrackInfo> result = new ArrayList<>();
+            for (PlaylistSong s : songs) {
+                result.add(new TrackInfo(s.title, s.artist, s.trackPath));
+            }
+            cb.accept(result);
+        });
+    }
+    public void insertPlaylist(Context ctx, Playlist pl) {
+        executor.execute(() -> AppDatabase.getInstance(ctx).playlistDao().insertPlaylist(pl));
+    }
+    public void insertPlaylistSong(Context ctx, PlaylistSong ps) {
+        executor.execute(() -> AppDatabase.getInstance(ctx).playlistDao().insertSong(ps));
+    }
+
     // ── 数据类 ──
     public static class TrackInfo {
         public final String title, artist, path;

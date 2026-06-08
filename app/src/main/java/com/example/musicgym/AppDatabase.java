@@ -9,7 +9,8 @@ import androidx.room.migration.Migration;
 import androidx.sqlite.db.SupportSQLiteDatabase;
 
 @Database(entities = {BlogPost.class, WorkoutRecord.class, WeightRecord.class,
-        StrengthRecord.class, BodyMeasurement.class, WorkoutTemplate.class}, version = 4, exportSchema = false)
+        StrengthRecord.class, BodyMeasurement.class, WorkoutTemplate.class,
+        Playlist.class, PlaylistSong.class}, version = 5, exportSchema = false)
 public abstract class AppDatabase extends RoomDatabase {
 
     public abstract BlogPostDao blogPostDao();
@@ -18,6 +19,7 @@ public abstract class AppDatabase extends RoomDatabase {
     public abstract StrengthRecordDao strengthRecordDao();
     public abstract BodyMeasurementDao bodyMeasurementDao();
     public abstract WorkoutTemplateDao workoutTemplateDao();
+    public abstract PlaylistDao playlistDao();
 
     static final Migration MIGRATION_1_2 = new Migration(1, 2) {
         @Override public void migrate(@NonNull SupportSQLiteDatabase db) {
@@ -47,6 +49,18 @@ public abstract class AppDatabase extends RoomDatabase {
         }
     };
 
+    static final Migration MIGRATION_4_5 = new Migration(4, 5) {
+        @Override public void migrate(@NonNull SupportSQLiteDatabase db) {
+            db.execSQL("CREATE TABLE IF NOT EXISTS `playlists` (" +
+                    "`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, " +
+                    "`name` TEXT, `createdAt` INTEGER NOT NULL)");
+            db.execSQL("CREATE TABLE IF NOT EXISTS `playlist_songs` (" +
+                    "`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, " +
+                    "`playlistId` INTEGER NOT NULL, `trackPath` TEXT, " +
+                    "`title` TEXT, `artist` TEXT, `position` INTEGER NOT NULL)");
+        }
+    };
+
     private static volatile AppDatabase INSTANCE;
     public static AppDatabase getInstance(Context context) {
         if (INSTANCE == null) {
@@ -54,7 +68,7 @@ public abstract class AppDatabase extends RoomDatabase {
                 if (INSTANCE == null) {
                     INSTANCE = Room.databaseBuilder(context.getApplicationContext(),
                                     AppDatabase.class, "musicgym_database")
-                            .addMigrations(MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4)
+                            .addMigrations(MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4, MIGRATION_4_5)
                             .build();
                 }
             }

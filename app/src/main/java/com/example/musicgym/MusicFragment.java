@@ -3,6 +3,7 @@ package com.example.musicgym;
 import android.Manifest;
 import android.animation.ObjectAnimator;
 import android.animation.ValueAnimator;
+import android.app.AlertDialog;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -153,6 +154,7 @@ public class MusicFragment extends Fragment {
         playlistScroll = view.findViewById(R.id.music_playlist_scroll);
         etSearch = view.findViewById(R.id.music_search);
         tvEmptyHint = view.findViewById(R.id.music_empty_hint);
+        setupPlaylistUI(view);
 
         audioManager = (AudioManager) requireContext().getSystemService(Context.AUDIO_SERVICE);
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
@@ -428,7 +430,45 @@ public class MusicFragment extends Fragment {
             });
             row.addView(btnDel);
             row.setOnClickListener(v -> { vm.selectAndPlay(idx); });
+            row.setOnLongClickListener(v -> {
+                showAddToPlaylistDialog(t);
+                return true;
+            });
             playlistContainer.addView(row);
+        }
+    }
+
+    // ═══════════ Gapless 预加载 ═══════════
+
+    private MediaPlayer nextMediaPlayer;
+
+    private void preloadNextTrack(int currentIndex) {
+        List<MusicViewModel.TrackInfo> tracks = vm.getTrackList();
+        int nextIdx = vm.getNextIndex();
+        if (nextIdx < 0 || currentIndex == nextIdx || nextIdx >= tracks.size()) return;
+
+        // 释放旧的预加载
+        if (nextMediaPlayer != null) {
+            try { nextMediaPlayer.release(); } catch (Exception ignored) {}
+        }
+
+        try {
+            nextMediaPlayer = new MediaPlayer();
+            nextMediaPlayer.setDataSource(tracks.get(nextIdx).path);
+            nextMediaPlayer.prepare();
+            mediaPlayer.setNextMediaPlayer(nextMediaPlayer);
+
+            // 下一首播完后回调
+            mediaPlayer.setOnCompletionListener(mp -> {
+                // Gapless 已自动切换，现在准备下下首
+                int nextAfter = vm.getNextIndex();
+                if (nextAfter >= 0) vm.selectAndPlay(nextAfter);
+            });
+        } catch (Exception ignored) {
+            if (nextMediaPlayer != null) {
+                try { nextMediaPlayer.release(); } catch (Exception e) {}
+                nextMediaPlayer = null;
+            }
         }
     }
 
@@ -465,6 +505,10 @@ public class MusicFragment extends Fragment {
             if (eqManager != null) eqManager.release();
             eqManager = new EqualizerManager(mediaPlayer.getAudioSessionId());
             if (autoPlay) startPlayback(); else vm.setPlaying(false);
+
+            // Gapless: 预加载下一首
+            preloadNextTrack(index);
+
         } catch (Exception e) {
             Toast.makeText(getContext(), "无法播放", Toast.LENGTH_SHORT).show();
             if (mediaPlayer != null) {
@@ -609,14 +653,100 @@ public class MusicFragment extends Fragment {
         }
     }
 
+    // ═══════════ 歌单管理 ═══════════
+
+    private TextView playlistSelector;
+
+    private void setupPlaylistUI(View view) {
+        playlistSelector = view.findViewById(R.id.music_playlist_selector);
+        playlistSelector.setOnClickListener(v -> showPlaylistListDialog());
+    }
+
+    private void showPlaylistListDialog() {
+        AlertDialog.Builder b = new AlertDialog.Builder(requireContext());
+        b.setTitle("📂 歌单管理");
+        vm.loadPlaylists(requireContext(), playlists -> {
+            if (!isAdded()) return;
+            String[] names = new String[playlists.size() + 2];
+            for (int i = 0; i < playlists.size(); i++)
+                names[i] = "🎵 " + playlists.get(i).name;
+            names[playlists.size()] = "──────────────";
+            names[playlists.size() + 1] = "+ 创建新歌单";
+
+            requireActivity().runOnUiThread(() -> {
+                b.setItems(names, (d, w) -> {
+                    if (w == playlists.size() + 1) showCreatePlaylistDialog();
+                    else if (w < playlists.size())
+                        loadPlaylistSongs(playlists.get(w));
+                });
+                b.setNegativeButton("全部歌曲", (d, w) -> {
+                    playlistSelector.setText("📂 全部歌曲");
+                    vm.setTracks(vm.getTrackList()); // restore from ViewModel
+                    buildPlaylistUI();
+                });
+                b.show();
+            });
+        });
+    }
+
+    private void showCreatePlaylistDialog() {
+        EditText input = new EditText(requireContext());
+        input.setHint("歌单名称"); input.setTextColor(Color.WHITE);
+        input.setBackgroundColor(ColorTokens.BG_INPUT); input.setPadding(24, 16, 24, 16);
+        new AlertDialog.Builder(requireContext())
+                .setTitle("新建歌单")
+                .setView(input)
+                .setPositiveButton("创建", (d, w) -> {
+                    String name = input.getText().toString().trim();
+                    if (name.isEmpty()) return;
+                    Playlist pl = new Playlist(name);
+                    vm.insertPlaylist(requireContext(), pl);
+                    Toast.makeText(getContext(), "歌单已创建", Toast.LENGTH_SHORT).show();
+                })
+                .setNegativeButton("取消", null).show();
+    }
+
+    private void showAddToPlaylistDialog(MusicViewModel.TrackInfo track) {
+        vm.loadPlaylists(requireContext(), playlists -> {
+            if (!isAdded() || playlists.isEmpty()) { safePost(() ->
+                    Toast.makeText(getContext(), "请先创建歌单", Toast.LENGTH_SHORT).show()); return; }
+            String[] names = new String[playlists.size()];
+            for (int i = 0; i < playlists.size(); i++) names[i] = playlists.get(i).name;
+            safePost(() -> new AlertDialog.Builder(requireContext())
+                    .setTitle("添加到歌单: " + track.title)
+                    .setItems(names, (d, w) -> {
+                        PlaylistSong ps = new PlaylistSong(playlists.get(w).id,
+                                track.path, track.title, track.artist, 0);
+                        vm.insertPlaylistSong(requireContext(), ps);
+                        Toast.makeText(getContext(),
+                                "已添加到 " + playlists.get(w).name, Toast.LENGTH_SHORT).show();
+                    }).show());
+        });
+    }
+
+    private void loadPlaylistSongs(Playlist playlist) {
+        playlistSelector.setText("📂 " + playlist.name);
+        vm.loadPlaylistSongs(requireContext(), playlist.id, tracks -> {
+            if (!isAdded()) return;
+            safePost(() -> {
+                vm.setTracks(tracks);
+                buildPlaylistUI();
+            });
+        });
+    }
+
     // ═══════════ 工具 ═══════════
 
     private int dp(int d) { return UiUtils.dp(getContext(), d); }
     static final int WRAP = UiUtils.WRAP;
+    private void safePost(Runnable r) {
+        if (isAdded() && getActivity() != null) getActivity().runOnUiThread(r);
+    }
 
     @Override public void onDestroyView() {
         super.onDestroyView();
         if (mediaPlayer != null) { mediaPlayer.release(); mediaPlayer = null; }
+        if (nextMediaPlayer != null) { try { nextMediaPlayer.release(); } catch (Exception ignored) {} nextMediaPlayer = null; }
         if (eqManager != null) { eqManager.release(); eqManager = null; }
         if (cadenceDetector != null) cadenceDetector.stop();
         abandonAudioFocus();
