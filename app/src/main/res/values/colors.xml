@@ -31,4 +31,5 @@
     <color name="pr_yellow">#fbbf24</color>
     <color name="text_white_soft">#f8fafc</color>
     <color name="divider_dark">#475569</color>
+    <color name="comment_bubble">#3338bdf8</color>
 </resources>
