@@ -122,18 +122,24 @@ public class ProfileFragment extends Fragment {
         // 加载已缓存的头像
         loadCachedAvatar();
 
-        // 成就检查
+        // 成就检查（安全：后台线程 + null全守卫）
         executor.execute(() -> {
             try {
-                AchievementManager am = new AchievementManager(getContext());
-                if (am == null || db == null) return;
-                List<String> newBadges = am.checkAndUnlock(db);
+                Context ctx = getContext();
+                if (ctx == null) return;
+                AppDatabase database = db;
+                if (database == null) return;
+                AchievementManager am = new AchievementManager(ctx);
+                List<String> newBadges = am.checkAndUnlock(database);
                 if (newBadges != null && !newBadges.isEmpty()) {
-                    safePost(() -> Toast.makeText(getContext(), "🏆 解锁成就: " + newBadges.get(0) + "!",
-                            Toast.LENGTH_LONG).show());
+                    final String badge = newBadges.get(0);
+                    safePost(() -> {
+                        Context c = getContext();
+                        if (c != null) Toast.makeText(c, "🏆 解锁成就: " + badge + "!", Toast.LENGTH_LONG).show();
+                    });
                 }
             } catch (Exception e) {
-                android.util.Log.e("MusicGym", "Achievement check failed", e);
+                android.util.Log.e("MusicGym", "Achievement failed", e);
             }
         });
 
