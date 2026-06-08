@@ -324,7 +324,7 @@
                     android:layout_height="wrap_content"
                     android:layout_marginTop="60dp"
                     android:gravity="center"
-                    android:text="没有找到音乐文件\n请将 MP3 放入 Music 或 Download 文件夹\n然后点击 🔄 重新扫描"
+                    android:text="@string/music_empty_hint"
                     android:textColor="@color/text_gray"
                     android:textSize="13sp"
                     android:lineSpacingExtra="4dp"

@@ -19,4 +19,128 @@
         7. 变更\n\
         我们可能会不时更新本隐私政策。更新后的政策将在应用内公布。
     </string>
+
+    <!-- ═══ 通用 ═══ -->
+    <string name="btn_cancel">取消</string>
+    <string name="btn_confirm">确定</string>
+    <string name="btn_save">保存</string>
+    <string name="btn_delete">删除</string>
+    <string name="btn_back">返回</string>
+    <string name="loading">加载中...</string>
+    <string name="no_data">暂无数据</string>
+
+    <!-- ═══ 引导页 ═══ -->
+    <string name="onboarding_title_1">音乐同步运动</string>
+    <string name="onboarding_desc_1">运动时音乐自动匹配步频\n无需看手机,尽情奔跑</string>
+    <string name="onboarding_title_2">力量追踪</string>
+    <string name="onboarding_desc_2">50+ 动作库·肌群细分\n记录每一组,可视化成长</string>
+    <string name="onboarding_title_3">AI 智能计划</string>
+    <string name="onboarding_desc_3">基于你的训练数据\nAI 生成个性化周期计划</string>
+    <string name="onboarding_btn_next">下一步</string>
+    <string name="onboarding_btn_start">开始使用</string>
+
+    <!-- ═══ 音乐页 ═══ -->
+    <string name="music_title">Music Player</string>
+    <string name="music_not_playing">未在播放</string>
+    <string name="music_scanning">扫描歌曲中...</string>
+    <string name="music_empty_hint">没有找到音乐文件\n请将 MP3 放入 Music 或 Download 文件夹\n然后点击 🔄 重新扫描</string>
+    <string name="music_playlist_title">播放列表</string>
+    <string name="music_search_hint">🔍 搜索歌曲或歌手...</string>
+    <string name="music_track_count">%s 首</string>
+    <string name="music_mode_sequential">🔁 顺序</string>
+    <string name="music_mode_single">🔂 单曲</string>
+    <string name="music_mode_shuffle">🔀 随机</string>
+    <string name="music_cannot_play">无法播放</string>
+    <string name="music_audio_focus_fail">无法获取音频焦点</string>
+    <string name="music_permission_needed">需要存储权限</string>
+    <string name="music_permission_denied">无法访问音频</string>
+
+    <!-- ═══ GYM 页 ═══ -->
+    <string name="gym_running">跑步</string>
+    <string name="gym_cycling">骑行</string>
+    <string name="gym_walking">步行</string>
+    <string name="gym_strength">力量训练</string>
+
+    <!-- ═══ 力量训练 ═══ -->
+    <string name="strength_title">力量训练</string>
+    <string name="strength_selected_count">已选 %d 项</string>
+    <string name="strength_search_hint">搜索动作...</string>
+    <string name="strength_start_training">开始训练</string>
+    <string name="strength_save_training">保存训练</string>
+    <string name="strength_saved">训练已保存 ✓</string>
+    <string name="strength_save_failed">保存失败</string>
+    <string name="strength_discard_confirm">确认放弃</string>
+    <string name="strength_discard_msg">放弃本次训练？已记录的数据将会丢失。</string>
+    <string name="strength_note_saved">笔记已保存</string>
+
+    <!-- ═══ 运动追踪 ═══ -->
+    <string name="workout_go">GO</string>
+    <string name="workout_complete">%s 完成！</string>
+    <string name="workout_summary_format">距离: %.2f km\n时长: %d:%02d\n卡路里: %d kcal</string>
+    <string name="workout_again">再来一组</string>
+    <string name="workout_view_summary">查看总结</string>
+    <string name="workout_route_playback">%s 路线</string>
+    <string name="workout_no_route">无路线数据</string>
+
+    <!-- ═══ 统计页 ═══ -->
+    <string name="stats_section_history">HISTORY</string>
+    <string name="stats_filter_all">All</string>
+    <string name="stats_view_month">📅 月视图</string>
+    <string name="stats_view_week">📅 周视图</string>
+
+    <!-- ═══ 个人页 ═══ -->
+    <string name="profile_edit">编辑资料</string>
+    <string name="profile_measurements">身体围度</string>
+    <string name="profile_export_csv">导出数据 CSV</string>
+    <string name="profile_reminder">训练提醒</string>
+    <string name="profile_settings">⚙ 设置</string>
+    <string name="profile_weight_history">体重记录</string>
+    <string name="profile_body_measurements">身体围度</string>
+    <string name="profile_no_measurements">暂无围度数据</string>
+    <string name="profile_updated">已更新</string>
+    <string name="profile_saved">围度已保存</string>
+    <string name="profile_invalid_number">请输入有效数字</string>
+    <string name="profile_exported">已导出到 Downloads/</string>
+    <string name="profile_export_failed">导出失败</string>
+    <string name="profile_streak">🔥 连续运动 %d 天</string>
+
+    <!-- ═══ 社区页 ═══ -->
+    <string name="community_title">🏘 运动社区</string>
+    <string name="community_unavailable">社区不可用，请检查网络连接</string>
+    <string name="community_empty">暂无帖子，点击 + 发布第一条</string>
+    <string name="community_publish">发布动态</string>
+    <string name="community_publish_hint">分享你的运动心得...</string>
+    <string name="community_publish_btn">发布</string>
+    <string name="community_new_playlist">创建新歌单</string>
+    <string name="community_report_title">举报帖子</string>
+    <string name="community_report_confirm">确定举报该帖子？</string>
+    <string name="community_report_done">已提交举报</string>
+    <string name="community_challenges">🏆 挑战</string>
+    <string name="community_no_challenges">暂无进行中的挑战</string>
+
+    <!-- ═══ 设置页 ═══ -->
+    <string name="settings_title">设置</string>
+    <string name="settings_data_management">数据管理</string>
+    <string name="settings_export_all">导出全部数据 (CSV)</string>
+    <string name="settings_clear_data">清除所有数据</string>
+    <string name="settings_clear_cache">清除缓存</string>
+    <string name="settings_about">关于</string>
+    <string name="settings_version">版本号</string>
+    <string name="settings_theme">主题切换</string>
+    <string name="settings_privacy">隐私政策</string>
+    <string name="settings_about_title">关于 MusicGym</string>
+    <string name="settings_about_msg">MusicGym v5.2\n\n一站式健身记录助手\n运动追踪 · 力量训练 · 音乐播放\n社区社交 · AI 训练计划\n\n© 2026 MusicGym Team</string>
+    <string name="settings_clear_confirm_title">确认清除</string>
+    <string name="settings_clear_confirm_msg">将删除所有运动记录、训练数据和体重记录，此操作不可恢复。</string>
+    <string name="settings_exported">已导出到 Downloads/MusicGym_data.csv</string>
+    <string name="settings_export_failed">导出失败</string>
+    <string name="settings_cleared">数据已清除</string>
+    <string name="settings_cache_cleared">缓存已清除</string>
+    <string name="settings_footer">MusicGym — Made with ❤️</string>
+
+    <!-- ═══ 主题 ═══ -->
+    <string name="theme_follow_system">跟随系统</string>
+    <string name="theme_dark">深色模式</string>
+    <string name="theme_light">浅色模式</string>
+
 </resources>
