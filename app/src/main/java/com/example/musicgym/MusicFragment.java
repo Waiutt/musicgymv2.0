@@ -689,7 +689,7 @@ public class MusicFragment extends Fragment {
                 });
                 b.setNegativeButton("全部歌曲", (d, w) -> {
                     playlistSelector.setText("📂 全部歌曲");
-                    vm.setTracks(vm.getTrackList()); // restore from ViewModel
+                    vm.restoreFullTrackList();
                     buildPlaylistUI();
                 });
                 b.show();

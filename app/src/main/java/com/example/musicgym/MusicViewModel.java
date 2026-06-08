@@ -102,6 +102,16 @@ public class MusicViewModel extends AndroidViewModel {
         tracks.postValue(new ArrayList<>(list));
         trackCount.postValue(list.size() + " 首");
     }
+    /** 保存完整歌单（从扫描结果）供后续恢复 */
+    public void saveFullTrackList(List<TrackInfo> list) {
+        allTracksCache = new ArrayList<>(list);
+    }
+    /** 恢复全部歌曲 */
+    public void restoreFullTrackList() {
+        if (allTracksCache != null && !allTracksCache.isEmpty()) {
+            setTracks(allTracksCache);
+        }
+    }
 
     // ── 扫描 ──
     public void scanMusic(Context ctx) {
@@ -135,6 +145,7 @@ public class MusicViewModel extends AndroidViewModel {
                 }
             }
             setTracks(found);
+            saveFullTrackList(found); // 保存原始列表供恢复
             if (!found.isEmpty() && (currentIndex.getValue() == null
                     || currentIndex.getValue() < 0)) {
                 selectNoPlay(0);
@@ -195,6 +206,9 @@ public class MusicViewModel extends AndroidViewModel {
         currentIndex.postValue(idx);
     }
     public void clearAutoPlay() { autoPlay.postValue(false); }
+
+    // 保存原始扫描结果（切换歌单后可恢复）
+    private List<TrackInfo> allTracksCache;
 
     // ── 歌单管理 ──
     public void loadPlaylists(Context ctx, java.util.function.Consumer<List<Playlist>> cb) {
