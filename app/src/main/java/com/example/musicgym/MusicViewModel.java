@@ -139,6 +139,18 @@ public class MusicViewModel extends AndroidViewModel {
                     || currentIndex.getValue() < 0)) {
                 selectNoPlay(0);
             }
+            // 扫描 assets/demo 目录（内置 demo 歌曲）
+            try {
+                String[] assets = ctx.getAssets().list("demo");
+                if (assets != null) for (String f : assets) {
+                    if (f.endsWith(".mp3") && seen.add("assets/demo/" + f)) {
+                        found.add(new TrackInfo(
+                                f.replace(".mp3","").replace("demo_","Demo "),
+                                "MusicGym Demo", "assets/demo/" + f));
+                    }
+                }
+            } catch (Exception ignored) {}
+
             scanStatus.postValue(found.isEmpty() ? "0 首" : "");
         });
     }

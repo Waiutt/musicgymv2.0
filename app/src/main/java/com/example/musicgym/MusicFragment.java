@@ -494,7 +494,15 @@ public class MusicFragment extends Fragment {
 
         try {
             mediaPlayer = new MediaPlayer();
-            mediaPlayer.setDataSource(track.path);
+            if (track.path.startsWith("assets/")) {
+                android.content.res.AssetFileDescriptor afd =
+                        requireContext().getAssets().openFd(track.path);
+                mediaPlayer.setDataSource(afd.getFileDescriptor(),
+                        afd.getStartOffset(), afd.getLength());
+                afd.close();
+            } else {
+                mediaPlayer.setDataSource(track.path);
+            }
             mediaPlayer.prepare();
             seekBar.setMax(mediaPlayer.getDuration());
             tvTotalTime.setText(formatTime(mediaPlayer.getDuration()));

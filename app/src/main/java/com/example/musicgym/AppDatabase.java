@@ -69,7 +69,18 @@ public abstract class AppDatabase extends RoomDatabase {
                     INSTANCE = Room.databaseBuilder(context.getApplicationContext(),
                                     AppDatabase.class, "musicgym_database")
                             .addMigrations(MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4, MIGRATION_4_5)
+                            .addCallback(new Callback() {
+                                @Override public void onCreate(@NonNull SupportSQLiteDatabase db) {
+                                    super.onCreate(db);
+                                    // 首次创建数据库后预置 demo 数据
+                                    new Thread(() -> SeedDataManager.seedIfNeeded(
+                                            context.getApplicationContext())).start();
+                                }
+                            })
                             .build();
+                    // 已有数据库但未种子化（升级场景）
+                    new Thread(() -> SeedDataManager.seedIfNeeded(
+                            context.getApplicationContext())).start();
                 }
             }
         }

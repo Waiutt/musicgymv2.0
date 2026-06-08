@@ -48,7 +48,11 @@ public class CommunityRepository {
     }
 
     public void loadPosts(OnPostsLoadedListener listener) {
-        if (!available) { if (listener != null) listener.onLoaded(null); return; }
+        if (!available) {
+            // Firebase 不可用 → 从 Room 加载本地帖子
+            loadLocalPosts(listener);
+            return;
+        }
         try {
             db.collection("posts").orderBy("timestamp", Query.Direction.DESCENDING).limit(50).get()
                     .addOnCompleteListener(task -> {
@@ -57,11 +61,45 @@ public class CommunityRepository {
                             for (DocumentSnapshot doc : task.getResult()) result.add(docToPost(doc));
                         }
                         if (listener != null) {
-                            if (!task.isSuccessful()) listener.onLoaded(null); // network error
+                            if (!task.isSuccessful()) listener.onLoaded(null);
+                            else if (result.isEmpty()) loadLocalPosts(listener); // Firestore空了，试试本地
                             else listener.onLoaded(result);
                         }
                     });
         } catch (Exception e) { if (listener != null) listener.onLoaded(null); }
+    }
+
+    private void loadLocalPosts(OnPostsLoadedListener listener) {
+        try {
+            android.content.Context ctx = com.example.musicgym.MusicGymApp.getContext();
+            if (ctx == null) { listener.onLoaded(new ArrayList<>()); return; }
+            AppDatabase localDb = AppDatabase.getInstance(ctx);
+            List<BlogPost> local = localDb.blogPostDao().getAllPosts();
+            if (local == null || local.isEmpty()) {
+                if (listener != null) listener.onLoaded(new ArrayList<>());
+                return;
+            }
+            List<CommunityPost> result = new ArrayList<>();
+            for (BlogPost bp : local) result.add(localToPost(bp));
+            if (listener != null) listener.onLoaded(result);
+        } catch (Exception e) {
+            if (listener != null) listener.onLoaded(new ArrayList<>());
+        }
+    }
+
+    private CommunityPost localToPost(BlogPost bp) {
+        CommunityPost p = new CommunityPost();
+        p.id = String.valueOf(bp.getId());
+        p.userId = "local";
+        p.nickname = bp.getAuthor();
+        p.title = bp.getTitle();
+        p.content = bp.getFullContent();
+        p.imageUri = bp.getImageUri();
+        p.timestamp = System.currentTimeMillis();
+        p.likeCount = 0;
+        p.commentCount = 0;
+        p.comments = new ArrayList<>();
+        return p;
     }
 
     public void loadPost(String postId, OnPostLoadedListener listener) {
