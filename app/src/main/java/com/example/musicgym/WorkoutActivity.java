@@ -14,12 +14,13 @@ import android.speech.tts.TextToSpeech;
 import android.view.Gravity;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.EditText;
 import android.widget.FrameLayout;
 import android.widget.LinearLayout;
 import android.widget.TextView;
-import android.widget.FrameLayout;
-import android.widget.TextView;
 import android.widget.Toast;
+
+import androidx.appcompat.app.AlertDialog;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
@@ -80,9 +81,15 @@ public class WorkoutActivity extends AppCompatActivity implements AMapLocationLi
             ColorTokens.ACCENT_RED,        // 冲刺: 红
     };
 
-    // 公里标记
+    // 公里标记 + 分段配速
     private int nextKmMark = 1;
     private int kmStartSeconds;
+    private final List<String> splitPaces = new ArrayList<>();
+    private TextView tvSplitPaces;
+
+    // 目标配速
+    private int targetPaceSeconds; // 0=不设置
+    private boolean paceAlertFaster, paceAlertSlower;
 
     private float totalDistanceMeters;
     private int totalSeconds;
@@ -116,6 +123,18 @@ public class WorkoutActivity extends AppCompatActivity implements AMapLocationLi
 
         // 迷你音乐控制条
         buildMiniMusicControl();
+
+        // 分段配速显示
+        tvSplitPaces = new TextView(this);
+        tvSplitPaces.setTextColor(ColorTokens.ACCENT_CYAN);
+        tvSplitPaces.setTextSize(11f);
+        tvSplitPaces.setPadding(0, 4, 0, 4);
+        tvSplitPaces.setMaxLines(5);
+        tvSplitPaces.setVisibility(View.GONE);
+        tvSplitPaces.setBackgroundColor(Color.argb(120, 15, 23, 42));
+        ((ViewGroup) findViewById(android.R.id.content)).addView(tvSplitPaces,
+                new FrameLayout.LayoutParams(FrameLayout.LayoutParams.MATCH_PARENT,
+                        FrameLayout.LayoutParams.WRAP_CONTENT, Gravity.BOTTOM));
 
         sportType = getIntent().getStringExtra("sport_type");
         if (sportType == null) sportType = "跑步";
@@ -253,9 +272,12 @@ public class WorkoutActivity extends AppCompatActivity implements AMapLocationLi
                     drawPaceSegment();
                 }
 
-                // 公里标记
+                // 公里标记 + 分段配速
                 if (totalDistanceMeters >= nextKmMark * 1000) {
                     int kmTime = totalSeconds - kmStartSeconds;
+                    int kmPaceSec = (int) (kmTime * 1000.0 / 1000.0); // sec/km
+                    splitPaces.add(String.format(Locale.getDefault(), "第%dkm %d'%02d\"", nextKmMark, kmPaceSec / 60, kmPaceSec % 60));
+                    updateSplitPaceDisplay();
                     aMap.addMarker(new MarkerOptions()
                             .position(latLng)
                             .icon(BitmapDescriptorFactory.fromBitmap(
@@ -266,9 +288,12 @@ public class WorkoutActivity extends AppCompatActivity implements AMapLocationLi
                 }
 
                 float speedMs = loc.getSpeed();
+                int currentPaceSec = 0;
                 if (speedMs > 0) {
-                    int paceSec = (int) (1000 / speedMs);
-                    tvPace.setText(String.format(Locale.getDefault(), "%d'%02d''", paceSec / 60, paceSec % 60));
+                    currentPaceSec = (int) (1000 / speedMs);
+                    tvPace.setText(String.format(Locale.getDefault(), "%d'%02d''", currentPaceSec / 60, currentPaceSec % 60));
+                    // 目标配速提醒
+                    if (targetPaceSeconds > 0) checkPaceAlert(currentPaceSec);
                 }
                 updateDashboardUI();
             }
@@ -278,9 +303,46 @@ public class WorkoutActivity extends AppCompatActivity implements AMapLocationLi
     private void checkPermissionAndStart() {
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
             requestPermissions(new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, LOCATION_PERMISSION_CODE);
+            return;
+        }
+        // 目标配速设置弹窗
+        if (targetPaceSeconds <= 0) {
+            showTargetPaceDialog();
         } else {
             startTracking();
         }
+    }
+
+    private void showTargetPaceDialog() {
+        LinearLayout layout = new LinearLayout(this);
+        layout.setOrientation(LinearLayout.VERTICAL);
+        layout.setPadding(48, 32, 48, 16);
+
+        TextView tvTitle = new TextView(this);
+        tvTitle.setText("🏃 设置目标配速（可选）");
+        tvTitle.setTextColor(Color.WHITE); tvTitle.setTextSize(16f);
+        tvTitle.setPadding(0, 0, 0, 16); layout.addView(tvTitle);
+
+        EditText etMin = new EditText(this); etMin.setHint("分 (如 5)");
+        etMin.setTextColor(Color.WHITE); etMin.setHintTextColor(ColorTokens.TEXT_HINT);
+        etMin.setInputType(android.text.InputType.TYPE_CLASS_NUMBER); layout.addView(etMin);
+
+        EditText etSec = new EditText(this); etSec.setHint("秒 (如 30)");
+        etSec.setTextColor(Color.WHITE); etSec.setHintTextColor(ColorTokens.TEXT_HINT);
+        etSec.setInputType(android.text.InputType.TYPE_CLASS_NUMBER); layout.addView(etSec);
+
+        new AlertDialog.Builder(this)
+                .setView(layout)
+                .setPositiveButton("开始", (d, w) -> {
+                    try {
+                        int m = etMin.getText().toString().isEmpty() ? 0 : Integer.parseInt(etMin.getText().toString());
+                        int s = etSec.getText().toString().isEmpty() ? 0 : Integer.parseInt(etSec.getText().toString());
+                        targetPaceSeconds = m * 60 + s;
+                    } catch (NumberFormatException e) { targetPaceSeconds = 0; }
+                    startTracking();
+                })
+                .setNegativeButton("跳过", (d, w) -> startTracking())
+                .setCancelable(false).show();
     }
 
     private void startTracking() {
@@ -407,6 +469,8 @@ public class WorkoutActivity extends AppCompatActivity implements AMapLocationLi
                 .setPositiveButton("再来一组", (d, w) -> {
                     totalDistanceMeters = 0; totalSeconds = 0;
                     pathPoints.clear(); lastLatLng = null;
+                    splitPaces.clear(); nextKmMark = 1; kmStartSeconds = 0;
+                    if (tvSplitPaces != null) tvSplitPaces.setVisibility(View.GONE);
                     updateDashboardUI(); checkPermissionAndStart();
                 })
                 .setNegativeButton("查看总结", (d, w) -> {
@@ -516,6 +580,40 @@ public class WorkoutActivity extends AppCompatActivity implements AMapLocationLi
             tts.speak(msg, TextToSpeech.QUEUE_FLUSH, null, "workout_announce");
         }
     }
+
+    private void updateSplitPaceDisplay() {
+        if (tvSplitPaces == null || splitPaces.isEmpty()) return;
+        tvSplitPaces.setVisibility(View.VISIBLE);
+        StringBuilder sb = new StringBuilder();
+        int show = Math.min(splitPaces.size(), 5);
+        for (int i = splitPaces.size() - show; i < splitPaces.size(); i++) {
+            if (sb.length() > 0) sb.append("  ");
+            sb.append(splitPaces.get(i));
+        }
+        tvSplitPaces.setText(sb.toString());
+    }
+
+    private void checkPaceAlert(int currentPaceSec) {
+        if (targetPaceSeconds <= 0 || totalSeconds < 30) return;
+        int diff = currentPaceSec - targetPaceSeconds;
+        // 偏离超过30秒/公里才提醒
+        if (Math.abs(diff) < 30) return;
+        // 每30秒最多提醒一次
+        if (System.currentTimeMillis() - lastPaceAlertTime < 30000) return;
+        lastPaceAlertTime = System.currentTimeMillis();
+        if (diff > 0) {
+            if (!paceAlertSlower) {
+                paceAlertSlower = true; paceAlertFaster = false;
+                if (tts != null) tts.speak("当前配速偏慢，请加速", TextToSpeech.QUEUE_FLUSH, null, "pace_slow");
+            }
+        } else {
+            if (!paceAlertFaster) {
+                paceAlertFaster = true; paceAlertSlower = false;
+                if (tts != null) tts.speak("当前配速偏快，注意节奏", TextToSpeech.QUEUE_FLUSH, null, "pace_fast");
+            }
+        }
+    }
+    private long lastPaceAlertTime;
 
     // ========== 生命周期 ==========
 
