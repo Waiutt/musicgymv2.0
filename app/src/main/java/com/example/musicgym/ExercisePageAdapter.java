@@ -136,10 +136,11 @@ public class ExercisePageAdapter extends RecyclerView.Adapter<ExercisePageAdapte
             EditText etW = buildEdit(String.valueOf(se.weight), true);
             final int finalSi1 = si;
             etW.setOnFocusChangeListener((v, f) -> {
-                if (!f) try {
-                    sets.get(finalSi1).weight = Double.parseDouble(etW.getText().toString());
-                    activity.onPagerDataChanged(fExI);
-                } catch (Exception ignored) {}
+                if (!f) {
+                    double w = UiUtils.safeParseDouble(etW.getText().toString(), -1);
+                    if (w >= 0) { sets.get(finalSi1).weight = UiUtils.clamp(w, 0, 999);
+                    activity.onPagerDataChanged(fExI); }
+                }
             });
             row.addView(etW);
 
@@ -147,10 +148,11 @@ public class ExercisePageAdapter extends RecyclerView.Adapter<ExercisePageAdapte
             EditText etR = buildEdit(String.valueOf(se.reps), false);
             final int finalSi2 = si;
             etR.setOnFocusChangeListener((v, f) -> {
-                if (!f) try {
-                    sets.get(finalSi2).reps = Integer.parseInt(etR.getText().toString());
-                    activity.onPagerDataChanged(fExI);
-                } catch (Exception ignored) {}
+                if (!f) {
+                    int r = UiUtils.safeParseInt(etR.getText().toString(), -1);
+                    if (r >= 0) { sets.get(finalSi2).reps = UiUtils.clamp(r, 0, 999);
+                    activity.onPagerDataChanged(fExI); }
+                }
             });
             row.addView(etR);
 

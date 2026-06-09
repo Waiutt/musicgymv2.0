@@ -29,4 +29,39 @@ public final class UiUtils {
     public static int dp(Context ctx, int dp) {
         return (int) (dp * ctx.getResources().getDisplayMetrics().density);
     }
+
+    // ── 输入校验 ──
+
+    /** 安全解析 double，失败返回 defaultValue */
+    public static double safeParseDouble(String s, double defaultValue) {
+        if (s == null || s.trim().isEmpty()) return defaultValue;
+        try { return Double.parseDouble(s.trim()); } catch (NumberFormatException e) { return defaultValue; }
+    }
+
+    /** 安全解析 int，失败返回 defaultValue */
+    public static int safeParseInt(String s, int defaultValue) {
+        if (s == null || s.trim().isEmpty()) return defaultValue;
+        try { return Integer.parseInt(s.trim()); } catch (NumberFormatException e) { return defaultValue; }
+    }
+
+    /** 钳制 double 值在 [min, max] 范围内 */
+    public static double clamp(double value, double min, double max) {
+        return Math.max(min, Math.min(max, value));
+    }
+
+    /** 钳制 int 值在 [min, max] 范围内 */
+    public static int clamp(int value, int min, int max) {
+        return Math.max(min, Math.min(max, value));
+    }
+
+    /** 校验日期格式 yyyy-MM-dd，且不能是未来日期 */
+    public static boolean isValidDate(String date) {
+        if (date == null || date.length() != 10) return false;
+        try {
+            java.text.SimpleDateFormat sdf = new java.text.SimpleDateFormat("yyyy-MM-dd", java.util.Locale.getDefault());
+            sdf.setLenient(false);
+            java.util.Date d = sdf.parse(date);
+            return d != null && !d.after(new java.util.Date());
+        } catch (Exception e) { return false; }
+    }
 }

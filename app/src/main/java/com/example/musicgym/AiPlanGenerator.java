@@ -52,69 +52,85 @@ public class AiPlanGenerator {
             lastCallTime = System.currentTimeMillis();
 
             String prompt = buildPrompt(ctx, goal, daysPerWeek);
-            try {
-                URL url = new URL(API_URL);
-                HttpURLConnection conn = (HttpURLConnection) url.openConnection();
-                conn.setRequestMethod("POST");
-                conn.setRequestProperty("Content-Type", "application/json");
-                conn.setRequestProperty("Authorization", "Bearer " + apiKey);
-                conn.setDoOutput(true);
-                conn.setConnectTimeout(30000);
-                conn.setReadTimeout(60000);
+            Exception lastError = null;
+            // 最多重试 3 次（网络波动）
+            for (int attempt = 0; attempt < 3; attempt++) {
+                if (attempt > 0) {
+                    try { Thread.sleep(2000); } catch (InterruptedException ignored) {}
+                }
+                try {
+                    URL url = new URL(API_URL);
+                    HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+                    conn.setRequestMethod("POST");
+                    conn.setRequestProperty("Content-Type", "application/json");
+                    conn.setRequestProperty("Authorization", "Bearer " + apiKey);
+                    conn.setDoOutput(true);
+                    conn.setConnectTimeout(30000);
+                    conn.setReadTimeout(60000);
 
-                JSONObject body = new JSONObject();
-                body.put("model", "deepseek-chat");
-                body.put("temperature", 0.7);
-                body.put("max_tokens", 3000);
+                    JSONObject body = new JSONObject();
+                    body.put("model", "deepseek-chat");
+                    body.put("temperature", 0.7);
+                    body.put("max_tokens", 3000);
 
-                JSONArray messages = new JSONArray();
-                JSONObject sys = new JSONObject();
-                sys.put("role", "system");
-                sys.put("content", "你是一位NSCA认证力量教练。只输出JSON格式，不要任何解释文字。");
-                messages.put(sys);
+                    JSONArray messages = new JSONArray();
+                    JSONObject sys = new JSONObject();
+                    sys.put("role", "system");
+                    sys.put("content", "你是一位NSCA认证力量教练。只输出JSON格式，不要任何解释文字。");
+                    messages.put(sys);
 
-                JSONObject user = new JSONObject();
-                user.put("role", "user");
-                user.put("content", prompt);
-                messages.put(user);
+                    JSONObject user = new JSONObject();
+                    user.put("role", "user");
+                    user.put("content", prompt);
+                    messages.put(user);
 
-                body.put("messages", messages);
+                    body.put("messages", messages);
 
-                OutputStream os = conn.getOutputStream();
-                os.write(body.toString().getBytes("UTF-8"));
-                os.close();
+                    OutputStream os = conn.getOutputStream();
+                    os.write(body.toString().getBytes("UTF-8"));
+                    os.close();
 
-                int code = conn.getResponseCode();
-                if (code == 200) {
-                    BufferedReader br = new BufferedReader(
-                            new InputStreamReader(conn.getInputStream()));
-                    StringBuilder sb = new StringBuilder();
-                    String line;
-                    while ((line = br.readLine()) != null) sb.append(line);
-                    br.close();
-
-                    JSONObject resp = new JSONObject(sb.toString());
-                    String content = resp.getJSONArray("choices")
-                            .getJSONObject(0).getJSONObject("message")
-                            .getString("content");
-                    cb.onResult(content, null);
-                } else {
-                    String errMsg = "API Error " + code;
-                    if (conn.getErrorStream() != null) {
+                    int code = conn.getResponseCode();
+                    if (code == 200) {
                         BufferedReader br = new BufferedReader(
-                                new InputStreamReader(conn.getErrorStream()));
+                                new InputStreamReader(conn.getInputStream()));
                         StringBuilder sb = new StringBuilder();
                         String line;
                         while ((line = br.readLine()) != null) sb.append(line);
                         br.close();
-                        errMsg += ": " + sb.toString();
+
+                        JSONObject resp = new JSONObject(sb.toString());
+                        String content = resp.getJSONArray("choices")
+                                .getJSONObject(0).getJSONObject("message")
+                                .getString("content");
+                        cb.onResult(content, null);
+                        conn.disconnect();
+                        return;
+                    } else if (code >= 500) {
+                        // 服务端错误才重试
+                        lastError = new Exception("API Error " + code);
+                        conn.disconnect();
+                        continue;
+                    } else {
+                        String errMsg = "API Error " + code;
+                        if (conn.getErrorStream() != null) {
+                            BufferedReader br = new BufferedReader(
+                                    new InputStreamReader(conn.getErrorStream()));
+                            StringBuilder sb = new StringBuilder();
+                            String line;
+                            while ((line = br.readLine()) != null) sb.append(line);
+                            br.close();
+                            errMsg += ": " + sb.toString();
+                        }
+                        cb.onResult(null, errMsg);
+                        conn.disconnect();
+                        return;
                     }
-                    cb.onResult(null, errMsg);
+                } catch (Exception e) {
+                    lastError = e;
                 }
-                conn.disconnect();
-            } catch (Exception e) {
-                cb.onResult(null, e.getMessage());
             }
+            cb.onResult(null, lastError != null ? lastError.getMessage() : "多次重试失败");
         });
     }
 

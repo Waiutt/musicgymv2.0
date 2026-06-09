@@ -350,16 +350,18 @@ public class StrengthWorkoutActivity extends AppCompatActivity {
                 row.addView(tvWu);
 
                 EditText etW = buildEdit(row, String.valueOf(se.weight), true);
-                etW.setOnFocusChangeListener((v, f) -> { if (!f) try {
-                    sets.get(si).weight = Double.parseDouble(etW.getText().toString());
-                    updateCardDisplay(exI);
-                } catch (Exception ignored) {} });
+                etW.setOnFocusChangeListener((v, f) -> { if (!f) {
+                    double w = UiUtils.safeParseDouble(etW.getText().toString(), -1);
+                    if (w >= 0) { sets.get(si).weight = UiUtils.clamp(w, 0, 999);
+                    updateCardDisplay(exI); }
+                }});
 
                 EditText etR = buildEdit(row, String.valueOf(se.reps), false);
-                etR.setOnFocusChangeListener((v, f) -> { if (!f) try {
-                    sets.get(si).reps = Integer.parseInt(etR.getText().toString());
-                    updateCardDisplay(exI);
-                } catch (Exception ignored) {} });
+                etR.setOnFocusChangeListener((v, f) -> { if (!f) {
+                    int r = UiUtils.safeParseInt(etR.getText().toString(), -1);
+                    if (r >= 0) { sets.get(si).reps = UiUtils.clamp(r, 0, 999);
+                    updateCardDisplay(exI); }
+                }});
 
                 // %1RM + RPE
                 double oneRM = pr != null ? pr[0] : 0;
