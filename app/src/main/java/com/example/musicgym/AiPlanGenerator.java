@@ -18,7 +18,7 @@ import java.util.concurrent.Executors;
 /** DeepSeek AI 训练计划生成器 */
 public class AiPlanGenerator {
 
-    private static final String API_URL = "https://api.deepseek.com/v1/chat/completions";
+    private static final String API_URL = "https://api.deepseek.com/chat/completions";
     private final ExecutorService executor = Executors.newSingleThreadExecutor();
     private String apiKey;
 
@@ -69,7 +69,7 @@ public class AiPlanGenerator {
                     conn.setReadTimeout(60000);
 
                     JSONObject body = new JSONObject();
-                    body.put("model", "deepseek-chat");
+                    body.put("model", "deepseek-v4-pro");
                     body.put("temperature", 0.7);
                     body.put("max_tokens", 3000);
 
