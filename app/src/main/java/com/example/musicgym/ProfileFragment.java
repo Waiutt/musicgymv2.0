@@ -103,6 +103,7 @@ public class ProfileFragment extends Fragment {
 
         prefs = requireActivity().getSharedPreferences("UserProfile", Context.MODE_PRIVATE);
         db = AppDatabase.getInstance(requireContext());
+        if (executor != null) executor.shutdownNow();
         executor = Executors.newSingleThreadExecutor();
 
         executor.execute(this::migrateWeightHistoryIfNeeded);
