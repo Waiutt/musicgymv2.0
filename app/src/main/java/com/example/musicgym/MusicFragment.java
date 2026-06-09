@@ -739,7 +739,9 @@ public class MusicFragment extends Fragment {
 
     // ═══════════ 工具 ═══════════
 
+    /** @deprecated 直接调用 UiUtils.dp(getContext(), d) */ @Deprecated
     private int dp(int d) { return UiUtils.dp(getContext(), d); }
+    /** @deprecated 直接使用 UiUtils.WRAP */ @Deprecated
     static final int WRAP = UiUtils.WRAP;
     private void safePost(Runnable r) {
         if (isAdded() && getActivity() != null) getActivity().runOnUiThread(r);

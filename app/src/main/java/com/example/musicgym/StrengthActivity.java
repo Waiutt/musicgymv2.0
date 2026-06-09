@@ -817,6 +817,7 @@ public class StrengthActivity extends AppCompatActivity {
         startActivity(i);
     }
 
+    /** @deprecated 直接调用 UiUtils.dp(this, d) */ @Deprecated
     private int dp(int d) { return UiUtils.dp(this, d); }
     private String getEmoji(String n) {
         if (n.contains("卧推")||n.contains("推胸")) return "🏋️"; if (n.contains("深蹲")||n.contains("腿举")) return "🦵";
@@ -829,6 +830,7 @@ public class StrengthActivity extends AppCompatActivity {
         return "🎯";
     }
 
+    /** @deprecated 直接使用 UiUtils.WRAP/UiUtils.MATCH */ @Deprecated
     static final int WRAP = UiUtils.WRAP, MATCH = UiUtils.MATCH;
 
     @Override protected void onDestroy() {

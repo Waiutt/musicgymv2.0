@@ -297,7 +297,9 @@ public class ExercisePageAdapter extends RecyclerView.Adapter<ExercisePageAdapte
         return tv;
     }
 
+    /** @deprecated 直接调用 UiUtils.dp(activity, d) */ @Deprecated
     private int dp(int d) { return UiUtils.dp(activity, d); }
+    /** @deprecated 直接使用 UiUtils.WRAP */ @Deprecated
     static final int WRAP = UiUtils.WRAP;
 
     static class PageHolder extends RecyclerView.ViewHolder {

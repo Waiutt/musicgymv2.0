@@ -528,7 +528,9 @@ public class StrengthWorkoutActivity extends AppCompatActivity {
         return et;
     }
 
+    /** @deprecated 直接使用 UiUtils.WRAP */ @Deprecated
     private static final int WRAP = UiUtils.WRAP;
+    /** @deprecated 直接使用 UiUtils.MATCH */ @Deprecated
     private static final int MATCH = UiUtils.MATCH;
     private TextView addView(LinearLayout parent, String text, int color, float size, int width) {
         return addView(parent, text, color, size, width, Gravity.START);

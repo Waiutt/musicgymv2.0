@@ -15,6 +15,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
 import androidx.fragment.app.Fragment;
+import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.recyclerview.widget.StaggeredGridLayoutManager;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
@@ -30,6 +31,7 @@ import java.util.Map;
 /** 社区 Tab — Firebase Firestore 驱动的真实社交平台 */
 public class ShareFragment extends Fragment {
 
+    private ShareViewModel vm;
     private RecyclerView recyclerView;
     private CommunityAdapter adapter;
     private final List<CommunityRepository.CommunityPost> posts = new ArrayList<>();
@@ -70,12 +72,24 @@ public class ShareFragment extends Fragment {
         view.findViewById(R.id.share_challenges).setOnClickListener(v ->
                 showChallengesDialog());
 
-        swipe.setOnRefreshListener(this::loadPosts);
+        swipe.setOnRefreshListener(() -> vm.loadPosts());
         swipe.setColorSchemeResources(android.R.color.holo_blue_bright,
                 android.R.color.holo_green_light,
                 android.R.color.holo_orange_light);
 
-        userManager.signIn((userId, nickname) -> loadPosts());
+        // ViewModel 观察（仅帖子列表加载状态）
+        vm = new ViewModelProvider(this).get(ShareViewModel.class);
+        vm.getPosts().observe(getViewLifecycleOwner(), result -> {
+            if (swipe != null) swipe.setRefreshing(false);
+            posts.clear();
+            if (result != null) posts.addAll(result);
+            adapter.notifyDataSetChanged();
+        });
+        vm.getStatusMessage().observe(getViewLifecycleOwner(), msg -> {
+            if (tvStatus != null) tvStatus.setText(msg);
+        });
+
+        userManager.signIn((userId, nickname) -> vm.loadPosts());
 
         return view;
     }
@@ -83,25 +97,7 @@ public class ShareFragment extends Fragment {
     @Override
     public void onResume() {
         super.onResume();
-        if (userManager.getUserId() != null) loadPosts();
-    }
-
-    private void loadPosts() {
-        if (tvStatus != null) tvStatus.setText("加载中...");
-        repo.loadPosts(result -> {
-            if (swipe != null) swipe.setRefreshing(false);
-            if (tvStatus == null) return;
-            if (result == null) {
-                tvStatus.setText("社区不可用，请检查网络连接");
-                posts.clear();
-                adapter.notifyDataSetChanged();
-                return;
-            }
-            posts.clear();
-            posts.addAll(result);
-            adapter.notifyDataSetChanged();
-            tvStatus.setText(result.isEmpty() ? "暂无帖子，点击 + 发布第一条" : "");
-        });
+        if (userManager.getUserId() != null) vm.loadPosts();
     }
 
     private void openPostDetail(CommunityRepository.CommunityPost post) {
