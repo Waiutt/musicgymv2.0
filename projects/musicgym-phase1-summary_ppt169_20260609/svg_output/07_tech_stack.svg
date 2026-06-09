@@ -1,0 +1,73 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1280 720">
+  <rect width="1280" height="720" fill="#0F172A"/>
+  <rect x="0" y="0" width="1280" height="6" fill="#FC4C02"/>
+  <text x="80" y="60" font-family="Arial" font-size="36" fill="#FFFFFF" font-weight="bold">技术栈详解</text>
+  <line x1="80" y1="80" x2="300" y2="80" stroke="#FC4C02" stroke-width="3"/>
+
+  <!-- Row 1 -->
+  <rect x="60" y="120" width="280" height="130" rx="12" fill="#1E293B"/>
+  <text x="200" y="160" text-anchor="middle" font-family="Arial" font-size="28">☕</text>
+  <text x="200" y="195" text-anchor="middle" font-family="Arial" font-size="18" fill="#FFFFFF" font-weight="bold">Java 11</text>
+  <text x="200" y="220" text-anchor="middle" font-family="Arial" font-size="14" fill="#9CA3AF">语言</text>
+
+  <rect x="355" y="120" width="280" height="130" rx="12" fill="#1E293B"/>
+  <text x="495" y="160" text-anchor="middle" font-family="Arial" font-size="28">🏗️</text>
+  <text x="495" y="195" text-anchor="middle" font-family="Arial" font-size="18" fill="#FFFFFF" font-weight="bold">MVVM</text>
+  <text x="495" y="220" text-anchor="middle" font-family="Arial" font-size="14" fill="#9CA3AF">架构 · 4 ViewModels</text>
+
+  <rect x="650" y="120" width="280" height="130" rx="12" fill="#1E293B"/>
+  <text x="790" y="160" text-anchor="middle" font-family="Arial" font-size="28">🗄️</text>
+  <text x="790" y="195" text-anchor="middle" font-family="Arial" font-size="18" fill="#FFFFFF" font-weight="bold">Room v5</text>
+  <text x="790" y="220" text-anchor="middle" font-family="Arial" font-size="14" fill="#9CA3AF">8 Entity · 7 DAO</text>
+
+  <rect x="945" y="120" width="275" height="130" rx="12" fill="#1E293B"/>
+  <text x="1082" y="160" text-anchor="middle" font-family="Arial" font-size="28">🔥</text>
+  <text x="1082" y="195" text-anchor="middle" font-family="Arial" font-size="18" fill="#FFFFFF" font-weight="bold">Firebase</text>
+  <text x="1082" y="220" text-anchor="middle" font-family="Arial" font-size="14" fill="#9CA3AF">Firestore + Auth</text>
+
+  <!-- Row 2 -->
+  <rect x="60" y="270" width="280" height="130" rx="12" fill="#1E293B"/>
+  <text x="200" y="310" text-anchor="middle" font-family="Arial" font-size="28">🗺️</text>
+  <text x="200" y="345" text-anchor="middle" font-family="Arial" font-size="18" fill="#FFFFFF" font-weight="bold">AMap SDK</text>
+  <text x="200" y="370" text-anchor="middle" font-family="Arial" font-size="14" fill="#9CA3AF">高德 3D · GPS追踪</text>
+
+  <rect x="355" y="270" width="280" height="130" rx="12" fill="#1E293B"/>
+  <text x="495" y="310" text-anchor="middle" font-family="Arial" font-size="28">📊</text>
+  <text x="495" y="345" text-anchor="middle" font-family="Arial" font-size="18" fill="#FFFFFF" font-weight="bold">MPAndroidChart</text>
+  <text x="495" y="370" text-anchor="middle" font-family="Arial" font-size="14" fill="#9CA3AF">折线图 · 热力图</text>
+
+  <rect x="650" y="270" width="280" height="130" rx="12" fill="#1E293B"/>
+  <text x="790" y="310" text-anchor="middle" font-family="Arial" font-size="28">🖼️</text>
+  <text x="790" y="345" text-anchor="middle" font-family="Arial" font-size="18" fill="#FFFFFF" font-weight="bold">Glide 4.16</text>
+  <text x="790" y="370" text-anchor="middle" font-family="Arial" font-size="14" fill="#9CA3AF">图片加载 + 缓存</text>
+
+  <rect x="945" y="270" width="275" height="130" rx="12" fill="#1E293B"/>
+  <text x="1082" y="310" text-anchor="middle" font-family="Arial" font-size="28">🤖</text>
+  <text x="1082" y="345" text-anchor="middle" font-family="Arial" font-size="18" fill="#FFFFFF" font-weight="bold">DeepSeek API</text>
+  <text x="1082" y="370" text-anchor="middle" font-family="Arial" font-size="14" fill="#9CA3AF">AI 训练计划</text>
+
+  <!-- Row 3 -->
+  <rect x="60" y="420" width="280" height="130" rx="12" fill="#1E293B"/>
+  <text x="200" y="460" text-anchor="middle" font-family="Arial" font-size="28">🎵</text>
+  <text x="200" y="495" text-anchor="middle" font-family="Arial" font-size="18" fill="#FFFFFF" font-weight="bold">MediaPlayer</text>
+  <text x="200" y="520" text-anchor="middle" font-family="Arial" font-size="14" fill="#9CA3AF">AudioFocus · EQ</text>
+
+  <rect x="355" y="420" width="280" height="130" rx="12" fill="#1E293B"/>
+  <text x="495" y="460" text-anchor="middle" font-family="Arial" font-size="28">📐</text>
+  <text x="495" y="495" text-anchor="middle" font-family="Arial" font-size="18" fill="#FFFFFF" font-weight="bold">Material UI</text>
+  <text x="495" y="520" text-anchor="middle" font-family="Arial" font-size="14" fill="#9CA3AF">CardView · RecyclerView</text>
+
+  <rect x="650" y="420" width="280" height="130" rx="12" fill="#1E293B"/>
+  <text x="790" y="460" text-anchor="middle" font-family="Arial" font-size="28">📦</text>
+  <text x="790" y="495" text-anchor="middle" font-family="Arial" font-size="18" fill="#FFFFFF" font-weight="bold">ProGuard/R8</text>
+  <text x="790" y="520" text-anchor="middle" font-family="Arial" font-size="14" fill="#9CA3AF">混淆 · 78→45MB</text>
+
+  <rect x="945" y="420" width="275" height="130" rx="12" fill="#1E293B"/>
+  <text x="1082" y="460" text-anchor="middle" font-family="Arial" font-size="28">📱</text>
+  <text x="1082" y="495" text-anchor="middle" font-family="Arial" font-size="18" fill="#FFFFFF" font-weight="bold">minSdk 26</text>
+  <text x="1082" y="520" text-anchor="middle" font-family="Arial" font-size="14" fill="#9CA3AF">Android 8.0+</text>
+
+  <!-- Footer -->
+  <rect x="60" y="580" width="1160" height="50" rx="10" fill="#334155"/>
+  <text x="640" y="612" text-anchor="middle" font-family="Arial" font-size="17" fill="#38BDF8">Gradle · Release 签名 · ExecutorService 线程池 · SwipeRefreshLayout · ViewPager2 · StaggeredGrid · TTS · Sensor</text>
+</svg>

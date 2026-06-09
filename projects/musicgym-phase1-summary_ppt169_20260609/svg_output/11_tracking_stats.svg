@@ -1,0 +1,44 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1280 720">
+  <rect width="1280" height="720" fill="#0F172A"/>
+  <rect x="0" y="0" width="1280" height="6" fill="#FC4C02"/>
+  <text x="80" y="60" font-family="Arial" font-size="36" fill="#FFFFFF" font-weight="bold">GPS 追踪 + 数据统计</text>
+  <line x1="80" y1="80" x2="380" y2="80" stroke="#FC4C02" stroke-width="3"/>
+
+  <!-- Left: Tracking -->
+  <rect x="40" y="120" width="580" height="560" rx="14" fill="#1E293B" stroke="#22C55E" stroke-width="1"/>
+  <text x="330" y="165" text-anchor="middle" font-family="Arial" font-size="24" fill="#22C55E" font-weight="bold">🗺️ GPS 运动追踪</text>
+  <text x="330" y="195" text-anchor="middle" font-family="Arial" font-size="16" fill="#22C55E">完成度 92%</text>
+  <line x1="70" y1="215" x2="590" y2="215" stroke="#334155"/>
+
+  <text x="80" y="250" font-family="Arial" font-size="16" fill="#FFFFFF">✅ 高德 3D 地图实时 GPS 追踪</text>
+  <text x="80" y="280" font-family="Arial" font-size="16" fill="#FFFFFF">✅ 配速着色路线 (4色: 蓝/绿/橙/红)</text>
+  <text x="80" y="310" font-family="Arial" font-size="16" fill="#FFFFFF">✅ 每公里语音播报 (TTS)</text>
+  <text x="80" y="340" font-family="Arial" font-size="16" fill="#FFFFFF">✅ 自动暂停 (8s 无移动检测)</text>
+  <text x="80" y="370" font-family="Arial" font-size="16" fill="#FFFFFF">✅ 运动中迷你音乐控制条</text>
+  <text x="80" y="400" font-family="Arial" font-size="16" fill="#FFFFFF">✅ 路线回放动画 (RoutePlayback)</text>
+  <text x="80" y="430" font-family="Arial" font-size="16" fill="#FFFFFF">✅ 运动后快速再开始</text>
+  <text x="80" y="460" font-family="Arial" font-size="16" fill="#9CA3AF">❌ 目标配速提醒</text>
+  <text x="80" y="490" font-family="Arial" font-size="16" fill="#9CA3AF">❌ 分段配速 (每公里)</text>
+
+  <rect x="70" y="555" width="520" height="30" rx="6" fill="#334155"/>
+  <text x="330" y="576" text-anchor="middle" font-family="Arial" font-size="14" fill="#22C55E">AMap · LocationClient · TextToSpeech · PathPoints JSON</text>
+
+  <!-- Right: Stats -->
+  <rect x="660" y="120" width="580" height="560" rx="14" fill="#1E293B" stroke="#F59E0B" stroke-width="1"/>
+  <text x="950" y="165" text-anchor="middle" font-family="Arial" font-size="24" fill="#F59E0B" font-weight="bold">📊 数据统计 (MVVM)</text>
+  <text x="950" y="195" text-anchor="middle" font-family="Arial" font-size="16" fill="#22C55E">完成度 80%</text>
+  <line x1="690" y1="215" x2="1210" y2="215" stroke="#334155"/>
+
+  <text x="700" y="250" font-family="Arial" font-size="16" fill="#FFFFFF">✅ 日历热力图 (月视图)</text>
+  <text x="700" y="280" font-family="Arial" font-size="16" fill="#FFFFFF">✅ MPAndroidChart 折线图 (距离/热量)</text>
+  <text x="700" y="310" font-family="Arial" font-size="16" fill="#FFFFFF">✅ 5种运动过滤芯片 (HScroll防溢出)</text>
+  <text x="700" y="340" font-family="Arial" font-size="16" fill="#FFFFFF">✅ 摘要卡片 (距离/时长/次数/热量)</text>
+  <text x="700" y="370" font-family="Arial" font-size="16" fill="#FFFFFF">✅ 趋势箭头 (本月 vs 上月 ↑↓%)</text>
+  <text x="700" y="400" font-family="Arial" font-size="16" fill="#FFFFFF">✅ 个人纪录墙 (最快/最远/最大重量)</text>
+  <text x="700" y="430" font-family="Arial" font-size="16" fill="#FFFFFF">✅ 目标进度条 (🎯 月目标完成度)</text>
+  <text x="700" y="460" font-family="Arial" font-size="16" fill="#FFFFFF">✅ 运动历史 RecyclerView</text>
+  <text x="700" y="490" font-family="Arial" font-size="16" fill="#9CA3AF">❌ 周视图对比 / 年视图 / 周报推送</text>
+
+  <rect x="690" y="555" width="520" height="30" rx="6" fill="#334155"/>
+  <text x="950" y="576" text-anchor="middle" font-family="Arial" font-size="14" fill="#F59E0B">StatsViewModel · StatsRepository · 防御性拷贝 (线程安全)</text>
+</svg>

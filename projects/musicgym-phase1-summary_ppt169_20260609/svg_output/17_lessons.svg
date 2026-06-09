@@ -1,0 +1,33 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1280 720">
+  <rect width="1280" height="720" fill="#0F172A"/>
+  <rect x="0" y="0" width="1280" height="6" fill="#FC4C02"/>
+  <text x="80" y="60" font-family="Arial" font-size="36" fill="#FFFFFF" font-weight="bold">Vibe Coding 经验总结</text>
+  <line x1="80" y1="80" x2="380" y2="80" stroke="#38BDF8" stroke-width="3"/>
+
+  <!-- Gains -->
+  <text x="80" y="140" font-family="Arial" font-size="22" fill="#22C55E" font-weight="bold">✅ 收益</text>
+  <rect x="60" y="160" width="560" height="220" rx="12" fill="#1E293B"/>
+  <text x="90" y="200" font-family="Arial" font-size="16" fill="#FFFFFF">🚀 开发效率: 单会话 35 次提交, 7项新功能 + 20+ Bug修复</text>
+  <text x="90" y="235" font-family="Arial" font-size="16" fill="#FFFFFF">🔍 代码质量: AI 可执行机械性审计 (5轮全维度), 人做不到这种耐心</text>
+  <text x="90" y="270" font-family="Arial" font-size="16" fill="#FFFFFF">📝 文档输出: README/ROADMAP/SUMMARY/作品集一键生成</text>
+  <text x="90" y="305" font-family="Arial" font-size="16" fill="#FFFFFF">🧠 方案探索: AI 可快速给出多种方案对比, 人工只需决策</text>
+  <text x="90" y="340" font-family="Arial" font-size="16" fill="#FFFFFF">🔄 快速迭代: 需求→代码→测试→修复 可在5分钟内完成一轮</text>
+
+  <!-- Pains -->
+  <text x="660" y="140" font-family="Arial" font-size="22" fill="#EF4444" font-weight="bold">⚠️ 踩坑</text>
+  <rect x="660" y="160" width="560" height="220" rx="12" fill="#1E293B"/>
+  <text x="690" y="200" font-family="Arial" font-size="16" fill="#FFFFFF">❌ 批量 sed/Python 替换易引入语法错误 (中文路径/GBK编码)</text>
+  <text x="690" y="235" font-family="Arial" font-size="16" fill="#FFFFFF">❌ AI 倾向于"过度实现",需要人工说"这样够了,不要再加了"</text>
+  <text x="690" y="270" font-family="Arial" font-size="16" fill="#FFFFFF">❌ 长会话上下文压缩后会丢失细节 (spec_lock mitigates)</text>
+  <text x="690" y="305" font-family="Arial" font-size="16" fill="#FFFFFF">❌ MediaSession 兼容性 — AI 给了"理论正确"的代码但真机崩溃</text>
+  <text x="690" y="340" font-family="Arial" font-size="16" fill="#FFFFFF">❌ 无法真机测试 — AI 只能通过 logcat 间接调试</text>
+
+  <!-- Best Practices -->
+  <text x="80" y="430" font-family="Arial" font-size="22" fill="#38BDF8" font-weight="bold">💡 最佳实践</text>
+  <rect x="60" y="450" width="1160" height="200" rx="12" fill="#1E293B"/>
+  <text x="90" y="490" font-family="Arial" font-size="16" fill="#FFFFFF">1. 编译验证每步必做 — AI 改代码后立即 compile, 不让错误堆积</text>
+  <text x="90" y="522" font-family="Arial" font-size="16" fill="#FFFFFF">2. 小步提交 — 每个独立改动一个 commit, 出问题 git revert 即可</text>
+  <text x="90" y="554" font-family="Arial" font-size="16" fill="#FFFFFF">3. AI 给方案, 人做决策 — 让 AI 列出 pro/con, 人选择方向, 不要 AI 替你做决定</text>
+  <text x="90" y="586" font-family="Arial" font-size="16" fill="#FFFFFF">4. 真机验证不可替代 — 编译通过 ≠ 功能正常, 至少要 1 台真机走一遍全流程</text>
+  <text x="90" y="618" font-family="Arial" font-size="16" fill="#FFFFFF">5. spec_lock 是抗上下文压缩的关键 — 18页 PPT 的生成本身就是证明</text>
+</svg>

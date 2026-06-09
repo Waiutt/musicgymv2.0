@@ -1,0 +1,56 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1280 720">
+  <rect width="1280" height="720" fill="#0F172A"/>
+  <rect x="0" y="0" width="1280" height="6" fill="#FC4C02"/>
+  <text x="80" y="60" font-family="Arial" font-size="36" fill="#FFFFFF" font-weight="bold">技术架构</text>
+  <line x1="80" y1="80" x2="300" y2="80" stroke="#FC4C02" stroke-width="3"/>
+
+  <!-- Architecture diagram -->
+  <!-- MainActivity -->
+  <rect x="340" y="120" width="600" height="50" rx="10" fill="#FC4C02"/>
+  <text x="640" y="150" text-anchor="middle" font-family="Arial" font-size="20" fill="#FFFFFF" font-weight="bold">MainActivity (5 Tab 底部导航)</text>
+
+  <!-- Lines down -->
+  <line x1="400" y1="170" x2="400" y2="210" stroke="#475569" stroke-width="2"/>
+  <line x1="520" y1="170" x2="520" y2="210" stroke="#475569" stroke-width="2"/>
+  <line x1="640" y1="170" x2="640" y2="210" stroke="#475569" stroke-width="2"/>
+  <line x1="760" y1="170" x2="760" y2="210" stroke="#475569" stroke-width="2"/>
+  <line x1="880" y1="170" x2="880" y2="210" stroke="#475569" stroke-width="2"/>
+
+  <!-- 5 Tabs -->
+  <rect x="310" y="210" width="180" height="40" rx="8" fill="#38BDF8"/>
+  <text x="400" y="235" text-anchor="middle" font-family="Arial" font-size="15" fill="#FFFFFF">GYM (MVVM)</text>
+  <rect x="430" y="210" width="180" height="40" rx="8" fill="#22C55E"/>
+  <text x="520" y="235" text-anchor="middle" font-family="Arial" font-size="15" fill="#FFFFFF">MUSIC (MVVM)</text>
+  <rect x="550" y="210" width="180" height="40" rx="8" fill="#F59E0B"/>
+  <text x="640" y="235" text-anchor="middle" font-family="Arial" font-size="15" fill="#FFFFFF">STATS (MVVM)</text>
+  <rect x="670" y="210" width="180" height="40" rx="8" fill="#A78BFA"/>
+  <text x="760" y="235" text-anchor="middle" font-family="Arial" font-size="15" fill="#FFFFFF">PROFILE</text>
+  <rect x="790" y="210" width="180" height="40" rx="8" fill="#EF4444"/>
+  <text x="880" y="235" text-anchor="middle" font-family="Arial" font-size="15" fill="#FFFFFF">SHARE</text>
+
+  <!-- Middle layer -->
+  <rect x="240" y="320" width="800" height="45" rx="10" fill="#1E293B" stroke="#38BDF8" stroke-width="1"/>
+  <text x="640" y="348" text-anchor="middle" font-family="Arial" font-size="18" fill="#38BDF8">AppDatabase · Room v5 · 8 Entities · 7 DAOs · 5 Migrations</text>
+  <line x1="640" y1="365" x2="640" y2="400" stroke="#475569" stroke-width="2"/>
+
+  <!-- Bottom layer -->
+  <rect x="100" y="400" width="250" height="45" rx="8" fill="#334155"/>
+  <text x="225" y="428" text-anchor="middle" font-family="Arial" font-size="16" fill="#FFFFFF">Firebase Firestore</text>
+
+  <rect x="380" y="400" width="250" height="45" rx="8" fill="#334155"/>
+  <text x="505" y="428" text-anchor="middle" font-family="Arial" font-size="16" fill="#FFFFFF">AMap SDK</text>
+
+  <rect x="660" y="400" width="250" height="45" rx="8" fill="#334155"/>
+  <text x="785" y="428" text-anchor="middle" font-family="Arial" font-size="16" fill="#FFFFFF">SharedPreferences</text>
+
+  <rect x="940" y="400" width="240" height="45" rx="8" fill="#334155"/>
+  <text x="1060" y="428" text-anchor="middle" font-family="Arial" font-size="16" fill="#FFFFFF">DeepSeek API</text>
+
+  <!-- Right column: Key decisions -->
+  <rect x="60" y="490" width="1160" height="180" rx="12" fill="#1E293B"/>
+  <text x="100" y="530" font-family="Arial" font-size="20" fill="#FFFFFF" font-weight="bold">关键设计决策</text>
+  <text x="100" y="570" font-family="Arial" font-size="16" fill="#9CA3AF">● 双重检查锁单例（volatile + synchronized）确保 AppDatabase 线程安全</text>
+  <text x="100" y="600" font-family="Arial" font-size="16" fill="#9CA3AF">● 全 DAO 调用通过 ExecutorService 后台线程池执行，零主线程查询</text>
+  <text x="100" y="630" font-family="Arial" font-size="16" fill="#9CA3AF">● API Key 通过 BuildConfig + local.properties 安全注入，不入 Git</text>
+  <text x="100" y="660" font-family="Arial" font-size="16" fill="#9CA3AF">● Firebase 离线降级 → Room BlogPost 本地数据，社区不中断</text>
+</svg>

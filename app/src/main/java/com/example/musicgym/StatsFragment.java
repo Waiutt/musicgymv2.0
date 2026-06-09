@@ -48,6 +48,8 @@ public class StatsFragment extends Fragment {
     private RecyclerView recyclerView;
     private LinearLayout calendarContainer, prContainer;
     private TextView tvViewToggle, tvGoalBar;
+    private TextView tvWeekThis, tvWeekLast, tvWeekTrend;
+    private LinearLayout yearGridContainer;
 
     private static final int COLOR_LAST_MONTH = ColorTokens.TEXT_SECONDARY;
 
@@ -96,10 +98,93 @@ public class StatsFragment extends Fragment {
         ((ViewGroup) view.findViewById(R.id.stats_filter_container))
                 .addView(tvGoalBar);
 
+        // 周视图对比卡 + 年视图（动态添加）
+        addWeekCompareCards((ViewGroup) view.findViewById(R.id.stats_summary_row));
+        addYearViewGrid(view);
+
         initChart();
         initFilters();
         observeViewModel();
         return view;
+    }
+
+    // ═══════════ 周视图 + 年视图 UI ═══════════
+
+    private void addWeekCompareCards(ViewGroup summaryRow) {
+        ViewGroup parent = (ViewGroup) summaryRow.getParent();
+        int idx = parent.indexOfChild(summaryRow) + 1;
+
+        LinearLayout row = new LinearLayout(requireContext());
+        row.setOrientation(LinearLayout.HORIZONTAL);
+        row.setPadding(16, 4, 16, 4);
+
+        tvWeekThis = new TextView(requireContext());
+        tvWeekThis.setLayoutParams(new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1));
+        tvWeekThis.setTextSize(12f); tvWeekThis.setTextColor(ColorTokens.ACCENT_CYAN);
+        tvWeekThis.setGravity(Gravity.CENTER); row.addView(tvWeekThis);
+
+        tvWeekTrend = new TextView(requireContext());
+        tvWeekTrend.setLayoutParams(new LinearLayout.LayoutParams(
+                ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT));
+        tvWeekTrend.setTextSize(18f); tvWeekTrend.setTypeface(null, android.graphics.Typeface.BOLD);
+        tvWeekTrend.setGravity(Gravity.CENTER); tvWeekTrend.setPadding(12, 0, 12, 0);
+        row.addView(tvWeekTrend);
+
+        tvWeekLast = new TextView(requireContext());
+        tvWeekLast.setLayoutParams(new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1));
+        tvWeekLast.setTextSize(12f); tvWeekLast.setTextColor(ColorTokens.TEXT_SECONDARY);
+        tvWeekLast.setGravity(Gravity.CENTER); row.addView(tvWeekLast);
+
+        parent.addView(row, idx);
+    }
+
+    private void addYearViewGrid(View view) {
+        yearGridContainer = new LinearLayout(requireContext());
+        yearGridContainer.setOrientation(LinearLayout.HORIZONTAL);
+        yearGridContainer.setPadding(16, 0, 16, 8);
+
+        String[] months = {"1月","2月","3月","4月","5月","6月","7月","8月","9月","10月","11月","12月"};
+        for (int i = 0; i < 12; i++) {
+            LinearLayout col = new LinearLayout(requireContext());
+            col.setOrientation(LinearLayout.VERTICAL);
+            col.setLayoutParams(new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1));
+            col.setGravity(Gravity.CENTER);
+
+            TextView tvLabel = new TextView(requireContext());
+            tvLabel.setText(months[i]); tvLabel.setTextSize(9f);
+            tvLabel.setTextColor(ColorTokens.TEXT_HINT);
+            tvLabel.setGravity(Gravity.CENTER); col.addView(tvLabel);
+
+            TextView tvVal = new TextView(requireContext());
+            tvVal.setText("0"); tvVal.setTextSize(13f);
+            tvVal.setTextColor(ColorTokens.ACCENT_CYAN);
+            tvVal.setGravity(Gravity.CENTER); tvVal.setTag("year_val");
+            tvVal.setPadding(0, 4, 0, 0); col.addView(tvVal);
+
+            yearGridContainer.addView(col);
+        }
+        // 插入到stats_summary_row 下方
+        ViewGroup summaryRow = (ViewGroup) view.findViewById(R.id.stats_summary_row);
+        ViewGroup parent = (ViewGroup) summaryRow.getParent();
+        parent.addView(yearGridContainer, parent.indexOfChild(summaryRow) + 2);
+    }
+
+    private void renderYearGrid(int[] days) {
+        if (yearGridContainer == null) return;
+        int maxDay = 1;
+        for (int d : days) if (d > maxDay) maxDay = d;
+        for (int i = 0; i < 12 && i < yearGridContainer.getChildCount(); i++) {
+            LinearLayout col = (LinearLayout) yearGridContainer.getChildAt(i);
+            for (int j = 0; j < col.getChildCount(); j++) {
+                if (col.getChildAt(j) instanceof TextView && "year_val".equals(col.getChildAt(j).getTag())) {
+                    TextView tv = (TextView) col.getChildAt(j);
+                    int d = i < days.length ? days[i] : 0;
+                    tv.setText(d + "天");
+                    int alpha = maxDay > 0 ? (int) (80 + 175 * d / maxDay) : 80;
+                    tv.setTextColor(android.graphics.Color.argb(alpha, 56, 189, 248));
+                }
+            }
+        }
     }
 
     // ═══════════ Observe ViewModel ═══════════
@@ -162,6 +247,19 @@ public class StatsFragment extends Fragment {
             tvGoalBar.setText("🎯 " + t);
             tvGoalBar.setVisibility(View.VISIBLE);
         });
+
+        // 周视图对比
+        vm.getWeekThisLabel().observe(getViewLifecycleOwner(), t -> tvWeekThis.setText(t));
+        vm.getWeekLastLabel().observe(getViewLifecycleOwner(), t -> tvWeekLast.setText(t));
+        vm.getWeekComparison().observe(getViewLifecycleOwner(), t -> {
+            if (t != null && !t.equals("-")) {
+                tvWeekTrend.setText(t.startsWith("-") ? "↓" + t : "↑" + t);
+                tvWeekTrend.setTextColor(t.startsWith("-") ? ColorTokens.ACCENT_RED : ColorTokens.ACCENT_GREEN);
+            } else tvWeekTrend.setText("—");
+        });
+
+        // 年视图
+        vm.getYearWorkoutDays().observe(getViewLifecycleOwner(), this::renderYearGrid);
     }
 
     // ═══════════ 折线图 ═══════════

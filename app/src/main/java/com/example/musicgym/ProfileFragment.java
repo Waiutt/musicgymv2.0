@@ -461,9 +461,11 @@ public class ProfileFragment extends Fragment {
     }
 
     private void setupReminder() {
-        String[] days = {"每天","周一三五","周二四六","周末","关闭提醒"};
+        String[] days = {"每天","周一三五","周二四六","周末","📊 周报推送","关闭提醒"};
         new AlertDialog.Builder(getContext()).setTitle("训练提醒").setItems(days, (d,w)->{
-            if (w==4) { cancelReminder(); return; }
+            if (w == 4) { WeeklyReportService.schedule(requireContext());
+                Toast.makeText(getContext(), "每周一早9点推送上周周报", Toast.LENGTH_SHORT).show(); return; }
+            if (w == 5) { cancelReminder(); WeeklyReportService.cancel(requireContext()); return; }
             int[] daysOfWeek;
             switch(w) {
                 case 0: daysOfWeek = new int[]{Calendar.SUNDAY,Calendar.MONDAY,Calendar.TUESDAY,Calendar.WEDNESDAY,Calendar.THURSDAY,Calendar.FRIDAY,Calendar.SATURDAY}; break;

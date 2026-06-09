@@ -54,6 +54,9 @@
             android:name=".MusicService"
             android:foregroundServiceType="mediaPlayback"
             android:exported="false" />
+        <receiver
+            android:name=".WeeklyReportService"
+            android:exported="false" />
 
         <receiver
             android:name=".MusicGymWidget"

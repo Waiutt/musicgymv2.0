@@ -1,0 +1,46 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1280 720">
+  <rect width="1280" height="720" fill="#0F172A"/>
+  <rect x="0" y="0" width="1280" height="6" fill="#FC4C02"/>
+  <text x="80" y="60" font-family="Arial" font-size="36" fill="#FFFFFF" font-weight="bold">音乐 + 力量训练</text>
+  <line x1="80" y1="80" x2="380" y2="80" stroke="#FC4C02" stroke-width="3"/>
+
+  <!-- Left: Music -->
+  <rect x="40" y="120" width="580" height="560" rx="14" fill="#1E293B" stroke="#38BDF8" stroke-width="1"/>
+  <text x="330" y="165" text-anchor="middle" font-family="Arial" font-size="24" fill="#38BDF8" font-weight="bold">🎵 音乐模块</text>
+  <text x="330" y="195" text-anchor="middle" font-family="Arial" font-size="16" fill="#22C55E">完成度 93%</text>
+  <line x1="70" y1="215" x2="590" y2="215" stroke="#334155"/>
+
+  <text x="80" y="250" font-family="Arial" font-size="16" fill="#FFFFFF">✅ 双向 MP3 扫描 (MediaStore + 文件系统)</text>
+  <text x="80" y="280" font-family="Arial" font-size="16" fill="#FFFFFF">✅ 3 种播放模式 + ❤️ 收藏</text>
+  <text x="80" y="310" font-family="Arial" font-size="16" fill="#FFFFFF">✅ 5 段 EQ 均衡器 + AudioFocus</text>
+  <text x="80" y="340" font-family="Arial" font-size="16" fill="#FFFFFF">✅ 前台服务 + 通知栏控制</text>
+  <text x="80" y="370" font-family="Arial" font-size="16" fill="#FFFFFF">✅ BPM 步频匹配引擎</text>
+  <text x="80" y="400" font-family="Arial" font-size="16" fill="#FFFFFF">✅ 📂 歌单管理 (Room Playlist 表)</text>
+  <text x="80" y="430" font-family="Arial" font-size="16" fill="#FFFFFF">✅ Gapless 无缝播放</text>
+  <text x="80" y="460" font-family="Arial" font-size="16" fill="#9CA3AF">❌ Spotify SDK 集成</text>
+  <text x="80" y="490" font-family="Arial" font-size="16" fill="#9CA3AF">❌ 歌词 LRC 显示</text>
+  <text x="80" y="520" font-family="Arial" font-size="16" fill="#9CA3AF">❌ MediaSession 蓝牙线控 (兼容性待调试)</text>
+
+  <rect x="70" y="555" width="520" height="30" rx="6" fill="#334155"/>
+  <text x="330" y="576" text-anchor="middle" font-family="Arial" font-size="14" fill="#38BDF8">demo MP3 × 2 · MusicViewModel (MVVM) · StepCadenceDetector</text>
+
+  <!-- Right: Strength -->
+  <rect x="660" y="120" width="580" height="560" rx="14" fill="#1E293B" stroke="#F59E0B" stroke-width="1"/>
+  <text x="950" y="165" text-anchor="middle" font-family="Arial" font-size="24" fill="#F59E0B" font-weight="bold">🏋️ 力量训练</text>
+  <text x="950" y="195" text-anchor="middle" font-family="Arial" font-size="16" fill="#22C55E">完成度 85%</text>
+  <line x1="690" y1="215" x2="1210" y2="215" stroke="#334155"/>
+
+  <text x="700" y="250" font-family="Arial" font-size="16" fill="#FFFFFF">✅ 7大肌群 × 17子群 × 50+动作</text>
+  <text x="700" y="280" font-family="Arial" font-size="16" fill="#FFFFFF">✅ 动作搜索 + 多选 + 肌群标签</text>
+  <text x="700" y="310" font-family="Arial" font-size="16" fill="#FFFFFF">✅ 双模式训练 (列表 / ViewPager2 滑动)</text>
+  <text x="700" y="340" font-family="Arial" font-size="16" fill="#FFFFFF">✅ 热身标记 + RPE + 备注</text>
+  <text x="700" y="370" font-family="Arial" font-size="16" fill="#FFFFFF">✅ %1RM 一键填充胶囊</text>
+  <text x="700" y="400" font-family="Arial" font-size="16" fill="#FFFFFF">✅ 组间休息计时器 (60/90/120/180s)</text>
+  <text x="700" y="430" font-family="Arial" font-size="16" fill="#FFFFFF">✅ 训练模板 + 渐进超负荷建议</text>
+  <text x="700" y="460" font-family="Arial" font-size="16" fill="#FFFFFF">✅ 🤖 DeepSeek AI 4周计划</text>
+  <text x="700" y="490" font-family="Arial" font-size="16" fill="#FFFFFF">✅ 动作详情折线图 (重量趋势)</text>
+  <text x="700" y="520" font-family="Arial" font-size="16" fill="#9CA3AF">❌ 动作演示 GIF (6张已下载,待展示)</text>
+
+  <rect x="690" y="555" width="520" height="30" rx="6" fill="#334155"/>
+  <text x="950" y="576" text-anchor="middle" font-family="Arial" font-size="14" fill="#F59E0B">2 Activities · ExercisePageAdapter · BuildConfig API Key</text>
+</svg>

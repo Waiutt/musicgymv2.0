@@ -61,6 +61,21 @@ public class StatsViewModel extends AndroidViewModel {
     private final MutableLiveData<String> goalProgress = new MutableLiveData<>();
     private final android.content.SharedPreferences goalPrefs;
 
+    // ── 周视图 ──
+    private final MutableLiveData<String> weekThisLabel = new MutableLiveData<>("");
+    private final MutableLiveData<String> weekLastLabel = new MutableLiveData<>("");
+    private final MutableLiveData<String> weekComparison = new MutableLiveData<>("");
+
+    // ── 年视图 ──
+    private final MutableLiveData<int[]> yearWorkoutDays = new MutableLiveData<>();
+    private final MutableLiveData<float[]> yearDistance = new MutableLiveData<>();
+
+    public LiveData<String> getWeekThisLabel() { return weekThisLabel; }
+    public LiveData<String> getWeekLastLabel() { return weekLastLabel; }
+    public LiveData<String> getWeekComparison() { return weekComparison; }
+    public LiveData<int[]> getYearWorkoutDays() { return yearWorkoutDays; }
+    public LiveData<float[]> getYearDistance() { return yearDistance; }
+
     public StatsViewModel(@NonNull Application app) {
         super(app);
         repo = new StatsRepository(app);
@@ -165,6 +180,8 @@ public class StatsViewModel extends AndroidViewModel {
         isStrengthMode.postValue("Strength".equals(filter));
         prText.postValue(calcPRs());
         calcGoalProgress();
+        calcWeekComparison(filter);
+        calcYearView(filter);
     }
 
     // ── 周视图数据 ──
@@ -348,5 +365,75 @@ public class StatsViewModel extends AndroidViewModel {
               .append("  |  📊 最大容量: ").append(maxVolEx).append(" ").append((int)maxVol).append("kg");
         }
         return sb.length() > 0 ? sb.toString() : "暂无纪录，快去运动吧！💪";
+    }
+
+    // ── 周视图对比 ──
+    private void calcWeekComparison(String filter) {
+        java.util.Calendar cal = java.util.Calendar.getInstance();
+        int dow = cal.get(java.util.Calendar.DAY_OF_WEEK);
+        // 本周一
+        cal.add(java.util.Calendar.DAY_OF_YEAR, -(dow == 1 ? 6 : dow - 2));
+        String thisMon = new java.text.SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(cal.getTime());
+        // 上周一
+        cal.add(java.util.Calendar.DAY_OF_YEAR, -7);
+        String lastMon = new java.text.SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(cal.getTime());
+        cal.add(java.util.Calendar.DAY_OF_YEAR, 6);
+        String lastSun = new java.text.SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(cal.getTime());
+
+        double thisDist = 0, lastDist = 0;
+        int thisCount = 0, lastCount = 0, thisSec = 0, lastSec = 0;
+        for (WorkoutRecord r : cardioRecords) {
+            if (!"All".equals(filter) && !filter.equals(r.getSportType())) continue;
+            if (r.getDate() == null) continue;
+            if (r.getDate().compareTo(thisMon) >= 0) {
+                thisDist += r.getDistanceKm(); thisCount++; thisSec += r.getDurationSeconds();
+            } else if (r.getDate().compareTo(lastMon) >= 0 && r.getDate().compareTo(lastSun) <= 0) {
+                lastDist += r.getDistanceKm(); lastCount++; lastSec += r.getDurationSeconds();
+            }
+        }
+        weekThisLabel.postValue(String.format(Locale.getDefault(), "本周 %d次 · %.1fkm · %dmin", thisCount, thisDist, thisSec / 60));
+        weekLastLabel.postValue(String.format(Locale.getDefault(), "上周 %d次 · %.1fkm · %dmin", lastCount, lastDist, lastSec / 60));
+        if (lastDist > 0) {
+            double chg = (thisDist - lastDist) / lastDist * 100;
+            weekComparison.postValue(String.format(Locale.getDefault(), "%.0f%%", Math.abs(chg)));
+        } else weekComparison.postValue("-");
+    }
+
+    // ── 年视图 ──
+    private void calcYearView(String filter) {
+        java.util.Calendar cal = java.util.Calendar.getInstance();
+        int thisYear = cal.get(java.util.Calendar.YEAR);
+        int[] days = new int[12];
+        float[] dist = new float[12];
+        for (WorkoutRecord r : cardioRecords) {
+            if (!"All".equals(filter) && !filter.equals(r.getSportType())) continue;
+            if (r.getDate() == null) continue;
+            try {
+                int y = Integer.parseInt(r.getDate().substring(0, 4));
+                int m = Integer.parseInt(r.getDate().substring(5, 7)) - 1;
+                if (y == thisYear && m >= 0 && m < 12) {
+                    days[m]++; dist[m] += (float) r.getDistanceKm();
+                }
+            } catch (Exception ignored) {}
+        }
+        // 力量训练也计入天数
+        java.util.HashSet<String> strengthDays = new java.util.HashSet<>();
+        for (StrengthRecord r : strengthRecords) {
+            if (r.getDate() != null) try {
+                int y = Integer.parseInt(r.getDate().substring(0, 4));
+                int m = Integer.parseInt(r.getDate().substring(5, 7)) - 1;
+                if (y == thisYear && m >= 0 && m < 12) {
+                    strengthDays.add(r.getDate());
+                }
+            } catch (Exception ignored) {}
+        }
+        for (String d : strengthDays) {
+            try {
+                int m = Integer.parseInt(d.substring(5, 7)) - 1;
+                if (m >= 0 && m < 12) days[m] = Math.max(days[m], 1);
+            } catch (Exception ignored) {}
+        }
+        yearWorkoutDays.postValue(days);
+        yearDistance.postValue(dist);
     }
 }

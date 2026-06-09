@@ -1,0 +1,38 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1280 720">
+  <rect width="1280" height="720" fill="#0F172A"/>
+  <rect x="0" y="0" width="1280" height="6" fill="#FC4C02"/>
+  <text x="80" y="80" font-family="Arial" font-size="36" fill="#FFFFFF" font-weight="bold">目录</text>
+  <line x1="80" y1="100" x2="300" y2="100" stroke="#FC4C02" stroke-width="3"/>
+
+  <!-- Part 1 -->
+  <text x="80" y="160" font-family="Arial" font-size="20" fill="#FC4C02" font-weight="bold">第一部分 · 项目概述</text>
+  <text x="120" y="200" font-family="Arial" font-size="18" fill="#9CA3AF">P3  项目简介</text>
+
+  <text x="80" y="250" font-family="Arial" font-size="20" fill="#38BDF8" font-weight="bold">第二部分 · 开发方式</text>
+  <text x="120" y="290" font-family="Arial" font-size="18" fill="#9CA3AF">P4  Vibe Coding 开发流程</text>
+  <text x="120" y="320" font-family="Arial" font-size="18" fill="#9CA3AF">P5  AI + 人工协作模式</text>
+
+  <text x="80" y="370" font-family="Arial" font-size="20" fill="#22C55E" font-weight="bold">第三部分 · 技术架构</text>
+  <text x="120" y="410" font-family="Arial" font-size="18" fill="#9CA3AF">P6  整体架构图</text>
+  <text x="120" y="440" font-family="Arial" font-size="18" fill="#9CA3AF">P7  技术栈详解</text>
+  <text x="120" y="470" font-family="Arial" font-size="18" fill="#9CA3AF">P8  数据库设计</text>
+
+  <!-- Right column -->
+  <text x="480" y="160" font-family="Arial" font-size="20" fill="#F59E0B" font-weight="bold">第四部分 · 功能矩阵</text>
+  <text x="520" y="200" font-family="Arial" font-size="18" fill="#9CA3AF">P9   7大模块总览</text>
+  <text x="520" y="230" font-family="Arial" font-size="18" fill="#9CA3AF">P10  音乐 + 力量训练</text>
+  <text x="520" y="260" font-family="Arial" font-size="18" fill="#9CA3AF">P11  GPS追踪 + 数据统计</text>
+  <text x="520" y="290" font-family="Arial" font-size="18" fill="#9CA3AF">P12  社区社交系统</text>
+
+  <text x="480" y="340" font-family="Arial" font-size="20" fill="#EF4444" font-weight="bold">第五部分 · 质量工程</text>
+  <text x="520" y="380" font-family="Arial" font-size="18" fill="#9CA3AF">P13  5轮代码审计</text>
+  <text x="520" y="410" font-family="Arial" font-size="18" fill="#9CA3AF">P14  真机 Bug 修复</text>
+  <text x="520" y="440" font-family="Arial" font-size="18" fill="#9CA3AF">P15  代码规模 + 质量评分</text>
+
+  <text x="480" y="490" font-family="Arial" font-size="20" fill="#A78BFA" font-weight="bold">第六部分 · 反思展望</text>
+  <text x="520" y="530" font-family="Arial" font-size="18" fill="#9CA3AF">P16  项目不足之处</text>
+  <text x="520" y="560" font-family="Arial" font-size="18" fill="#9CA3AF">P17  Vibe Coding 经验总结</text>
+
+  <text x="80" y="610" font-family="Arial" font-size="20" fill="#6B7280" font-weight="bold">第七部分</text>
+  <text x="120" y="650" font-family="Arial" font-size="18" fill="#9CA3AF">P18  结尾 · GitHub + 截图</text>
+</svg>
