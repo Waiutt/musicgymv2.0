@@ -15,3 +15,7 @@
 local.properties
 *.jks
 *.keystore
+projects/
+.claude/
+generate_portfolio.js
+*.docx
